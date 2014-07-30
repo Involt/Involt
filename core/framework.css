@@ -1,0 +1,229 @@
+/*----Global CSS----*/
+* { -webkit-box-sizing: border-box; box-sizing: border-box; }
+/*Import Open Sans font from app category (using link not working)*/
+@font-face {
+    font-family: 'OpenSansBold';
+    src: url('font/OpenSans-Bold.ttf');
+}
+
+@font-face {
+    font-family: 'OpenSansRegular';
+    src: url('font/OpenSans-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'OpenSansLight';
+    src: url('font/OpenSans-Light.ttf');
+}
+
+html{
+	overflow: auto;
+}
+
+body{
+	background-color: white;
+	margin: 0px;
+	padding: 0px;
+
+}
+
+.ard{
+	margin:10px;
+	float: left;
+}
+
+/*----Button----*/
+.button, .custom-button, .toggle, #loader-button, .loader-ports > p{
+	width: 180px;
+	height: 38px;
+	border-radius: 3px;
+	box-shadow: 0px 1px #0088b5;
+	background-color: #00aae2;
+	color:white;
+	text-align: center;
+	font-size: 18px;
+	line-height: 38px;
+	font-family: "OpenSansLight";
+}
+
+.button:hover, .custom-button:hover, #loader-button:hover{
+	border: 1px solid  #00aae2;
+	box-shadow: 0px 0px white;
+	background-color: white;
+	color:#00aae2;
+
+}
+
+.bar, .slider, .custom-write, .input-write, .active, .loader-ports >p{
+	border-radius: 3px;
+	box-shadow: 0px 1px #bebebe;
+	background-color: #ededed;
+	color:#bebebe;
+}
+
+
+.bar {
+	height: 38px;
+	width: 255px;
+}
+
+.toggle{
+	width: 80px;
+}
+
+.bar-value {
+	height: 38px;
+	border-radius: 3px;
+	box-shadow: 0px 1px #0088b5;
+	background-color: #00aae2;
+	color:#003e53;
+	line-height: 38px;
+	text-align: center;
+	font-size: 24px;
+	font-family: "OpenSansBold";
+}
+
+.show{
+	width: 140px;
+	height: 76px;
+	line-height: 76px;
+	color:#003e53;
+	text-align: right;
+	border-bottom: 1px solid #00aae2;
+	font-size: 60px;
+	font-family: "OpenSansBold";
+}
+
+.slider{
+	height: 38px;
+	width: 320px;
+
+}
+
+.slider-label{
+	width: 50px;
+	border-right: 1px solid #d1d1d1;
+	box-shadow: 1px 0px #f8f8f8;
+	margin-right:5px;
+	color:#003e53;
+	text-align: center;
+	line-height: 38px;
+	font-size: 18px;
+	font-family: "OpenSansBold";
+	float: left;
+}
+
+.slider>input{
+	width: 255px;
+	margin-top:18px;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+	height: 2px;
+	background-color: #80d5f1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+     -webkit-appearance: none;
+    background-color: #00aae2;
+    width: 27px;
+    height: 27px;
+    border-radius: 30px;
+    margin: 0px;
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+     -webkit-appearance: none;
+}
+
+input:focus {
+    outline: 0;
+}
+
+.input-write, .custom-write  {
+	width: 180px;
+	height: 38px;
+    border: 0px solid white; 
+    padding-left: 10px;
+    color:#00aae2;
+	font-size: 18px;
+	font-family: "OpenSansLight";
+}
+
+.input-write:hover, .custom-write:hover, 
+.input-write:focus, .custom-write:focus {
+	border: 1px solid #00aae2;
+	padding-left: 9px;
+}
+
+.btn{
+	width: 80px;
+	height: 38px;
+	border-radius: 3px;
+}
+
+.increase, .decrease {
+	background-color: #00aae2;
+	color:white;
+	float: left;
+	width: 40px;
+	height: 38px;
+	color:white;
+	text-align: center;
+	font-size: 30px;
+	font-family: "OpenSansBold";
+}
+
+.increase:hover, .decrease:hover{
+	box-shadow: 0px 0px white;
+	background-color: white;
+	color:#00aae2;
+	border: 1px solid  #00aae2;
+}
+
+.increase{
+	border-top-left-radius: 3px;
+	border-bottom-left-radius: 3px;
+	line-height: 38px;
+	border-right:1px solid #0086b3;
+}
+
+.decrease{
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 3px;
+	line-height: 33.5px;
+	border-left:1px solid #66ccee;
+}
+
+#loader{
+	text-align: center;
+	background-color: lightgray;
+	width: 400px;
+	height: 500px;
+	position: absolute;
+	left: 50%;
+   	top: 50%; 
+   	margin-left: -200px;
+    margin-top: -250px;
+}
+
+.loader-ports>p{
+	margin: 20px auto;
+}
+
+#loader-button{
+	margin: 0 auto;
+}
+
+#loader-bg{
+	width: 100%;
+	height: 100%;
+	background-color: white;
+	position: absolute;
+}
+
+.active-port {
+	background-color: #00aae2!important;
+	color:white!important;
+}
