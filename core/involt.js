@@ -36,10 +36,6 @@ var onGetDevices = function(ports) {
     if (loaderOnLaunch){
       $(".loader-ports").append('<p>'+ports[j].path+'</p>');
     }
-    else {
-      $(".knob").show();
-      $(".slider").show();
-    }
   }
   //change the port for button to connect based on selected port from list
   $(".loader-ports > p").click(function() {
@@ -62,7 +58,6 @@ var onConnect = function(connectionInfo) {
   //Remove loader if connection is successful
   else {
     $("#loader-bg").remove();
-    //hack for knob elements
     $(".knob").show();
     $(".slider").show();
   }
@@ -77,16 +72,16 @@ var onConnect = function(connectionInfo) {
   console.log("Connection ID:");
   console.log(connectionInfo.connectionId);
   _this.connectionId = connectionInfo.connectionId;
+
 }
 
 //LOADER SCREEN
 $(document).ready(function() {
   //create loader html elements if loader is on, if not - connect directly
   //hack for not displaying knob numbers on loader screen
-  $(".knob").hide();
-   $(".slider").hide();
-
   if (loaderOnLaunch){
+    $(".knob").hide();
+    $(".slider").hide();
     $("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
     $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select Arduino port:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
   }
@@ -154,9 +149,9 @@ var onReceive = function(receiveInfo) {
 
 
 var analogCssSplit = function(analogClasses){
-        var pin = analogClasses[2];
-        var command = analogClasses[1]; 
-        k = pin.substring(1,pin.length);
+  var pin = analogClasses[2];
+  var command = analogClasses[1]; 
+  k = pin.substring(1,pin.length);
 }
 
 setInterval(function(){ 
@@ -207,7 +202,7 @@ chrome.serial.onReceiveError.addListener(onError);
 
 //Empty function for testing
 var onSend = function(){
-    console.log(ardSend);
+    //console.log(ardSend);
 }
 
 //Sends data to arduino based on event
@@ -240,11 +235,6 @@ var sendCssSplit = function(sendClasses){
 }
 
 $(document).ready(function() {
-/*
-$(this).on('click', '.ard', function () {
-  console.log("aa");
-});
-*/
 
   $(".ard").not('.custom-write').each(function() {
     //defines value for each pin in digitalPins array (only on startup)
@@ -322,7 +312,9 @@ $(this).on('click', '.ard', function () {
     if ($(this).hasClass('slider')) {
       $(this).append('<div class="sliderjq"></div>');
       $(this).append('<div class="tooltip">0</div>');
+      $(this).append('<input class="slidervalue" disabled>');
       $(".tooltip").hide();
+      $(".slidervalue").hide();
 
       $(this).hover(function() {
         $(this).children('.tooltip').fadeIn(250);
@@ -340,23 +332,25 @@ $(this).on('click', '.ard', function () {
 
         start: function( event, ui ) {
           var sendCss = $(this).parent().attr('class').split(' ');
-          sendCssSplit(sendCss);
-          
+          sendCssSplit(sendCss); 
         },
 
         //Slider Event
         slide: function(event, ui) {
-          var value  = $(this).slider('value');
           var tooltipPosition = $(this).children(".ui-slider-handle").css('left');
           $(this).siblings('.tooltip').css('left', tooltipPosition); 
-          $(this).siblings('.tooltip').text(ui.value);   
+          $(this).siblings('.tooltip').text(ui.value);
+          $(this).siblings('.slidervalue').val(ui.value).change();    
           digitalPins[pinNumber] = $(this).siblings('.tooltip').html();
             arduinoSend(pin, digitalPins[pinNumber]); 
+
         },
 
         stop: function( event, ui ) {
           var tooltipPosition = $(this).children(".ui-slider-handle").css('left');
-          $(this).siblings('.tooltip').css('left', tooltipPosition);           
+          $(this).siblings('.tooltip').css('left', tooltipPosition);
+          digitalPins[pinNumber] = $(this).siblings('.tooltip').html();
+            arduinoSend(pin, digitalPins[pinNumber]);              
         },
 
 

@@ -264,7 +264,7 @@ input:focus {
 }
 
 .loader-ports>p, #loader-button{
-	width: 180px;
+	width: 260px;
 	height: 40px;
 	margin: 20px auto;
 	color: #282828;
