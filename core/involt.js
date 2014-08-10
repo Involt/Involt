@@ -154,8 +154,8 @@ var analogCssSplit = function(analogClasses){
   k = pin.substring(1,pin.length);
 }
 
-setInterval(function(){ 
-  $(".ard").each(function() {
+var analogUpdate = function(){
+    $(".ard").each(function() {
       //show 
       if ($(this).hasClass("show")){
         var splitCss = $(this).attr('class').split(' ');
@@ -186,7 +186,9 @@ setInterval(function(){
         $(this).attr('value', analogPins[k]);
       }
     });
-}, 50);
+}
+
+setInterval(analogUpdate, 50);
 
 
 //Error message when connection is interrupted
@@ -209,7 +211,6 @@ var onSend = function(){
 var arduinoSend = function(pin, value){
   ardSend = pin+"V"+value+"\n";
   chrome.serial.send(1, sendConvertString(ardSend), onSend);
-  
 }
 
 //convert "ardSend" string to arduino serial-friendly format
