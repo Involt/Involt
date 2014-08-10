@@ -4,10 +4,10 @@ var screenHeight = 700;
 
 //Create app window on launch
 chrome.app.runtime.onLaunched.addListener(function() {
-
   chrome.app.window.create('index.html', {
     width: screenWidth,
-    height: screenHeight
+    height: screenHeight,
+    //state: "fullscreen" // to run as fullscreen
   });
 });
 
