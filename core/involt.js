@@ -109,7 +109,6 @@ var onReceive = function(receiveInfo) {
   //create array from received arduino data (need to be fixed??)
   var Int8View  = new Int8Array(receiveInfo.data);
   encodedString = String.fromCharCode.apply(null, Int8View);
-  //console.log(encodedString); 
 
   //divide encoded string data (pin/value), it also verify the data.
   var Atest = encodedString.indexOf("A");
@@ -126,16 +125,14 @@ var onReceive = function(receiveInfo) {
   // remove corrupted serial data from array list
   if (  Atest == 0 && 
         Btest >= 2 && 
-        Btest  < 8 && 
         Ctest >= 1 && 
-        Ctest <= 2 && 
         Dtest >= 4    ) {
     //pin counter
-    i=encodedString.substring(1,Ctest);
+    i=parseInt(encodedString.substring(1,Ctest));
+   
     //count each analog pin number and create array of their values
     if (i<=analogPinsNumber){
-      analogPins[i] = parseInt(encodedString.substring(3,Btest));  
-      //console.log(analogPins);    
+      analogPins[i] = parseInt(encodedString.substring(Ctest+1,Btest));     
     }
     else{
       i = 0;
@@ -147,7 +144,6 @@ var onReceive = function(receiveInfo) {
 //READ ONLY EVENTS 
 //Updated in 50ms interval to reduce CPU usage
 
-
 var analogCssSplit = function(analogClasses){
   var pin = analogClasses[2];
   var command = analogClasses[1]; 
@@ -155,7 +151,7 @@ var analogCssSplit = function(analogClasses){
 }
 
 var analogUpdate = function(){
-    $(".ard").each(function() {
+  $(".ard").each(function() {
       //show 
       if ($(this).hasClass("show")){
         var splitCss = $(this).attr('class').split(' ');
@@ -185,11 +181,10 @@ var analogUpdate = function(){
         analogCssSplit(splitCss);
         $(this).attr('value', analogPins[k]);
       }
-    });
+  });
 }
 
 setInterval(analogUpdate, 50);
-
 
 //Error message when connection is interrupted
 var onError = function (errorInfo) {
@@ -438,6 +433,3 @@ $(document).ready(function() {
   });
 
 });
-
-
-
