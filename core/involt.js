@@ -173,7 +173,7 @@ var analogUpdate = function(){
       if ($(this).hasClass("knob")){
         var splitCss = $(this).attr('class').split(' ');
         analogCssSplit(splitCss);
-        $('.dial').val(analogPins[k]).trigger('change');
+        $(this).children().children('.dial').val(analogPins[k]).trigger('change');
       }
       //value
       if ($(this).hasClass("value")){
@@ -415,7 +415,7 @@ $(document).ready(function() {
   //knob
   $(".knob").append(function() {
     var splitCss = $(this).attr('class').split(' ');
-    var knobMax = splitCss[3]
+    var knobMax = splitCss[3];
     $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-readOnly="true" value="0" class="dial">'); 
   });
 
