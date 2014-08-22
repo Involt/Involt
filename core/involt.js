@@ -27,27 +27,26 @@ Remember to include them inside arduino sketch.*/
 
 //PORT DETECTION + LOADER PORT LIST
 var loaderCtaPort = defaultSerialPort;
+
 var onGetDevices = function(ports) {
   //create list of ports and print it to console 
   console.log("Available port list:");
   for (var j=0; j<ports.length; j++) {
     console.log(ports[j].path);
-    //create objects for loader
+    //create port buttons for loader
     if (loaderOnLaunch){
       $(".loader-ports").append('<p>'+ports[j].path+'</p>');
+      //change selected port when clicked
+      $(".loader-ports > p").click(function() {
+        $(".loader-ports > p").removeClass("active-port");
+        $(this).addClass("active-port");
+        loaderCtaPort = $(this).html();
+      });
     }
   }
-  //change the port for button to connect based on selected port from list
-  $(".loader-ports > p").click(function() {
-    $(".loader-ports > p").removeClass("active-port");
-    $(this).addClass("active-port");
-    loaderCtaPort = $(this).html();
-  });
 }
 
-chrome.serial.getDevices(onGetDevices);
-
-//CONNECTION + ID
+//Function when connecting with Arduino
 var onConnect = function(connectionInfo) {
   //Error message
   if (!connectionInfo) {
@@ -55,7 +54,7 @@ var onConnect = function(connectionInfo) {
     console.error("ヽ༼ຈل͜ຈ༽ﾉ RIOT ヽ༼ຈل͜ຈ༽ﾉ");
     return;
   }
-  //Remove loader if connection is successful
+  //Remove loader if connection is successful + hack for knob and slider
   else {
     $("#loader-bg").remove();
     $(".knob").show();
@@ -72,28 +71,30 @@ var onConnect = function(connectionInfo) {
   console.log("Connection ID:");
   console.log(connectionInfo.connectionId);
   _this.connectionId = connectionInfo.connectionId;
-
 }
 
-//LOADER SCREEN
-$(document).ready(function() {
-  //create loader html elements if loader is on, if not - connect directly
-  //hack for not displaying knob numbers on loader screen
-  if (loaderOnLaunch){
+//LOADER
+if(loaderOnLaunch){
+  $(document).ready(function() {
+    //hack for UI elements that shows on loader background
     $(".knob").hide();
     $(".slider").hide();
+    //create loader elements
     $("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
     $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select Arduino port:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
-  }
-  else {
-    chrome.serial.connect(defaultSerialPort, {bitrate: 115200}, onConnect);
-  }
-  //Connect button
-  $("#loader-button").click(function() {
-    chrome.serial.connect(loaderCtaPort, {bitrate: 115200}, onConnect);
+    //connect button
+    $("#loader-button").click(function() {
+      chrome.serial.connect(loaderCtaPort, {bitrate: 115200}, onConnect);
+    });
   });
-  
-});
+  //get the port list for loader
+  chrome.serial.getDevices(onGetDevices);
+}
+else{
+  chrome.serial.getDevices(onGetDevices);
+  chrome.serial.connect(defaultSerialPort, {bitrate: 115200}, onConnect);
+}
+
 
 
 //SERIAL DATA READ
@@ -129,7 +130,6 @@ var onReceive = function(receiveInfo) {
         Dtest >= 4    ) {
     //pin counter
     i=parseInt(encodedString.substring(1,Ctest));
-   
     //count each analog pin number and create array of their values
     if (i<=analogPinsNumber){
       analogPins[i] = parseInt(encodedString.substring(Ctest+1,Btest));     
@@ -181,6 +181,9 @@ var analogUpdate = function(){
         analogCssSplit(splitCss);
         $(this).attr('value', analogPins[k]);
       }
+      /*------------------------------------
+      Here should go additional write events
+      ------------------------------------*/
   });
 }
 
@@ -204,8 +207,19 @@ var onSend = function(){
 
 //Sends data to arduino based on event
 var arduinoSend = function(pin, value){
-  ardSend = pin+"V"+value+"\n";
-  chrome.serial.send(1, sendConvertString(ardSend), onSend);
+  //check if there are more pins to send
+  if(pin.indexOf("-")>0){
+    var multiPins = pin.split("-");
+    //send value to each pin
+    for(var m=0; m<=multiPins.length; m++){
+      ardSend = multiPins[m]+"V"+value+"\n";
+      chrome.serial.send(1, sendConvertString(ardSend), onSend);
+    }
+  }
+  else {
+    ardSend = pin+"V"+value+"\n";
+    chrome.serial.send(1, sendConvertString(ardSend), onSend);
+  }
 }
 
 //convert "ardSend" string to arduino serial-friendly format
@@ -349,7 +363,6 @@ $(document).ready(function() {
             arduinoSend(pin, digitalPins[pinNumber]);              
         },
 
-
       });
     }
 
@@ -380,8 +393,6 @@ $(document).ready(function() {
       });
     }
 
-
-
     //custom-button
     if ($(this).hasClass("custom-button")){
       $(this).click(function() {
@@ -390,7 +401,6 @@ $(document).ready(function() {
           chrome.serial.send(1, sendConvertString(customBut), onSend);
       });
     }
-
 
     /*------------------------------------
     Here should go additional write events
