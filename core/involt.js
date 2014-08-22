@@ -333,12 +333,9 @@ $(document).ready(function() {
 
     //slider
     if ($(this).hasClass('slider')) {
-      $(this).append('<div class="sliderjq"></div>');
-      $(this).append('<div class="tooltip">0</div>');
-      $(this).append('<input class="slidervalue" disabled>');
-      $(".tooltip").hide();
-      $(".slidervalue").hide();
-
+      $(this).append('<div class="sliderjq"></div><div class="tooltip">0</div><input class="slidervalue" disabled>');
+      $(".tooltip, .slidervalue").hide();
+      //display the tooltip on hover
       $(this).hover(function() {
         $(this).children('.tooltip').fadeIn(250);
       }, function() {
@@ -355,7 +352,7 @@ $(document).ready(function() {
 
         start: function( event, ui ) {
           var sendCss = $(this).parent().attr('class').split(' ');
-          sendCssSplit(sendCss); 
+          sendCssSplit(sendCss);  
         },
 
         //Slider Event
@@ -366,7 +363,6 @@ $(document).ready(function() {
           $(this).siblings('.slidervalue').val(ui.value).change();    
           digitalPins[pinNumber] = $(this).siblings('.tooltip').html();
             arduinoSend(pin, digitalPins[pinNumber]); 
-
         },
 
         stop: function( event, ui ) {
@@ -381,6 +377,7 @@ $(document).ready(function() {
 
     //hover
     if ($(this).hasClass("hover")){
+      var sendCss = $(this).attr('class').split(' ');
       $(this).mouseenter(function() {
         sendCssSplit(sendCss);
           arduinoSend(pin, digitalPins[pinNumber]);
@@ -421,17 +418,17 @@ $(document).ready(function() {
 
   });
 
-    //custom-write
-    if ($(".ard").hasClass("custom-write")){
-      $(".custom-write").change(function() {
-        var valCustom = $(this).val();
-        var valCustomSend = valCustom+"\n";
-          chrome.serial.send(1, sendConvertString(valCustomSend), onSend);
-      });
-    }
+  //custom-write
+  if ($(".ard").hasClass("custom-write")){
+    $(".custom-write").change(function() {
+      var valCustom = $(this).val();
+      var valCustomSend = valCustom+"\n";
+        chrome.serial.send(1, sendConvertString(valCustomSend), onSend);
+    });
+  }
 
-//HTML GENERATED ELEMENTS OF FRAMEWORK
-//html/css operations that create framework objects in html file 
+  //HTML GENERATED ELEMENTS OF FRAMEWORK
+  //html/css operations that create framework objects in html file 
 
   //bar
   $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
