@@ -73,7 +73,7 @@ body{
 }
 
 .toggle.inactive{
-	color: #282828;
+	color: #064f6d;
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;
 }
@@ -220,7 +220,7 @@ input:focus {
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;	
     border: 0px solid white; 
-	font-size: 18px;
+	font-size: 26px;
 	font-family: "SourceSansProLight";
 }
 
@@ -232,7 +232,7 @@ input:focus {
 }
 
 .input-write:focus, .custom-write:focus{
-	color: #282828;
+	color: #064f6d;
 	box-shadow: 0 2px 0px #00aae2;	
 }
 
