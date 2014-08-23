@@ -10,4 +10,3 @@ chrome.app.runtime.onLaunched.addListener(function() {
     //state: "fullscreen" // to run as fullscreen
   });
 });
-

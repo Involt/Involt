@@ -216,7 +216,7 @@ var arduinoSend = function(pin, value){
   if(pin.indexOf("-")>0){
     var multiPins = pin.split("-");
     //send value to each pin
-    for(var m=0; m<=multiPins.length-1; m++){
+    for(var m=0; m<multiPins.length; m++){
       //check if there are multiple values
       if(value.indexOf("-")>0){
         //multiple values+pins
@@ -444,7 +444,7 @@ $(document).ready(function() {
     var sendCss = $(this).attr('class').split(' ');
     var knobMax  = sendCss[3];
     sendCssSplit(sendCss);
-    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'"value="0" data-displayPrevious="true" class="knob-write">'); 
+    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'"value="0" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
     $(this).children(".knob-write").knob({
       'change' : function (value) {
         sendCssSplit(sendCss);
