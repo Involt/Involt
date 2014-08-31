@@ -466,7 +466,7 @@ $(document).ready(function() {
     "width": '90%',
     "text-align": 'center',
     "font-size": 36,
-    "font-family": 'Source Sans Pro Light',
+    "font-family": 'SourceSansProLight',
   });
 
 });
