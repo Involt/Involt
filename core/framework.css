@@ -36,7 +36,9 @@ body{
 
 /*Clickable elements (buttons)*/
 
-.button, .increase, .decrease, .toggle, .custom-button{
+.button,
+.increase, .decrease, 
+.toggle, .toggle-pwm, .custom-button{
 	width: 180px;
 	height: 40px;
 	color: white;
@@ -51,7 +53,9 @@ body{
 	cursor: pointer;
 }
 
-.button:hover, .increase:hover, .decrease:hover, .toggle:hover, .custom-button:hover {
+.button:hover,
+.increase:hover, .decrease:hover, 
+.toggle:hover, .toggle-pwm:hover, .custom-button:hover {
 	background-color: #0099e7;
 }
 
@@ -72,58 +76,49 @@ body{
 	font-family: 'SourceSansProBold';
 }
 
-.toggle.inactive{
+.toggle.inactive, .toggle-pwm.state2{
 	color: #064f6d;
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;
 }
 
-.inactive:hover{
+.toggle.inactive:hover, .toggle-pwm.state2:hover{
 	color: #0099e7;
 	box-shadow: 0 2px 0px #0099e7!important;
 }
 
-/*Slider & Bar*/
+/*Rangelider & Bar*/
 
-.slider, .bar{
+.rangeslider, .bar{
 	width: 380px;
 	height: 40px;
-	padding: 14px 22px;
+	padding: 9px 22px;
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;
 }
 
-/*Slider JQuery UI elements*/
+.slider{
+	width: 100%;
+	margin-left: 0px!important;
+}
 
-.ui-slider {
-	position: relative;
+.dragger {
+	width: 26px;
+	height: 26px;
+	border-radius: 13px;
+	background: #064f6d;
+}
+
+.track, .highlight-track{
 	height: 12px;
 	background: #c8c8c8;
 	border-radius: 4px;
-	cursor: pointer;
-}
-
-.ui-slider-handle {
-	position: absolute;
-	bottom:-7px;
-	z-index: 2;
-	width: 26px;
-	height: 26px;
-	margin-left: -13px;
-	background: #0099e7;
-	border-radius: 13px;
-}
-
-.ui-slider-range {
-	top: 50%;
-	height: 12px;
-	background: rgb(6,79,109);
-	border-radius: 4px;
 	border: 0;
+	margin-top: -5px;
 }
 
-.ui-state-focus {
-	outline:none;
+.highlight-track{
+	background: #0099e7;
 }
 
 /*Value displayed over slider (hover)*/
@@ -155,6 +150,36 @@ body{
 	margin-left: -8px;
 }
 
+.rangeobj{
+	max-height: 40px;
+}
+
+.rangeval{
+	display:none;
+}
+
+/*
+
+Uncomment this if you want to display label value on slider.
+
+.rangeval{
+	float: left;
+	display: block;
+	line-height: 25px;
+	font-size:16px;
+	letter-spacing:2px;
+	text-align: center;
+}
+
+.rangeobj{
+	margin-left:60px;
+}
+
+.tooltip{
+	display: none!important;
+}
+*/
+
 /*Bar*/
 
 .bar{
@@ -178,7 +203,6 @@ body{
 	line-height: 40px;
 	font-family: "SourceSansProBold";
 }
-
 
 /*.hover*/
 
@@ -234,72 +258,4 @@ input:focus {
 .input-write:focus, .custom-write:focus{
 	color: #064f6d;
 	box-shadow: 0 2px 0px #00aae2;	
-}
-
-
-/*Loader*/
-
-#loader-bg{
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	background-color: #00546D;
-}
-
-#loader{
-	position: absolute;
-	left: 50%;
-   	top: 50%;
-   	width: 400px;
-	height: 500px; 
-	margin-left: -200px;
-    margin-top: -250px;
-	text-align: center;
-}
-
-#loader>div:nth-child(2){
-	color: white;
-}
-
-.loader-ports>p, #loader-button{
-	width: 260px;
-	height: 40px;
-	margin: 20px auto;
-	color: #282828;
-	background: #dedede;
-	box-shadow: 0 2px 0px #c8c8c8;
-	border-radius: 4px;
-	text-align: center;
-	font-size: 12px;
-	line-height: 40px;
-	text-transform: uppercase;
-	letter-spacing:2px;
-	font-family: 'SourceSansProRegular';
-	cursor: pointer;
-}
-
-.loader-ports>p:hover{
-	color: #0099e7;
-	box-shadow: 0 2px 0px #0099e7;
-}
-
-.active-port{
-	box-shadow: 0 2px 0px #0099e7!important;
-	background-color: #00aae2!important;
-	color:white!important;
-}
-
-#loader-button{
-	color:white;
-	margin: 0 auto;
-	background: #0099e7;
-	box-shadow: 0 2px 0px #0099e7;
-}
-
-#loader-button:hover{
-	color:#0099e7;
-	margin: 0 auto;
-	background: white;
 }

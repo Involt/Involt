@@ -7,41 +7,40 @@
 */
 
 //--------------------------------
+
 //LOADER SETTINGS:
-/*Set loaderOnLaunch to false if you dont want to use loader on every launch
-(useful when creating your app but not recommended for finished project).*/
+/*Set loaderOnLaunch to false if you dont want to run loader on every launch
+(direct connction is useful when creating your app but not recommended for finished project).*/
 var loaderOnLaunch = true;
 //If you want to work without launcher you must define your connected arduino port:
 var defaultSerialPort = "COM7";
-
-//ARDUINO->CHROME SETTINGS: 
-//Total number of analog pins (Arduino UNO - 6; MEGA - 16):
-var analogPinsNumber = 6;
-/*You can add additional variables that will be send as additional analog 
-pin values. Useful for sending data from sensors like gyro etc.*/
-var additionalVariables = 0;
-/*Example: 6 Analog pins A0, A1 ... A5 and 3 additonal variables as A6, A7, A8.
-Remember to include them inside arduino sketch.*/
+//Connection bitrate (slow bitrate will send errors)
+var arduinoBitrate = 115200;
 
 //--------------------------------
 
 //PORT DETECTION + LOADER PORT LIST
 var loaderCtaPort = defaultSerialPort;
+// ID of the connection, defined once.
+var involtID;
 
 var onGetDevices = function(ports) {
   //create list of ports and print it to console 
   console.log("Available port list:");
+
   for (var j=0; j<ports.length; j++) {
     console.log(ports[j].path);
     //create port buttons for loader
     if (loaderOnLaunch){
       $(".loader-ports").append('<p>'+ports[j].path+'</p>');
+
       //change selected port when clicked
       $(".loader-ports > p").click(function() {
         $(".loader-ports > p").removeClass("active-port");
         $(this).addClass("active-port");
-        loaderCtaPort = $(this).html();
+          loaderCtaPort = $(this).html();
       });
+
     }
   }
 }
@@ -50,16 +49,15 @@ var onGetDevices = function(ports) {
 var onConnect = function(connectionInfo) {
   //Error message
   if (!connectionInfo) {
-    console.error('Could not open, check if Arduino is connected or try other serial port');
-    console.error("ヽ༼ຈل͜ຈ༽ﾉ RIOT ヽ༼ຈل͜ຈ༽ﾉ");
+    console.error('Could not open, check if Arduino is connected or try other serial port', "ヽ༼ຈل͜ຈ༽ﾉ RIOT ヽ༼ຈل͜ຈ༽ﾉ");
     return;
   }
   //Remove loader if connection is successful + hack for knob and slider
   else {
     $("#loader-bg").remove();
-    $(".knob, .knob-send, .slider").show();
+    $(".knob, .knob-send, .rangeslider").show();
   }
-  //connection info
+
   console.log("Device connected:");
   if (loaderOnLaunch){
     console.log(loaderCtaPort);
@@ -67,9 +65,10 @@ var onConnect = function(connectionInfo) {
   else {
     console.log(defaultSerialPort);
   }
-  console.log("Connection ID:");
-  console.log(connectionInfo.connectionId);
-  _this.connectionId = connectionInfo.connectionId;
+
+  console.log("Connection ID:", connectionInfo.connectionId);
+
+  involtID = connectionInfo.connectionId;
 }
 
 //get the port list for loader
@@ -79,32 +78,98 @@ chrome.serial.getDevices(onGetDevices);
 if(loaderOnLaunch){
   $(document).ready(function() {
     //hack for UI elements that shows on loader background
-    $(".knob, .knob-send, .slider").hide();
+    $(".knob, .knob-send, .rangeslider").hide();
     //create loader elements
     $("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-    $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select Arduino port:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
+      $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select Arduino port:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
     //connect button
     $("#loader-button").click(function() {
-      chrome.serial.connect(loaderCtaPort, {bitrate: 115200}, onConnect);
+      chrome.serial.connect(loaderCtaPort, {bitrate: arduinoBitrate}, onConnect);
     });
   });
 
 }
 else{
-  chrome.serial.connect(defaultSerialPort, {bitrate: 115200}, onConnect);
+  chrome.serial.connect(defaultSerialPort, {bitrate: arduinoBitrate}, onConnect);
 }
 
+//IDENTIFY INVOLT OBJECTS AND DEFINE THEIR PARAMETERS
 
+//analog pins values (real time update)
+var analogPins = [];
+//digital pins values
+var digitalPins = [];
+//identify involt elements
+$(document).ready(function() {
+  $(".ard").not(".custom-write").each(function(index, el) {
+    //split css classes and store them for each object
+    $(this).data($(this).attr('class').split(' '));
+
+      //set default values and their pins
+      var pinRawData = $(this).data('2');
+      var pinData    = parseInt(pinRawData.substring(1,pinRawData.length));
+      var valueData  = $(this).data('3');
+
+      $(this).data('pinNumber', pinData);
+
+    if (pinRawData.indexOf("A")<0){
+      //define default value for digital pins
+      digitalPins[pinData] = valueData;
+
+      //check if string is number and convert
+      var numberCheck = isNaN(digitalPins[pinData]);
+      if (numberCheck == false) {
+         digitalPins[pinData] = parseInt(valueData);
+      }
+    }
+    else if (pinRawData.indexOf("A")==0){
+      //define analog pins variables
+      analogPins[pinData] = pinData;
+    };
+
+  });
+
+  //HTML GENERATED ELEMENTS OF FRAMEWORK
+  //html/css operations that create framework objects in html file 
+  //bar
+  $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
+ 
+  //knob
+  $(".knob").append(function() {
+    var knobMax  = $(this).data('3');
+    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-readOnly="true" value="0" class="knob-read">'); 
+  });
+
+  //knob-send
+  $(".knob-send").append(function() {
+    var knobMax     = $(this).data("4");
+    var knobCurrent = $(this).data("3");
+    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'"value="'+knobCurrent+'" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+  })
+
+  //rangeslider
+  $(".rangeslider").append('<div class="rangeval"></div><div class="rangeobj"></div>');
+  $(".rangeobj").replaceWith('<input type="text" class="range"/><div class="tooltip">slide</div>');
+
+  $(function() {
+    $(".knob-read").knob();
+  });
+
+  $("#involthankyou").css({
+    "margin": '0 auto',
+    "margin-top": '300px',
+    "width": '90%',
+    "text-align": 'center',
+    "font-size": 36,
+    "font-family": 'SourceSansProLight',
+  });
+});
 
 //SERIAL DATA READ
-//Total number of received variables (analog input + additional variables)
-var analogPinsNumber = analogPinsNumber + additionalVariables;
-//Array of values for each pin
-var analogPins = new Array (analogPinsNumber);
 
 var onReceive = function(receiveInfo) {
   //ID test
-  if (receiveInfo.connectionId !== 1) return;
+  if (receiveInfo.connectionId !== involtID) return;
   
   //create array from received arduino data (need to be fixed??)
   var Int8View  = new Int8Array(receiveInfo.data);
@@ -127,69 +192,67 @@ var onReceive = function(receiveInfo) {
         Btest >= 2 && 
         Ctest >= 1 && 
         Dtest >= 4    ) {
+    
     //pin counter
-    i=parseInt(encodedString.substring(1,Ctest));
+    var i = parseInt(encodedString.substring(1,Ctest));
+
+    var stringValue = encodedString.substring(Ctest+1,Btest);
+    var stringValueCheck = isNaN(stringValue);
+
     //count each analog pin number and create array of their values
-    if (i<=analogPinsNumber){
-      analogPins[i] = parseInt(encodedString.substring(Ctest+1,Btest));     
+    if (stringValueCheck == false){
+      analogPins[i] = parseInt(stringValue);  
     }
-    else{
-      i = 0;
+    else {
+      analogPins[i] = stringValue; 
     }
+
   }
 
 };
 
 //READ ONLY EVENTS 
 //Updated in 50ms interval to reduce CPU usage
-
-var analogCssSplit = function(analogClasses){
-  var pin     = analogClasses[2];
-  var command = analogClasses[1]; 
-  k = pin.substring(1,pin.length);
-}
-
 var analogUpdate = function(){
-  $(".ard").each(function() {
-    //show 
-    if ($(this).hasClass("show")){
-      var splitCss = $(this).attr('class').split(' ');
-      analogCssSplit(splitCss);
-      $(this).html(analogPins[k]);
-    }
-    //bar
-    if ($(this).hasClass("bar")){
-      var splitCss = $(this).attr('class').split(' ');
-      analogCssSplit(splitCss);
-      //map the value to bar pixel width
-      var maxValue = parseInt(splitCss[3]);
-      var barMaxWidth = parseInt($(this).css('width'));
-        //scaling the variable
-        var widthMap = (barMaxWidth-0)/(maxValue-0)*(analogPins[k]-maxValue)+barMaxWidth;
-      $(this).children(".bar-value").css({
-        "width": widthMap,
-        "max-width": barMaxWidth
-      });
-      $(this).children(".bar-value").children('div').html(analogPins[k]);
-    }
-    //knob
-    if ($(this).hasClass("knob")){
-      var splitCss = $(this).attr('class').split(' ');
-      analogCssSplit(splitCss);
-      $(this).children().children('.knob-read').val(analogPins[k]).trigger('change');
-    }
-    //value
-    if ($(this).hasClass("value")){
-      var splitCss = $(this).attr('class').split(' ');
-      analogCssSplit(splitCss);
-      $(this).attr('value', analogPins[k]);
-    }
 
-    /*------------------------------------
-    Here should go additional write events
-    ------------------------------------*/
 
+  //show
+  $(".show").each(function() {
+    $(this).html(analogPins[$(this).data("pinNumber")]);
   });
+
+  //bar
+  $(".bar").each(function() {
+      //map the value to bar pixel width
+      var bar = {
+
+        maxValue : parseInt($(this).data('3')),
+        maxWidth : parseInt($(this).css('width'))
+
+      };
+      //scaling the variable
+      var widthMap = (bar.maxWidth-0)/(bar.maxValue-0)*(analogPins[$(this).data("pinNumber")]-bar.maxValue)+bar.maxWidth;
+      //change bar width
+      $(this).children(".bar-value").css({
+
+        "width": widthMap,
+        "max-width": bar.maxWidth
+
+      });
+      //display the value
+      $(this).children(".bar-value").children('div').html(analogPins[$(this).data("pinNumber")]);
+  });
+
+  //knob
+  $(".knob").each(function() {
+    $(this).children().children('.knob-read').val(analogPins[$(this).data("pinNumber")]).trigger('change');
+  });
+
+  //value
+  $(".value").each(function() {
+    $(this).attr('value', analogPins[$(this).data("pinNumber")]);
+  });
+
 }
 
 setInterval(analogUpdate, 50);
@@ -200,6 +263,7 @@ var onError = function (errorInfo) {
 };
 
 chrome.serial.onReceive.addListener(onReceive);
+
 chrome.serial.onReceiveError.addListener(onError);
 
 //SERIAL DATA SEND
@@ -207,266 +271,234 @@ chrome.serial.onReceiveError.addListener(onError);
 
 //Empty function for testing
 var onSend = function(){
-    //console.log(ardSend);
+
+  console.log(ardSend);
+  console.log(digitalPins);
+
+}
+
+//get object pin from data
+var definePin = function(pinData){
+
+    pinIndex  = pinData["pinNumber"];
+    pin       = pinData[2];
+
 }
 
 //Sends data to arduino based on event
 var arduinoSend = function(pin, value){
-  //check if there are more pins to send
-  if(pin.indexOf("-")>0){
-    var multiPins = pin.split("-");
-    //send value to each pin
-    for(var m=0; m<multiPins.length; m++){
-      //check if there are multiple values
-      if(value.indexOf("-")>0){
-        //multiple values+pins
-        var multiPinsVal = value.split("-");
-        ardSend = multiPins[m]+"V"+multiPinsVal[m]+"\n";
-          chrome.serial.send(1, sendConvertString(ardSend), onSend);
-      }
-      else {
-        //multiple pins - same values
-        ardSend = multiPins[m]+"V"+value+"\n";
-          chrome.serial.send(1, sendConvertString(ardSend), onSend);  
-      }
-    }
-  }
-  else {
-    //single pin + value
-    ardSend = pin+"V"+value+"\n";
-      chrome.serial.send(1, sendConvertString(ardSend), onSend);
-  }
+
+  ardSend = pin+"V"+value+"\n";
+  
+  chrome.serial.send(involtID, sendConvertString(ardSend), onSend);
+
 }
 
 //convert "ardSend" string to arduino serial-friendly format
 var sendConvertString = function(ardSend) {
   var buf      = new ArrayBuffer(ardSend.length);
   var bufView  = new Uint8Array(buf);
+
   for (var i   = 0; i < ardSend.length; i++) {
     bufView[i] = ardSend.charCodeAt(i);
   }
   return buf;
 }
 
-//SEND EVENTS
-var digitalPins = [];
-//convert css classes to array 
-//(fixed for sending - now it changes X times same element exist??)
-var sendCssSplit = function(sendClasses){  
-  pin       = sendClasses[2];
-  pinNumber = pin.substring(1,pin.length);
-  value     = sendClasses[3];
-  //console.log(sendClasses);    
-}
-
 $(document).ready(function() {
 
-  $(".ard").not('.custom-write').each(function() {
-    //defines value for each pin in digitalPins array (only on startup)
-    var sendCss = $(this).attr('class').split(' ');
-    sendCssSplit(sendCss);
-    //remove analog pin from reading on startup
-    if(pin.indexOf("A")<0){
-      digitalPins[pinNumber] = parseInt(sendCss[3]);
-      //console.log(digitalPins);
-    }
-
-    //button
-    if ($(this).hasClass("button")){      
-      $(this).click(function() {
-        sendCssSplit(sendCss);
-        digitalPins[pinNumber] = value;
-          arduinoSend(pin, digitalPins[pinNumber]);
-      });
-    }
-
-     //toggle
-    if ($(this).hasClass("toggle")){
-       
-      if (digitalPins[pinNumber]==0){
-        $(this).html("OFF");
-        $(this).addClass('inactive')
-      }
-      else if (digitalPins[pinNumber]==1){
-        $(this).html("ON");
-      }
-      $(this).click(function() {
-       sendCssSplit(sendCss);
-        if (digitalPins[pinNumber]==0){
-          $(this).html("ON");
-          $(this).toggleClass('inactive');
-            digitalPins[pinNumber]=1;
-              arduinoSend(pin, digitalPins[pinNumber]);
-        }
-        else if (digitalPins[pinNumber]==1){
-          $(this).html("OFF");
-          $(this).toggleClass('inactive');
-            digitalPins[pinNumber]=0; 
-              arduinoSend(pin, digitalPins[pinNumber]);         
-        }
-      });
-    }
-
-    //increase
-    if ($(this).hasClass('increase')) {
-      $(this).html("+");
-      $(this).click(function() {
-        var sendCss = $(this).attr('class').split(' ');
-        sendCssSplit(sendCss);
-        digitalPins[pinNumber] = digitalPins[pinNumber]+parseInt(sendCss[5]);
-        digitalPins[pinNumber] = Math.min(Math.max(parseInt(digitalPins[pinNumber]), 0), sendCss[4]);
-          arduinoSend(pin, digitalPins[pinNumber]); 
-      });
-    }
-
-    //decrease
-    if ($(this).hasClass('decrease')) {
-      $(this).html("-");
-      $(this).click(function() {
-        var sendCss = $(this).attr('class').split(' ');
-        sendCssSplit(sendCss);
-        digitalPins[pinNumber] = digitalPins[pinNumber]-parseInt(sendCss[5]);
-        digitalPins[pinNumber] = Math.min(Math.max(parseInt(digitalPins[pinNumber]), 0), sendCss[4]);
-          arduinoSend(pin, digitalPins[pinNumber]); 
-      });
-    }
-
-    //slider
-    if ($(this).hasClass('slider')) {
-      $(this).append('<div class="sliderjq"></div><div class="tooltip">0</div><input class="slidervalue" disabled>');
-      $(".tooltip, .slidervalue").hide();
-      //display the tooltip on hover
-      $(this).hover(function() {
-        $(this).children('.tooltip').fadeIn(250);
-      }, function() {
-        $(this).children('.tooltip').fadeOut(250);
-      });
-
-      //Call the Slider
-      $(this).children('.sliderjq').slider({
-        //Config
-        range: "min",
-        min: 0,
-        max: value,
-        value: 0,
-
-        start: function( event, ui ) {
-          var sendCss = $(this).parent().attr('class').split(' ');
-          sendCssSplit(sendCss);  
-        },
-
-        //Slider Event
-        slide: function(event, ui) {
-          var tooltipPosition = $(this).children(".ui-slider-handle").css('left');
-          $(this).siblings('.tooltip').css('left', tooltipPosition); 
-          $(this).siblings('.tooltip').text(ui.value);
-          $(this).siblings('.slidervalue').val(ui.value).change();    
-          digitalPins[pinNumber] = $(this).siblings('.tooltip').html();
-            arduinoSend(pin, digitalPins[pinNumber]); 
-        },
-
-        stop: function( event, ui ) {
-          var tooltipPosition = $(this).children(".ui-slider-handle").css('left');
-          $(this).siblings('.tooltip').css('left', tooltipPosition);
-          digitalPins[pinNumber] = $(this).siblings('.tooltip').html();
-            arduinoSend(pin, digitalPins[pinNumber]);              
-        },
-
-      });
-    }
-
-    //hover
-    if ($(this).hasClass("hover")){
-      var sendCss = $(this).attr('class').split(' ');
-      $(this).mouseenter(function() {
-        sendCssSplit(sendCss);
-          arduinoSend(pin, digitalPins[pinNumber]);
-      });
-      $(this).mouseleave(function() {
-        sendCssSplit(sendCss);
-          arduinoSend(pin, sendCss[4]);
-      });
-    }
-
-    //input-write
-    if ($(this).hasClass("input-write")){
-      $(this).mouseenter(function(event) {
-        var sendCss = $(this).attr('class').split(' ');
-        digitalPins[pinNumber] = $(this).val();
-        sendCssSplit(sendCss);
-      });
-      $(this).change(function() {
-        var sendCss = $(this).attr('class').split(' ');
-        digitalPins[pinNumber] = $(this).val();
-        sendCssSplit(sendCss);
-          arduinoSend(pin, digitalPins[pinNumber]);
-      });
-    }
-
-    //custom-button
-    if ($(this).hasClass("custom-button")){
-      $(this).click(function() {
-        classes = $(this).attr('class').split(' ');
-        var customBut = classes[2]+"\n"; 
-          chrome.serial.send(1, sendConvertString(customBut), onSend);
-      });
-    }
-
-    /*------------------------------------
-    Here should go additional write events
-    ------------------------------------*/
-
+  //button
+  $(".button").click(function() {
+    definePin($(this).data());
+    digitalPins[pinIndex] = parseInt($(this).data("3"));
+        arduinoSend(pin, digitalPins[pinIndex]);
   });
 
-  //custom-write
-  if ($(".ard").hasClass("custom-write")){
-    $(".custom-write").change(function() {
-      var valCustom = $(this).val();
-      var valCustomSend = valCustom+"\n";
-        chrome.serial.send(1, sendConvertString(valCustomSend), onSend);
+  //toggle
+  $(".toggle").each(function() {
+    if ($(this).data("3")==0){
+      $(this).html("OFF");
+      $(this).addClass('inactive')
+    }
+    else if ($(this).data("3")==1){
+      $(this).html("ON");
+    }
+
+    $(this).click(function() {
+      definePin($(this).data());
+
+      if (digitalPins[pinIndex] == 0){
+        $(this).html("ON");
+          digitalPins[pinIndex]=1;
+            arduinoSend(pin, digitalPins[pinIndex]);
+      }
+      else if (digitalPins[pinIndex] == 1){
+        $(this).html("OFF");
+          digitalPins[pinIndex]=0; 
+            arduinoSend(pin, digitalPins[pinIndex]);      
+      }
+      $(this).toggleClass('inactive');
     });
-  }
+  });
 
-  //HTML GENERATED ELEMENTS OF FRAMEWORK
-  //html/css operations that create framework objects in html file 
+  //toggle-pwm
+  $(".toggle-pwm").each(function() {
+    var togglePwm = {
 
-  //bar
-  $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
-  //knob
-  $(".knob").append(function() {
-    var splitCss = $(this).attr('class').split(' ');
-    var knobMax  = splitCss[3];
-    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-readOnly="true" value="0" class="knob-read">'); 
+      state1 : parseInt($(this).data('3')),
+      state2 : parseInt($(this).data('4'))
+
+    };
+
+    definePin($(this).data());
+
+    $(this).click(function(event) {
+      $(this).toggleClass('state2');
+
+      if ($(this).hasClass('state2')) {
+        digitalPins[pinIndex] = togglePwm.state2;
+          arduinoSend(pin, digitalPins[pinIndex]);
+      }
+      else {
+        digitalPins[pinIndex] = togglePwm.state1;
+          arduinoSend(pin, digitalPins[pinIndex]);        
+      }
+    });
+  });
+
+  //increase
+  $(".increase").html("+");
+
+  $(".increase").click(function() {
+    definePin($(this).data());
+
+      digitalPins[pinIndex] = parseInt(digitalPins[pinIndex])+parseInt($(this).data("5"));
+      digitalPins[pinIndex] = Math.min(Math.max(parseInt(digitalPins[pinIndex]), 0), $(this).data("4"));
+        arduinoSend(pin, digitalPins[pinIndex]); 
+  });
+
+  //decrease
+  $(".decrease").html("-");
+
+  $(".decrease").click(function() {
+    definePin($(this).data());
+
+      digitalPins[pinIndex] = parseInt(digitalPins[pinIndex])-parseInt($(this).data("5"));
+      digitalPins[pinIndex] = Math.min(Math.max(parseInt(digitalPins[pinIndex]), 0), $(this).data("4"));
+        arduinoSend(pin, digitalPins[pinIndex]); 
+  });
+
+  //hover
+  $(".hover").hover(function() {
+    definePin($(this).data());
+    digitalPins[pinIndex] = parseInt($(this).data("3"));
+      arduinoSend(pin, digitalPins[pinIndex]);
+  }, function() {
+    definePin($(this).data());
+    digitalPins[pinIndex] = parseInt($(this).data("4"));
+      arduinoSend(pin, digitalPins[pinIndex]);
   });
 
   //knob-send (plugin function)
-  $(".knob-send").append(function() {
-    var sendCss = $(this).attr('class').split(' ');
-    var knobMax  = sendCss[3];
-    sendCssSplit(sendCss);
-    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'"value="0" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
-    $(this).children(".knob-write").knob({
+  $(".knob-send").each(function() {
+    //definePin will not work
+      var pinIndex = $(this).data("pinNumber");
+      var pin = $(this).data("2");
+
+    $(this).children('.knob-write').knob({
       'change' : function (value) {
-        sendCssSplit(sendCss);
-        digitalPins[pinNumber] = value;
-        arduinoSend(pin, digitalPins[pinNumber]);
-        //console.log(pin+"-"+digitalPins[pinNumber]);
+        digitalPins[pinIndex] = value;
+          arduinoSend(pin, digitalPins[pinIndex]);
       }
     });
-  }); 
-
-  //jquery-knob plugin function
-  $(function() {
-    $(".knob-read").knob();
   });
 
-  $("#involthankyou").css({
-    "margin": '0 auto',
-    "margin-top": '300px',
-    "width": '90%',
-    "text-align": 'center',
-    "font-size": 36,
-    "font-family": 'Source Sans Pro Light',
+  //custom-button
+  $(".custom-button").click(function() {
+    var customBut = $(this).data("2");
+      chrome.serial.send(involtID, sendConvertString(customBut), onSend);
+  });
+
+  //input-write
+  $(".input-write").change(function() {
+    definePin($(this).data());
+    digitalPins[pinIndex] = $(this).val();
+      arduinoSend(pin, digitalPins[pinIndex]);
+  });
+
+  //custom-write
+  $(".custom-write").change(function() {
+    var valCustom = $(this).val();
+    var valCustomSend = valCustom+"\n";
+      chrome.serial.send(involtID, sendConvertString(valCustomSend), onSend);
+  });
+
+  //checkbox
+  $(".checkbox").change(function() {
+    definePin($(this).data());
+    if (this.checked) {
+      digitalPins[pinIndex] = parseInt($(this).data("3"));
+        arduinoSend(pin, digitalPins[pinIndex]);
+    }
+    else {
+      digitalPins[pinIndex] = parseInt($(this).data("4"));
+        arduinoSend(pin, digitalPins[pinIndex]);      
+    }
+  });
+
+  //radio 
+  $(".radio").change(function() {
+    if (this.checked) {
+      definePin($(this).data());
+      digitalPins[pinIndex] = parseInt($(this).data("3"));
+        arduinoSend(pin, digitalPins[pinIndex]);
+    }
+  });
+  
+  //slider (simple-slider plugin)
+  $(".rangeslider").each(function() {
+    $(this).children('.tooltip').hide();
+
+    var rangeslider = {
+
+      maxValue    : $(this).data("3"),
+      step        : $(this).data("4")
+
+    };
+
+    //define range element
+    $(this).children('.range').simpleSlider({
+
+      range    :[0,rangeslider.maxValue],
+      step     :rangeslider.step,
+      snap     :true,
+      highlight:true
+
+    });
+
+    //do something on change
+    $(this).children('.range').bind("slider:changed", function (event, data) {
+      
+      //display value
+      $(this).siblings('.tooltip').html(data.value);
+      $(this).parent().siblings('.rangeval').html(data.value);
+
+        //position of tooltip
+        var tooltipPosition = $(this).siblings('.slider').children('.dragger').css('left');
+        $(this).siblings('.tooltip').css('left', tooltipPosition);
+
+      definePin($(this).parent().data());
+      digitalPins[pinIndex] = parseInt(data.value);
+        arduinoSend(pin, digitalPins[pinIndex]);
+    });
+
+    //toggle tooltip on hover
+    $(this).hover(function() {
+      $(this).children('.tooltip').fadeIn(250);
+    }, function() {
+      $(this).children('.tooltip').fadeOut(250);
+    });
+
   });
 
 });
