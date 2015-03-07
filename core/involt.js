@@ -421,7 +421,6 @@ $(document).ready(function() {
       chrome.serial.send(involtID, sendConvertString(customBut), onSend);
   });
 
-<<<<<<< HEAD
   $("#involthankyou").css({
     "margin": '0 auto',
     "margin-top": '300px',
@@ -429,7 +428,7 @@ $(document).ready(function() {
     "text-align": 'center',
     "font-size": 36,
     "font-family": 'SourceSansProLight',
-=======
+
   //input-write
   $(".input-write").change(function() {
     definePin($(this).data());
@@ -510,7 +509,6 @@ $(document).ready(function() {
       $(this).children('.tooltip').fadeOut(250);
     });
 
->>>>>>> dev
   });
 
 });
