@@ -1,0 +1,61 @@
+/*Loader*/
+
+#loader-bg{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background-color: #00546D;
+}
+
+#loader{
+	margin:5% auto;
+   	width: 320px;
+	text-align: center;
+}
+
+#loader>div:nth-child(2){
+	color: white;
+}
+
+.loader-ports>p, #loader-button{
+	width: 260px;
+	height: 40px;
+	margin: 20px auto;
+	color: #282828;
+	background: #dedede;
+	box-shadow: 0 2px 0px #c8c8c8;
+	border-radius: 4px;
+	text-align: center;
+	font-size: 12px;
+	line-height: 40px;
+	text-transform: uppercase;
+	letter-spacing:2px;
+	font-family: 'SourceSansProRegular';
+	cursor: pointer;
+}
+
+.loader-ports>p:hover{
+	color: #0099e7;
+	box-shadow: 0 2px 0px #0099e7;
+}
+
+.active-port{
+	box-shadow: 0 2px 0px #0099e7!important;
+	background-color: #00aae2!important;
+	color:white!important;
+}
+
+#loader-button{
+	color:white;
+	margin: 0 auto;
+	background: #0099e7;
+	box-shadow: 0 2px 0px #0099e7;
+}
+
+#loader-button:hover{
+	color:#0099e7;
+	margin: 0 auto;
+	background: white;
+}
