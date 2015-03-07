@@ -1,5 +1,5 @@
 //App screen dimensions:
-var screenWidth  = 1200;
+var screenWidth  = 1000;
 var screenHeight = 700;
 
 //Create app window on launch
