@@ -14,10 +14,14 @@
 var loaderOnLaunch = true;
 //If you want to work without launcher you must define your connected arduino port:
 var defaultSerialPort = "COM7";
-//Connection bitrate (slow bitrate will send errors)
-var arduinoBitrate = 115200;
 
 //--------------------------------
+
+//ADVANCED SETTINGS:
+//Connection bitrate (slow bitrate will send errors)
+var arduinoBitrate = 115200;
+//set update rate of analog pins in miliseconds (lower value increases CPU usage)
+var updateRate = 50;
 
 //PORT DETECTION + LOADER PORT LIST
 var loaderCtaPort = defaultSerialPort;
@@ -45,7 +49,7 @@ var onGetDevices = function(ports) {
   }
 }
 
-//Function when connecting with Arduino
+//Function when connecting to Arduino
 var onConnect = function(connectionInfo) {
   //Error message
   if (!connectionInfo) {
@@ -58,17 +62,14 @@ var onConnect = function(connectionInfo) {
     $(".knob, .knob-send, .rangeslider").show();
   }
 
-  console.log("Device connected:");
-  if (loaderOnLaunch){
-    console.log(loaderCtaPort);
-  }
-  else {
-    console.log(defaultSerialPort);
-  }
+  console.log("Device connected:", loaderCtaPort);
 
-  console.log("Connection ID:", connectionInfo.connectionId);
+  this.connectionId = connectionInfo.connectionId;
+
+  console.log("Involt connection ID:", connectionInfo.connectionId);
 
   involtID = connectionInfo.connectionId;
+
 }
 
 //get the port list for loader
@@ -81,7 +82,7 @@ if(loaderOnLaunch){
     $(".knob, .knob-send, .rangeslider").hide();
     //create loader elements
     $("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-      $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select Arduino port:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
+      $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
     //connect button
     $("#loader-button").click(function() {
       chrome.serial.connect(loaderCtaPort, {bitrate: arduinoBitrate}, onConnect);
@@ -119,7 +120,7 @@ $(document).ready(function() {
       //check if string is number and convert
       var numberCheck = isNaN(digitalPins[pinData]);
       if (numberCheck == false) {
-         digitalPins[pinData] = parseInt(valueData);
+        digitalPins[pinData] = parseInt(valueData);
       }
     }
     else if (pinRawData.indexOf("A")==0){
@@ -161,7 +162,6 @@ $(document).ready(function() {
     "width": '90%',
     "text-align": 'center',
     "font-size": 36,
-    "font-family": 'SourceSansProLight',
   });
 });
 
@@ -171,7 +171,7 @@ var onReceive = function(receiveInfo) {
   //ID test
   if (receiveInfo.connectionId !== involtID) return;
   
-  //create array from received arduino data (need to be fixed??)
+  //create array from received arduino data
   var Int8View  = new Int8Array(receiveInfo.data);
   encodedString = String.fromCharCode.apply(null, Int8View);
 
@@ -187,7 +187,7 @@ var onReceive = function(receiveInfo) {
   */
 
   //corrupted serial data parameters (Based on my observations)
-  // remove corrupted serial data from array list
+  //remove corrupted serial data from array list
   if (  Atest == 0 && 
         Btest >= 2 && 
         Ctest >= 1 && 
@@ -255,7 +255,7 @@ var analogUpdate = function(){
 
 }
 
-setInterval(analogUpdate, 50);
+setInterval(analogUpdate, updateRate);
 
 //Error message when connection is interrupted
 var onError = function (errorInfo) {
@@ -271,10 +271,10 @@ chrome.serial.onReceiveError.addListener(onError);
 
 //Empty function for testing
 var onSend = function(){
-
+/*
   console.log(ardSend);
   console.log(digitalPins);
-
+*/
 }
 
 //get object pin from data
@@ -296,6 +296,7 @@ var arduinoSend = function(pin, value){
 
 //convert "ardSend" string to arduino serial-friendly format
 var sendConvertString = function(ardSend) {
+
   var buf      = new ArrayBuffer(ardSend.length);
   var bufView  = new Uint8Array(buf);
 
@@ -303,6 +304,7 @@ var sendConvertString = function(ardSend) {
     bufView[i] = ardSend.charCodeAt(i);
   }
   return buf;
+
 }
 
 $(document).ready(function() {

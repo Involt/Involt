@@ -1,7 +1,15 @@
 Involt
 ======
 
-Chrome based Arduino to HTML framework for designers.
+Chrome based Arduino to HTML framework for designers. 
+-------
+
+Involt is Chrome Packaged App with build in serial communication. The key to Involt is to "make it simple" to develop on every step of design process. You can use it to create app or to quickly prototype and iterate on early stages of bigger project.
+
+Why Involt?
+-------
+
+The main feature of this framework is easy and quick workflow. You can create your app with basic knowledge about HTML, CSS and Arduino.
 
 Install
 -------

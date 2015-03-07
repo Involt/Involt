@@ -9,14 +9,16 @@
   
   IMPORTANT
   In direct mode digitalWrite/analogWrite is automatic only for
-  values received from Involt.
+  values received from Involt. Remember about adding pinMode
+  for digital pins.
 */
   boolean directMode = true;
   
-//Array for digital pins 
+  //Array for digital pins. Use only in non-direct mode.
   int chromeDigital[] = {};
 
 void setup() {
+  //Do not change the serial connection bitrate.
   Serial.begin(115200);
 }
 
@@ -24,7 +26,7 @@ void loop() {
   //receive data from your app, do not remove this line.
   chromeReceive();
   
-
+  
 }
 
 //----------------------

@@ -1,7 +1,7 @@
 {
   //Basic info (you can change it)
-  "name": "Involt 1.0.3",
-  "description": "Prototype your Arduino-based app using html & css",
+  "name": "Involt",
+  "description": "Arduino to HTML framework for designers.",
   "author": "Involt, Ernest Warzocha",
   "version": "1.0.3",
   
@@ -19,6 +19,6 @@
 
   "manifest_version": 2,
   "offline_enabled": true,
-  "minimum_chrome_version": "23"
+  "minimum_chrome_version": "33"
 
 }
