@@ -18,9 +18,13 @@ http://involt.github.io/
 How does it work?
 ------
 
-Involt translates CSS classes into functions. You only need to specify UI element, target pin and variables like desired values or their range. Here is simple button example (Send to pin 5 value 255):
+Involt translates CSS classes into functions. You need to specify UI element, target pin and variables like desired values or their range. Here is simple button example (Send to pin 5 value 255):
 
     <div class = “ard button P5 255”> Click me </div> 
+
+It's also possible to do the same with JQuery:
+
+	$(this).pinDefine("P5").sendValue(255); 
     
 Getting started:
 http://involt.github.io/gettingstarted
