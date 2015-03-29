@@ -18,8 +18,12 @@
 */
   boolean directMode = false;
   
-  //Array for digital pins.
-  int chromeDigital[] = {};
+/*
+  Array for digital pins.
+  IMPORTANT: You need to declare the total number of variables.
+  Default is Arduino UNO total pin number +1.
+*/
+  int chromeDigital[14] = {};
 
 void setup() {
   //Do not change the serial connection bitrate.
