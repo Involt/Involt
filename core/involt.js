@@ -11,9 +11,9 @@
 //LOADER SETTINGS:
 /*Set loaderOnLaunch to false if you dont want to run loader on every launch
 (direct connction is useful when creating your app but not recommended for finished project).*/
-var loaderOnLaunch = true;
+var loaderOnLaunch = false;
 //If you want to work without launcher you must define your connected arduino port:
-var defaultSerialPort = "COM7";
+var defaultSerialPort = "COM3";
 
 //--------------------------------
 
@@ -23,7 +23,7 @@ var arduinoBitrate = 115200;
 //Set update rate of analog pins in miliseconds (lower value increases CPU usage).
 var updateRate = 50;
 //Debug mode logs into console object data on send (buttons send on click).
-var debugMode = false;
+var debugMode = true;
 
 //PORT DETECTION + LOADER PORT LIST
 var loaderCtaPort = defaultSerialPort;
@@ -164,6 +164,19 @@ $(document).ready(function() {
 
     };
 
+    //define default parameters
+    if($t.hasClass("rangeslider") || $t.hasClass("knob-send") || $t.hasClass("increase") || $t.hasClass("decrease")){
+      if(typeof $t.data("min") === 'undefined'){
+        $t.data("min", 0).data("max", 255);
+      };
+      if(typeof $t.data("step") === 'undefined'){
+        $t.data("step", 1);
+      };
+      if(typeof $t.data("value") === 'undefined'){
+        $t.data("value", 0);
+      };
+    };
+
     //log the data on debug
     if(debugMode) console.log($t.data());
 
@@ -189,11 +202,26 @@ $(document).ready(function() {
   $(".knob-send").append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
 
   //rangeslider
-  $(".rangeslider").append('<div class="rangeval"></div><input type="text" class="range"/><div class="tooltip">slide</div>');
+  $(".rangeslider").append('<div class="tooltip">test</div><div class="slider"></div>');
+  //$(".rangeslider").append('<div class="rangeval"></div><input type="text" class="range"/><div class="tooltip">slide</div>');
 
   $(function() {
     $(".knob-read").knob();
   });
+
+/*
+  $(".rangeslider").each(function() {
+    var $t = $(this);
+    $t.children('.range').simpleSlider({
+      range    :[$t.data("min"),$t.data("max")],
+      step     :$t.data("step"),
+      snap     :true,
+      highlight:true
+    });
+    
+  });
+*/
+
 
   //increase/decrease + and - when empty text
   $(".increase").each(function() {
@@ -566,19 +594,96 @@ $(document).ready(function() {
         $t.sendValue(); 
     }
   });
-  
-  //slider (simple-slider plugin)
+
+  //slider
+  $(".slider").each(function() {
+    var $t = $(this);
+    var $tp = $(this).parent(".rangeslider");
+
+    $t.siblings('.tooltip').hide();
+    $t.siblings('.tooltip').html($tp.data('value'));
+
+    $t.noUiSlider({
+      start: [$tp.data("value")],
+      range: {
+        'min': [$tp.data("min")],
+        'max': [$tp.data("max")]
+      },
+      step: $tp.data("step")
+    });
+    
+    $t.on({
+      slide: function(){
+        var cssPos = $t.children('.noUi-base').children('.noUi-origin').css('left');
+        var val = parseInt($t.val());
+        digitalPins[$tp.data("pinNumber")] = val;
+        arduinoSend($tp.data("pin"), val);
+        $t.siblings('.tooltip').css('left',cssPos).html(val);
+      }
+    });
+
+    $tp.hover(function() {
+      $t.siblings('.tooltip').css('left', $t.children('.noUi-base').children('.noUi-origin').css('left'));
+      $t.siblings('.tooltip').fadeIn(250);
+    }, function() {
+      $t.siblings('.tooltip').fadeOut(250);
+    });
+
+  });
+
+/*
   $(".rangeslider").each(function() {
+    var $t = $(this);
+    var min = $t.data("min");
+    var max = $t.data("max");
+    var step = $t.data("step");
+    var value = $t.data("value");
+
+      $t.append('<input type="range" class="test" value="'+value+'" min="'+min+'" max="'+max+'" step="'+step+'">');
+      $t.append('<div class="tooltip">'+value+'</div>');
+
+    $t.children('.test').rangeslider({
+      polyfill: false,
+      rangeClass: 'slider-inner',
+      fillClass: 'slider-track',
+      handleClass: 'slider-handle',
+      onSlide: function(position, value) {
+
+      },
+      onSlideEnd: function(position, value) {
+       $t.children('.tooltip').html(value).css('left', position);
+        digitalPins[$t.data("pinNumber")] = value;
+        arduinoSend($t.data("pin"), value);
+      }
+    });
+
+  });
+*/
+
+
+
+ /*
+    $(".rangeslider").each(function() {
+      var $t = $(this);
+      $(this).sliders({
+        min:$t.data("min"),
+        max:$t.data("max"),
+        step: $t.data("step"),
+        value: $t.data("value"),
+      });
+      $(this).on('change',function(event) {
+         console.log("aa");
+      });
+    });
+  */
+
+  //slider (simple-slider plugin)
+  /*$(".rangeslider").each(function() {
     var $t = $(this);
     $t.children('.tooltip').hide();
 
     //define range element
-    $t.children('.range').simpleSlider({
-      range    :[$t.data("min"),$t.data("max")],
-      step     :$t.data("step"),
-      snap     :true,
-      highlight:true
-    });
+    $t.children('.range').bind("slider:ready", function (event, data) { $t.children('.range').simpleSlider("setValue", $t.data("value")); })
     //do something on change
     $t.children('.range').bind("slider:changed", function (event, data) {
       var $tc = $(this);
@@ -601,6 +706,6 @@ $(document).ready(function() {
       $t.children('.tooltip').fadeOut(250);
     });
 
-  });
+  });*/
 
 });
