@@ -138,6 +138,15 @@ $(document).ready(function() {
         $t.data("value2", valueSplit[1]);
       };
     };
+    
+    if($t.attr('string') !== 'undefined'){
+      $t.data('value', $t.attr('string'));
+    };
+
+    //check if there is a function to send
+    if($t.attr('fn') !== 'undefined'){
+      $t.data('fn', $t.attr('fn'));
+    };
 
     //add values to array
     if (pin.indexOf("A")<0){
@@ -167,13 +176,17 @@ $(document).ready(function() {
     //define default parameters
     if($t.hasClass("rangeslider") || $t.hasClass("knob-send") || $t.hasClass("increase") || $t.hasClass("decrease")){
       if(typeof $t.data("min") === 'undefined'){
-        $t.data("min", 0).data("max", 255);
+        $t.data("min", 0);
+      };
+      if(typeof $t.data("max") === 'undefined'){
+        $t.data("max", 255);
       };
       if(typeof $t.data("step") === 'undefined'){
         $t.data("step", 1);
       };
       if(typeof $t.data("value") === 'undefined'){
         $t.data("value", 0);
+          digitalPins[pinNumber] = $t.data("value");
       };
     };
 
@@ -202,26 +215,11 @@ $(document).ready(function() {
   $(".knob-send").append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
 
   //rangeslider
-  $(".rangeslider").append('<div class="tooltip">test</div><div class="slider"></div>');
-  //$(".rangeslider").append('<div class="rangeval"></div><input type="text" class="range"/><div class="tooltip">slide</div>');
+  $(".rangeslider").append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
 
   $(function() {
     $(".knob-read").knob();
   });
-
-/*
-  $(".rangeslider").each(function() {
-    var $t = $(this);
-    $t.children('.range').simpleSlider({
-      range    :[$t.data("min"),$t.data("max")],
-      step     :$t.data("step"),
-      snap     :true,
-      highlight:true
-    });
-    
-  });
-*/
-
 
   //increase/decrease + and - when empty text
   $(".increase").each(function() {
@@ -248,6 +246,22 @@ $(document).ready(function() {
 
 (function($) {
 
+  $.fn.sendFn = function(name) {
+
+    return this.each(function() {
+      var $t = $(this);
+      if (typeof name === 'undefined'){
+        if (typeof $t.data('fn') !== 'undefined'){
+          arduinoFn($t.data('fn'));
+        };
+      }
+      else{
+        arduinoFn(name);
+      };
+    });
+
+  };
+  
   $.fn.sendValue = function(value){
 
     return this.each(function() {
@@ -258,6 +272,7 @@ $(document).ready(function() {
       else{
         arduinoSend($t.data("pin"), value);
       };
+      $t.not('.knob-send').not('.rangeslider').sendFn();
     });
 
   };
@@ -278,7 +293,7 @@ $(document).ready(function() {
     });
 
   };
-  
+
   $.fn.sendString = function(string){
 
     var directSend = string+"\n";
@@ -421,14 +436,14 @@ var onSend = function(){
   if(debugMode){
     console.log(ardSend);
     console.log(digitalPins);
-  }
+  };
 }
 
 //get object pin from data
 var definePin = function(pinData){
 
-    pinIndex  = pinData["pinNumber"];
-    pin       = pinData["pin"];
+  pinIndex  = pinData["pinNumber"];
+  pin       = pinData["pin"];
 
 }
 
@@ -438,6 +453,17 @@ var arduinoSend = function(pin, value){
   ardSend = pin+"V"+value+"\n";
   
   chrome.serial.send(involtID, sendConvertString(ardSend), onSend);
+
+}
+
+//Send function parameter to device
+var arduinoFn = function(afn){
+
+  var ardFN = "FN" + afn + "\n";
+
+  if(debugMode) console.log(ardFN);
+
+  chrome.serial.send(involtID, sendConvertString(ardFN), onSend);
 
 }
 
@@ -535,28 +561,59 @@ $(document).ready(function() {
   });
 
   //knob-send (plugin function)
-
   $(".knob-send").each(function() {
     //definePin will not work
     var $t = $(this);
+
       var index = $t.data("pinNumber");
       var currentValue = $t.data("value");
+      var max = $t.data("max");
         $t.children('.knob-write').val(currentValue).data($t.data());
+
     $t.children('.knob-write').knob({
       'min':  $t.data("min"),
-      'max':  $t.data("max"),
+      'max':  max,
       'step': $t.data("step"),
       'change' : function (value) {
-        digitalPins[index] = value;
-          $t.sendValue();
+        //prevent from sending duplicated values when step is higher than 1
+        if (digitalPins[index] !== this.cv){
+
+          if (this.cv <= max){
+            digitalPins[index] = this.cv;
+             $t.sendValue();
+          }
+          else {
+            digitalPins[index] = max;
+          };
+
+        };
+
+      },
+      'release' : function (value){
+
+        if (digitalPins[index] !== value){
+
+          if (value <= max){
+            digitalPins[index] = value;
+          }
+          else {
+            digitalPins[index] = max;
+          };
+
+          $t.sendValue(); 
+
+        };
+        $t.sendFn()
       }
     });
+
   });
 
   //custom-button
   $(".custom-button").click(function() {
     var customBut = $(this).data("pin");
       chrome.serial.send(involtID, sendConvertString(customBut), onSend);
+      $(this).sendFn();
   });
 
   //input-write
@@ -571,6 +628,7 @@ $(document).ready(function() {
     var valCustom = $(this).val();
     var valCustomSend = valCustom+"\n";
       chrome.serial.send(involtID, sendConvertString(valCustomSend), onSend);
+      $(this).sendFn();
   });
 
   //checkbox
@@ -599,9 +657,10 @@ $(document).ready(function() {
   $(".slider").each(function() {
     var $t = $(this);
     var $tp = $(this).parent(".rangeslider");
+    var $ts = $t.siblings('.tooltip');
 
-    $t.siblings('.tooltip').hide();
-    $t.siblings('.tooltip').html($tp.data('value'));
+    $ts.html($tp.data('value')).hide();
+    $t.siblings('.label').html($tp.data('value')).hide();
 
     $t.noUiSlider({
       start: [$tp.data("value")],
@@ -616,96 +675,23 @@ $(document).ready(function() {
       slide: function(){
         var cssPos = $t.children('.noUi-base').children('.noUi-origin').css('left');
         var val = parseInt($t.val());
-        digitalPins[$tp.data("pinNumber")] = val;
-        arduinoSend($tp.data("pin"), val);
-        $t.siblings('.tooltip').css('left',cssPos).html(val);
+          $ts.css('left',cssPos).html(val);
+          $t.siblings('.label').html(val);
+            digitalPins[$tp.data("pinNumber")] = val;
+            arduinoSend($tp.data("pin"), val);
+      },
+      set: function(){
+        $tp.sendFn();
       }
     });
 
     $tp.hover(function() {
-      $t.siblings('.tooltip').css('left', $t.children('.noUi-base').children('.noUi-origin').css('left'));
-      $t.siblings('.tooltip').fadeIn(250);
+      $ts.css('left', $t.children('.noUi-base').children('.noUi-origin').css('left'));
+      $ts.fadeIn(250);
     }, function() {
-      $t.siblings('.tooltip').fadeOut(250);
+      $ts.fadeOut(250);
     });
 
   });
-
-/*
-  $(".rangeslider").each(function() {
-    var $t = $(this);
-    var min = $t.data("min");
-    var max = $t.data("max");
-    var step = $t.data("step");
-    var value = $t.data("value");
-
-      $t.append('<input type="range" class="test" value="'+value+'" min="'+min+'" max="'+max+'" step="'+step+'">');
-      $t.append('<div class="tooltip">'+value+'</div>');
-
-    $t.children('.test').rangeslider({
-      polyfill: false,
-      rangeClass: 'slider-inner',
-      fillClass: 'slider-track',
-      handleClass: 'slider-handle',
-      onSlide: function(position, value) {
-
-      },
-      onSlideEnd: function(position, value) {
-       $t.children('.tooltip').html(value).css('left', position);
-        digitalPins[$t.data("pinNumber")] = value;
-        arduinoSend($t.data("pin"), value);
-      }
-    });
-
-  });
-*/
-
-
-
- /*
-    $(".rangeslider").each(function() {
-      var $t = $(this);
-      $(this).sliders({
-        min:$t.data("min"),
-        max:$t.data("max"),
-        step: $t.data("step"),
-        value: $t.data("value"),
-      });
-      $(this).on('change',function(event) {
-         console.log("aa");
-      });
-    });
-  */
-
-  //slider (simple-slider plugin)
-  /*$(".rangeslider").each(function() {
-    var $t = $(this);
-    $t.children('.tooltip').hide();
-
-    //define range element
-    $t.children('.range').bind("slider:ready", function (event, data) { $t.children('.range').simpleSlider("setValue", $t.data("value")); })
-    //do something on change
-    $t.children('.range').bind("slider:changed", function (event, data) {
-      var $tc = $(this);
-      //display value
-      $tc.siblings('.tooltip').html(data.value);
-      $tc.parent().siblings('.rangeval').html(data.value);
-
-        //position of tooltip
-        var tooltipPosition = $tc.siblings('.slider').children('.dragger').css('left');
-        $tc.siblings('.tooltip').css('left', tooltipPosition);
-
-      digitalPins[$t.data("pinNumber")] = parseInt(data.value);
-        $t.sendValue();
-    });
-
-    //toggle tooltip on hover
-    $t.hover(function() {
-      $t.children('.tooltip').fadeIn(250);
-    }, function() {
-      $t.children('.tooltip').fadeOut(250);
-    });
-
-  });*/
 
 });
