@@ -81,39 +81,48 @@ body{
 .rangeslider, .bar{
 	width: 380px;
 	height: 40px;
-	padding: 9px 22px;
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;
+	max-height: 40px;
 }
 
-.slider{
+.rangeslider{
+	padding: 19px 22px;
+}
+
+.noUi-base{
 	width: 100%;
-	margin-left: 0px!important;
-}
-
-.dragger {
-	width: 26px;
-	height: 26px;
-	border-radius: 13px;
-	background: #064f6d;
-}
-
-.track, .highlight-track{
-	height: 12px;
-	background: #c8c8c8;
-	border-radius: 4px;
-	border: 0;
-	margin-top: -5px;
-}
-
-.highlight-track{
+	height: 100%;
 	background: #0099e7;
+	position: relative;
+	height: 3px;
 }
 
-/*Value displayed over slider (hover)*/
+.noUi-handle{
+	width: 20px;
+	height: 20px;
+	background: #064f6d;
+	position: relative;
+	z-index: 1;
+	border-radius: 20px;
+	left: -10px;
+	top: -8px;
+	cursor:pointer;
+}
+
+.noUi-origin{
+	background: #c8c8c8;
+	position: absolute;
+	right: 0;
+	top: 0;
+	left: 0;
+	bottom: 0;
+}
+
 .tooltip{
 	position: relative;
-	bottom: 90px;
+	float:left;
+	bottom: 76px;
 	width: 80px;
 	height: 40px;
 	margin-top: 20px;
@@ -127,7 +136,7 @@ body{
 	letter-spacing:2px;
 }
 
-/*Small arrow below tooltip*/
+
 .tooltip:after {
 	content: " "; 
 	position: absolute; 
@@ -139,42 +148,25 @@ body{
 	margin-left: -8px;
 }
 
-.rangeobj{
-	max-height: 40px;
-}
-
-.rangeval{
-	display:none;
-}
+/*Uncomment to display label instead of tooltip*/
 
 /*
+.tooltip{
+	display: none!important;
+}
 
-Uncomment this if you want to display label value on rangeslider.
-
-.rangeval{
+.rangeslider>.label{
+	display:block!important;
 	float: left;
-	display: block;
-	line-height: 25px;
+	height:24px;
+	line-height: 24px;
 	font-size:16px;
 	letter-spacing:2px;
 	text-align: center;
 }
-
-.rangeobj{
-	margin-left:60px;
-}
-
-.tooltip{
-	display: none!important;
-}
 */
 
 /*Bar*/
-
-.bar{
-	width: 380px;
-	padding: 0;
-}
 
 .bar-value{
 	height: 40px;
@@ -184,6 +176,7 @@ Uncomment this if you want to display label value on rangeslider.
 }
 
 /*Number on bar*/
+
 .bar-value>div{
 	padding-left: 20px;
 	color:#003e53;
@@ -191,6 +184,12 @@ Uncomment this if you want to display label value on rangeslider.
 	font-size: 24px;
 	line-height: 40px;
 	font-family: "SourceSansProBold";
+}
+
+/*Knob-send*/
+
+.knob-send{
+	cursor:pointer;
 }
 
 /*.hover*/
@@ -222,7 +221,7 @@ Uncomment this if you want to display label value on rangeslider.
 /*Inputs - input-write, custom-write*/
 
 input:focus {
-    outline: 0;
+	outline: 0;
 }
 
 .input-write, .custom-write  {
@@ -232,7 +231,7 @@ input:focus {
 	color:#0099e7;
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;	
-    border: 0px solid white; 
+	border: 0px solid white; 
 	font-size: 26px;
 	font-family: "SourceSansProLight";
 }

@@ -60,6 +60,16 @@
 	background: white;
 }
 
+#loader-error{
+	width:100%;
+	position: absolute;
+	bottom: 0;
+	background: rgb(255, 70, 26);
+	padding:10px 0;
+	color:white;
+	text-align: center;
+}
+
 #involthankyou{
     margin: 0 auto;
     margin-top: 300px;
