@@ -50,4 +50,6 @@ Basic blink example
 http://involt.github.io/examples/ex1.html
 -
 
+Other examples can be found on http://involt.github.io/examples.html or https://github.com/Involt/examples
+
 For developement check wiki and issues on github.

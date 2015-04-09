@@ -11,7 +11,7 @@
 //LOADER SETTINGS:
 /*Set loaderOnLaunch to false if you dont want to run loader on every launch
 (direct connction is useful when creating your app but not recommended for finished project).*/
-var loaderOnLaunch = false;
+var loaderOnLaunch = true;
 //If you want to work without launcher you must define your connected arduino port:
 var defaultSerialPort = "COM3";
 
@@ -22,8 +22,10 @@ var defaultSerialPort = "COM3";
 var arduinoBitrate = 115200;
 //Set update rate of analog pins in miliseconds (lower value increases CPU usage).
 var updateRate = 50;
-//Debug mode logs into console object data on send (buttons send on click).
-var debugMode = true;
+//Debug mode logs into console object data on send (buttons sends on click).
+var debugMode = false;
+
+//--------------------------------
 
 //PORT DETECTION + LOADER PORT LIST
 var loaderCtaPort = defaultSerialPort;
@@ -47,22 +49,24 @@ var onGetDevices = function(ports) {
           loaderCtaPort = $(this).html();
       });
 
-    }
-  }
-}
+    };
+  };
+};
 
 //Function when connecting to Arduino
 var onConnect = function(connectionInfo) {
   //Error message
   if (!connectionInfo) {
-    console.error('Could not open, check if Arduino is connected or try other serial port', "ヽ༼ຈل͜ຈ༽ﾉ RIOT ヽ༼ຈل͜ຈ༽ﾉ");
+    console.error('Could not open, check if Arduino is connected, try other serial port or relaunch Chrome.', "ヽ༼ຈل͜ຈ༽ﾉ RIOT ヽ༼ຈل͜ຈ༽ﾉ");
+    $("body").append('<div id="loader-error">Could not open, check if device is connected, try other serial port or relaunch Chrome.</div>');
+    $("#loader-error").delay(2500).fadeOut('slow');
     return;
   }
   //Remove loader if connection is successful + hack for knob and slider
   else {
-    $("#loader-bg").remove();
+    $("#loader-bg, #loader-error").remove();
     $(".knob, .knob-send, .rangeslider").show();
-  }
+  };
 
   console.log("Device connected:", loaderCtaPort);
 
@@ -72,7 +76,7 @@ var onConnect = function(connectionInfo) {
 
   involtID = connectionInfo.connectionId;
 
-}
+};
 
 //get the port list for loader
 chrome.serial.getDevices(onGetDevices);
@@ -94,7 +98,7 @@ if(loaderOnLaunch){
 }
 else{
   chrome.serial.connect(defaultSerialPort, {bitrate: arduinoBitrate}, onConnect);
-}
+};
 
 //IDENTIFY INVOLT OBJECTS AND DEFINE THEIR PARAMETERS
 
@@ -197,6 +201,7 @@ $(document).ready(function() {
 
   //HTML GENERATED ELEMENTS OF FRAMEWORK
   //html/css operations that create framework objects in html file 
+
   //bar
   $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
   $(".bar-value").each(function() {
@@ -288,7 +293,9 @@ $(document).ready(function() {
         var valueCheck = isNaN(newValue);
         if(valueCheck == false) parseInt(newValue);
           digitalPins[$t.data("pinNumber")] = newValue;
-          $t.data("value", newValue);
+          if (typeof $t.data("value2") === 'undefined') {
+            $t.data("value", newValue);
+          };       
       };
     });
 
@@ -300,7 +307,7 @@ $(document).ready(function() {
       chrome.serial.send(involtID, sendConvertString(directSend), onSend);
         return this;
 
-  }
+  };
 
   $.fn.pinDefine = function(pin){
 
@@ -325,7 +332,7 @@ $(document).ready(function() {
       //check if the new pin value is defined - if not - put the previous value
       if (typeof digitalPins[$t.data("pinNumber")] == 'undefined') {
         digitalPins[$t.data("pinNumber")] = digitalPins[previousPin];
-      }
+      };
 
     });
 
@@ -372,9 +379,9 @@ var onReceive = function(receiveInfo) {
     }
     else {
       analogPins[i] = stringValue; 
-    }
+    };
 
-  }
+  };
 
 };
 
@@ -415,7 +422,7 @@ var analogUpdate = function(){
     $(this).attr('value', analogPins[$(this).data("pinNumber")]);
   });
 
-}
+};
 
 setInterval(analogUpdate, updateRate);
 
@@ -437,15 +444,7 @@ var onSend = function(){
     console.log(ardSend);
     console.log(digitalPins);
   };
-}
-
-//get object pin from data
-var definePin = function(pinData){
-
-  pinIndex  = pinData["pinNumber"];
-  pin       = pinData["pin"];
-
-}
+};
 
 //Sends data to arduino based on event
 var arduinoSend = function(pin, value){
@@ -454,7 +453,7 @@ var arduinoSend = function(pin, value){
   
   chrome.serial.send(involtID, sendConvertString(ardSend), onSend);
 
-}
+};
 
 //Send function parameter to device
 var arduinoFn = function(afn){
@@ -465,7 +464,7 @@ var arduinoFn = function(afn){
 
   chrome.serial.send(involtID, sendConvertString(ardFN), onSend);
 
-}
+};
 
 //convert "ardSend" string to arduino serial-friendly format
 var sendConvertString = function(ardSend) {
@@ -475,18 +474,16 @@ var sendConvertString = function(ardSend) {
 
   for (var i   = 0; i < ardSend.length; i++) {
     bufView[i] = ardSend.charCodeAt(i);
-  }
+  };
   return buf;
 
-}
+};
 
 $(document).ready(function() {
 
   //button
   $(".button").click(function() {
-    var $t = $(this);
-    digitalPins[$t.data("pinNumber")] = $t.data("value");
-      $t.sendValue();
+    $(this).updateValue().sendValue();
   });
 
   //toggle
@@ -506,7 +503,7 @@ $(document).ready(function() {
       };
         digitalPins[index] = 0; 
           $t.sendValue();    
-    }
+    };
     $t.toggleClass('inactive');
 
   });
@@ -519,13 +516,13 @@ $(document).ready(function() {
       $t.toggleClass('state2');
 
       if ($t.hasClass('state2')) {
-        digitalPins[$t.data("pinNumber")] = $t.data('value2');
+        digitalPins[$t.data("pinNumber")] = $t.data("value2");
           $t.sendValue();
       }
       else {
-        digitalPins[$t.data("pinNumber")] = $t.data('value');
-          $t.sendValue();        
-      }
+        digitalPins[$t.data("pinNumber")] = $t.data("value");
+          $t.sendValue();       
+      };
     });
   });
 
@@ -551,13 +548,17 @@ $(document).ready(function() {
 
   //hover
   $(".hover").hover(function() {
-    definePin($(this).data());
-    digitalPins[pinIndex] = $(this).data("value");
-      arduinoSend(pin, digitalPins[pinIndex]);
+
+    var $t = $(this);
+    digitalPins[$t.data("pinNumber")] = $t.data("value");
+      $t.sendValue();
+
   }, function() {
-    definePin($(this).data());
-    digitalPins[pinIndex] = $(this).data("value2");
-      arduinoSend(pin, digitalPins[pinIndex]);
+
+    var $t = $(this);
+    digitalPins[$t.data("pinNumber")] = $t.data("value2");
+      $t.sendValue();
+
   });
 
   //knob-send (plugin function)
@@ -619,8 +620,7 @@ $(document).ready(function() {
   //input-write
   $(".input-write").change(function() {
     var $t = $(this);
-    digitalPins[$t.data("pinNumber")] = $t.val();
-      $t.sendValue();
+      $t.updateValue($t.val()).sendValue();
   });
 
   //custom-write
@@ -636,20 +636,18 @@ $(document).ready(function() {
     var $t = $(this);
     if (this.checked) {
       digitalPins[$t.data("pinNumber")] = $t.data("value");
-        $t.sendValue(); 
+        $t.sendValue();
     }
     else {
       digitalPins[$t.data("pinNumber")] = $t.data("value2");
         $t.sendValue();
-    }
+    };
   });
 
   //radio 
   $(".radio").change(function() {
-    var $t = $(this);
     if (this.checked) {
-      digitalPins[$t.data("pinNumber")] = $t.data("value");
-        $t.sendValue(); 
+      $(this).updateValue().sendValue(); 
     }
   });
 

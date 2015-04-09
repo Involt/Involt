@@ -56,7 +56,7 @@ void chromeReceive() {
   String chrome;
   String pwm = "P";
   String dig = "D";
-  String fn = "fn";
+  String fn = "FN";
   int pin;
   int val;
 
