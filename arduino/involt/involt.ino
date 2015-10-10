@@ -16,7 +16,7 @@ boolean autoPinMode = true;
   inside App. In direct mode digitalWrite/analogWrite is
   automatic only for values received from Involt.
 */
-boolean directMode = false;
+boolean directMode = true;
 
 /*
   Array for digital pins.
@@ -28,16 +28,20 @@ String fname;
 
 void setup() {
   //Do not change the serial connection bitrate.
-  Serial.begin(115200);
+  Serial.begin(57600);
 }
+
 
 void loop() {
   //receive data from your app, do not remove this line.
   chromeReceive();
-  
+
+  chromeSend(0, analogRead(A0));
+  delay(2);
+  chromeSend(1, analogRead(A1));
   
   //Add your code here
-  
+  delay(2);
   
   //clear the fname to prevent from duplicating functions
   fname = "";
