@@ -1,10 +1,10 @@
 /*
 		INVOLT FRAMEWORK CORE FILE
-		Ernest Warzocha 2014
+		Ernest Warzocha 2015
 		involt.github.io
 */
 
-//--------------------------------
+//----------------------------------------------------------------------------------------------
 
 //INVOLT SETTINGS
 
@@ -16,22 +16,24 @@
 		Serial and Bluetooth are used for Chrome App.
 		isPhonegap is for mobile devices and uses BT low Energy only. Best used with Phonegap Build.
 	*/
-	var isSerial    = true;
-	var isBluetooth = false;
+	var isSerial    = false;
+	var isBluetooth = true;
 	//var isPhonegap  = false; NOT AVALIABLE
+	//var isOnline = false; NOT AVALIABLE
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on every launch. 
 		Remember to set default connection because it's not possible when app is running.
 	*/
-	var loaderOnLaunch = true;
+	var loaderOnLaunch = false;
 	/*
 		BLUETOOTH AND SERIAL DEFAULT CONNECTION
 	*/
 	var defaultSerialPort = "COM3";
 
-	var defaultMacAdress;
-	var uuid;
+	var defaultBtAddress = "98:D3:31:90:4C:66";
+	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
+	var discoveryDuration = 10000;
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 
@@ -50,7 +52,7 @@
 	*/
 	var debugMode = true;
 
-//--------------------------------
+//----------------------------------------------------------------------------------------------
 
 //Array of values stored for sending to device with Involt functions and HTML elements.
 var digitalPins = [];
@@ -66,6 +68,9 @@ var Involt =  function (){
 		if(debugMode){
 			involt.debug(digitalPins);
 		};
+		if (chrome.runtime.lastError) {
+	    console.error("Send failed: " + chrome.runtime.lastError.message);
+	  };
 	};
 	//arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
 	this.arduinoSend = function(pin, value){
@@ -230,6 +235,8 @@ var Involt =  function (){
 	};
 };
 
+//----------------------------------------------------------------------------------------------
+
 //CONNECTION FUNCTIONS
 
 //SERIAL CONNECTION
@@ -344,16 +351,155 @@ if (isSerial){
 
 	};
 
-}
+};
+
+//----------------------------------------------------------------------------------------------
 
 //BLUETOOTH CONNECTION
 
 else if (isBluetooth){
 
+	Involt.prototype.getDevices = function(){
+
+		var adapterOn;
+
+		var adapterOnLaunch = function(adapter) {
+			adapterOn = adapter.available;
+			if(adapterOn){
+				console.log("Involt for Classic Bluetooth is running")
+				console.log("Adapter " + adapter.address + ": " + adapter.name);
+			}
+			else{
+				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.")
+			};
+		}
+
+		//Check if there is adapter turned ON on startup.
+		chrome.bluetooth.getAdapterState(adapterOnLaunch);
+
+		var adapterChange = function(adapter) {
+			if(adapterOn != adapter.available){
+				adapterOn = adapter.available;
+				if(adapterOn){
+					console.log("Bluetooth adapter is ON");
+					console.log("Adapter " + adapter.address + ": " + adapter.name);
+				}
+				else{
+					console.log("Bluetooth adapter is OFF");
+				};
+			};
+		};
+
+		//Check if adapter state is changed
+		chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
+
+		var newDevice = function(device){
+			console.log("New device found: " + device.address);
+			involt.devices[device.name] = device;
+			console.log(involt.devices);
+		};
+		var removeDevice = function(device){
+			console.log("Device lost: " + device.address);
+			delete involt.devices[device.name];
+		};
+
+		//Update the device list
+		chrome.bluetooth.onDeviceAdded.addListener(newDevice);
+		chrome.bluetooth.onDeviceChanged.addListener(newDevice);
+		chrome.bluetooth.onDeviceRemoved.addListener(removeDevice);
+
+		var bluetoothDevices = function(devices){
+			console.log("Available devices:")
+		  for (var i = 0; i < devices.length; i++) {
+		  	involt.devices[devices[i].name] = devices[i];
+		    console.log(devices[i].name, devices[i]);
+		  };
+		};
+
+		chrome.bluetooth.getDevices(bluetoothDevices);
+
+	};
+
+	Involt.prototype.btDiscovery = function(duration){
+		chrome.bluetooth.startDiscovery(function() {
+
+			console.log("Start discovery");
+
+		  // Stop discovery after 30 seconds.
+		  setTimeout(function() {
+
+		    chrome.bluetooth.stopDiscovery(function() {
+		    	console.log("Discovery stopped");  	
+
+		    	if(!loaderOnLaunch){
+						involt.connect(defaultBtAddress, uuid);
+					};
+
+		    });
+
+		  }, duration);
+
+		});
+	};
+
+	Involt.prototype.connect = function(address, uuid){
+
+		var onConnect = function() {
+			if (chrome.runtime.lastError) {
+				console.error("Connection failed: " + chrome.runtime.lastError.message);
+			} 
+			else {
+				console.log("Connection established");
+			}
+		};
+
+		var onCreate = function(createInfo){
+
+			chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
+			involt.Id = createInfo.socketId;
+		
+		};
+
+		chrome.bluetoothSocket.create(onCreate);
+
+	};
+
+	Involt.prototype.send = function(sendString){
+
+		involt.debug(sendString);
+
+		chrome.bluetoothSocket.send(involt.id, involt.sendConvertString(sendString), involt.onSend);
+
+	};
+
+	Involt.prototype.receive = function(){
+
+		var onReceive = function(receiveInfo) {
+	  	if (receiveInfo.socketId !== involt.Id) return;
+
+	  	var encodedString = involt.receiveConvertString(receiveInfo);
+
+			involt.onReceiveParse(encodedString);
+
+		};
+
+		var onError = function (errorInfo) {
+			console.error("Received error on serial connection: " + errorInfo.error);
+		};
+
+		chrome.bluetoothSocket.onRecieve.addListener(onReceive);
+
+		chrome.bluetoothSocket.onReceiveError.addListener(onError);
+
+	};
+
+	Involt.prototype.createLoader = function(){
+
+	};
 
 };
 
-//--------------------------------
+//----------------------------------------------------------------------------------------------
 
 //INVOLT JQUERY METHODS
 
@@ -448,7 +594,7 @@ else if (isBluetooth){
 
 }(jQuery));
 
-//--------------------------------
+//----------------------------------------------------------------------------------------------
 
 //CREATE INVOLT APP
 
@@ -468,8 +614,13 @@ $(document).ready(function() {
 	
 });
 
-//GET DEVICES
+//GET DEVICES AND THEIR STATE
+//For bluetooth: getDevices also updates device/adapter status.
 involt.getDevices();
+//search for devices on startup
+if (isBluetooth){
+	involt.btDiscovery(discoveryDuration);
+};
 
 //CREATE LOADER TO CONNECT WITH BUTTON OR CONNECT DIRECTLY
 if (loaderOnLaunch){
@@ -477,8 +628,13 @@ if (loaderOnLaunch){
 	//involt.createLoader(involt.devices);
 }
 else {
-	involt.connect(defaultSerialPort, bitrate);
+	//For bluetooth: connection without launcher is right after btDiscovery
+	if(isSerial){
+		involt.connect(defaultSerialPort, bitrate);
+	};
 };
 
-//DATA RECEIVE
-involt.receive();
+//DATA RECEIVE AND VALUE UPDATE
+if(involt.id !== 0){
+	involt.receive();
+};

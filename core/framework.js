@@ -1,6 +1,6 @@
 /*
     INVOLT FRAMEWORK UI ELEMENTS AND UPDATING VALUES OF THEM
-    Ernest Warzocha 2014
+    Ernest Warzocha 2015
     involt.github.io
 
     This file is not required for Involt to work. 
