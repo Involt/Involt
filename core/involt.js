@@ -13,7 +13,7 @@
 		Select connection type, only one can be defined at once.
 
 		IMPORTANT:
-		Serial and Bluetooth are used for Chrome App.
+		Serial and Bluetooth Classic are used for Chrome App.
 		isPhonegap is for mobile devices and uses BT low Energy only. Best used with Phonegap Build.
 	*/
 	var isSerial    = false;
@@ -25,7 +25,7 @@
 		Set loaderOnLaunch to false and skip loading screen on every launch. 
 		Remember to set default connection because it's not possible when app is running.
 	*/
-	var loaderOnLaunch = false;
+	var loaderOnLaunch = true;
 	/*
 		BLUETOOTH AND SERIAL DEFAULT CONNECTION
 	*/
@@ -248,14 +248,11 @@ if (isSerial){
 			console.log("Available port list:");
 			for (var j=0; j<ports.length; j++) {
 				involt.devices[j] = ports[j].path;
-				$(".loader-ports").append('<p>'+involt.devices[j]+'</p>');
-				$(".loader-ports > p").click(function() {
-					$(".loader-ports > p").removeClass("active-port");
-					$(this).addClass("active-port");
-						defaultSerialPort = $(this).html();
-				});
 				console.log(involt.devices[j]);
 			};
+			if(loaderOnLaunch){
+				involt.createLoaderList(involt.devices);
+			}
 		};
 
 		chrome.serial.getDevices(onGetDevices);
@@ -319,7 +316,7 @@ if (isSerial){
 
 	Involt.prototype.receive = function(){
 		var onReceive = function(receiveInfo) {
-
+			console.log(receiveInfo);
 			if (receiveInfo.connectionId !== involt.id) return;
 
 			var encodedString = involt.receiveConvertString(receiveInfo);
@@ -337,21 +334,33 @@ if (isSerial){
 		chrome.serial.onReceiveError.addListener(onError);
 
 	};
-
-	Involt.prototype.createLoader = function(){
-		
-			$(function() {
-				$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-				$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
-			
-				$("#loader-button").click(function() {
-					involt.connect(defaultSerialPort, bitrate);
-				});
-			});
-
+	Involt.prototype.createLoaderList = function(devices){
+		for(var u=0; u<devices.length; u++){
+			$(".loader-ports").append('<p>'+involt.devices[u]+'</p>');
+		};	
 	};
 
-};
+	Involt.prototype.createLoader = function(){
+
+		$(function() {
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+			
+			$("#loader-button").click(function() {
+				involt.connect(defaultSerialPort, bitrate);
+			});
+
+			$(document).on("click",".loader-ports > p",function() {
+				$(".loader-ports > p").removeClass("active-port");
+				$(this).addClass("active-port");
+				defaultSerialPort = $(this).html();
+			});		
+		});
+
+	};	
+
+}
 
 //----------------------------------------------------------------------------------------------
 
@@ -366,8 +375,8 @@ else if (isBluetooth){
 		var adapterOnLaunch = function(adapter) {
 			adapterOn = adapter.available;
 			if(adapterOn){
-				console.log("Involt for Classic Bluetooth is running")
-				console.log("Adapter " + adapter.address + ": " + adapter.name);
+				console.info("Involt for Classic Bluetooth is running")
+				involt.debug("Adapter " + adapter.address + ": " + adapter.name);
 			}
 			else{
 				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.")
@@ -381,8 +390,8 @@ else if (isBluetooth){
 			if(adapterOn != adapter.available){
 				adapterOn = adapter.available;
 				if(adapterOn){
-					console.log("Bluetooth adapter is ON");
-					console.log("Adapter " + adapter.address + ": " + adapter.name);
+					console.info("Bluetooth adapter is ON");
+					involt.debug("Adapter " + adapter.address + ": " + adapter.name);
 				}
 				else{
 					console.log("Bluetooth adapter is OFF");
@@ -394,12 +403,12 @@ else if (isBluetooth){
 		chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
 
 		var newDevice = function(device){
-			console.log("New device found: " + device.address);
-			involt.devices[device.name] = device;
-			console.log(involt.devices);
+			console.log("New device found: " + device.name, device.address);
+			involt.appendDeviceToList(device, false);	
+			involt.devices[device.name] = device;	 
 		};
 		var removeDevice = function(device){
-			console.log("Device lost: " + device.address);
+			console.log("Device lost: " + device.name, device.address);
 			delete involt.devices[device.name];
 		};
 
@@ -413,8 +422,17 @@ else if (isBluetooth){
 		  for (var i = 0; i < devices.length; i++) {
 		  	involt.devices[devices[i].name] = devices[i];
 		    console.log(devices[i].name, devices[i]);
+		    involt.appendDeviceToList(devices[i], true);
 		  };
 		};
+
+		var checkConnections = function(socket){
+			for (var i=0; i<socket.length; i++) {
+				involt.disconnect(socket[i].socketId);
+			};
+		};
+
+		chrome.bluetoothSocket.getSockets(checkConnections);
 
 		chrome.bluetooth.getDevices(bluetoothDevices);
 
@@ -423,18 +441,17 @@ else if (isBluetooth){
 	Involt.prototype.btDiscovery = function(duration){
 		chrome.bluetooth.startDiscovery(function() {
 
-			console.log("Start discovery");
+			console.info("Start discovery");
 
-		  // Stop discovery after 30 seconds.
 		  setTimeout(function() {
 
 		    chrome.bluetooth.stopDiscovery(function() {
-		    	console.log("Discovery stopped");  	
+		    	console.info("Discovery stopped");  	
 
 		    	if(!loaderOnLaunch){
 						involt.connect(defaultBtAddress, uuid);
-					};
-
+					}
+		  		
 		    });
 
 		  }, duration);
@@ -450,17 +467,31 @@ else if (isBluetooth){
 			} 
 			else {
 				console.log("Connection established");
+				$("#loader-bg, #loader-error").remove();
+				$(".knob, .knob-send, .rangeslider").show();
 			}
 		};
 
 		var onCreate = function(createInfo){
 
 			chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
-			involt.Id = createInfo.socketId;
+			involt.id = createInfo.socketId;
 		
 		};
 
+
+
 		chrome.bluetoothSocket.create(onCreate);
+
+	};
+
+	Involt.prototype.disconnect = function(id){
+
+		var onDisconnect = function(){
+			console.log("disconnected from previous session (id:"+id+")");
+		};
+
+		chrome.bluetoothSocket.close(id, onDisconnect);
 
 	};
 
@@ -475,7 +506,7 @@ else if (isBluetooth){
 	Involt.prototype.receive = function(){
 
 		var onReceive = function(receiveInfo) {
-	  	if (receiveInfo.socketId !== involt.Id) return;
+	  	if (receiveInfo.socketId !== involt.id) return;
 
 	  	var encodedString = involt.receiveConvertString(receiveInfo);
 
@@ -484,18 +515,55 @@ else if (isBluetooth){
 		};
 
 		var onError = function (errorInfo) {
-			console.error("Received error on serial connection: " + errorInfo.error);
+			console.error("Received error on bluetooth connection: " + errorInfo.error);
 		};
 
-		chrome.bluetoothSocket.onRecieve.addListener(onReceive);
+		chrome.bluetoothSocket.onReceive.addListener(onReceive);
 
 		chrome.bluetoothSocket.onReceiveError.addListener(onError);
 
 	};
 
+	Involt.prototype.appendDeviceToList = function(device, savedDevices){
+		//Saved devices are devices already paired with computer
+		if(savedDevices){
+			$(".loader-ports").append('<p>'+device.name+'</p>');
+		}
+		else{
+			//With this there are no duplicated devices on loader list
+			if(typeof involt.devices[device.name] === undefined){
+				$(".loader-ports").append('<p>'+device.name+'</p>');
+			}
+			else {
+				console.log("Device already on list")
+			};
+		};
+	};
+
 	Involt.prototype.createLoader = function(){
 
-	};
+		$(function() {
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button">Refresh list</div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+
+			$("#loader-button").click(function() {
+				involt.connect(defaultBtAddress, uuid);
+			});
+
+			$("#discover-button").click(function() {
+				involt.btDiscovery(discoveryDuration);
+			});
+
+			$(document).on("click",".loader-ports > p",function() {
+				$(".loader-ports > p").removeClass("active-port");
+				$(this).addClass("active-port");
+				defaultBtAddress = involt.devices[$(this).html()].address;
+			});			
+
+		});
+
+	};	
 
 };
 
@@ -608,6 +676,7 @@ $(document).ready(function() {
 	$(".knob, .knob-send, .rangeslider").hide();
 
 	//check css classes and define framework elements
+	involt.debug("Involt UI generated elements:");
 	$(".ard").not(".custom-write").each(function(index, el) {
 		involt.defineElement($(this));
 	});
@@ -625,7 +694,6 @@ if (isBluetooth){
 //CREATE LOADER TO CONNECT WITH BUTTON OR CONNECT DIRECTLY
 if (loaderOnLaunch){
 	involt.createLoader();
-	//involt.createLoader(involt.devices);
 }
 else {
 	//For bluetooth: connection without launcher is right after btDiscovery
@@ -635,6 +703,5 @@ else {
 };
 
 //DATA RECEIVE AND VALUE UPDATE
-if(involt.id !== 0){
+
 	involt.receive();
-};
