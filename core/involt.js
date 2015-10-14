@@ -10,7 +10,7 @@
 
 	/*
 		CONNECTION
-		Select connection type, only one can be defined at once.
+		Select connection type, only ONE can be defined at once.
 
 		IMPORTANT:
 		Serial and Bluetooth Classic are used for Chrome App.
@@ -18,8 +18,9 @@
 	*/
 	var isSerial    = false;
 	var isBluetooth = true;
-	//var isPhonegap  = false; NOT AVALIABLE
-	//var isOnline = false; NOT AVALIABLE
+	//New modes in future:
+	//var isPhonegap  = false;
+	//var isOnline = false;
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on every launch. 
@@ -29,11 +30,13 @@
 	/*
 		BLUETOOTH AND SERIAL DEFAULT CONNECTION
 	*/
+	//Serial
 	var defaultSerialPort = "COM3";
-
+	//Bluetooth
 	var defaultBtAddress = "98:D3:31:90:4C:66";
 	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
-	var discoveryDuration = 10000;
+	var discoveryDuration = 5000;
+
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 
@@ -42,15 +45,16 @@
 	*/
 	var bitrate = 57600;
 	/*
-		RECEIVED VALUES UPDATE RATE
-		Set update rate of read-only elements in miliseconds (lower value increases CPU usage).
+		RECEIVED VALUES UI UPDATE RATE
+		Set update rate of read-only elements in miliseconds. 
+		Lower value improves response of UI elements but increases CPU usage.
 	*/
 	var updateRate = 50;
 	/*
 		DEBUG MODE
-		Debug mode logs into console object data on send (buttons sends on click).
+		Debug mode logs more information to console.
 	*/
-	var debugMode = true;
+	var debugMode = false;
 
 //----------------------------------------------------------------------------------------------
 
@@ -68,9 +72,6 @@ var Involt =  function (){
 		if(debugMode){
 			involt.debug(digitalPins);
 		};
-		if (chrome.runtime.lastError) {
-	    console.error("Send failed: " + chrome.runtime.lastError.message);
-	  };
 	};
 	//arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
 	this.arduinoSend = function(pin, value){
@@ -170,6 +171,16 @@ var Involt =  function (){
 			};
 		};
 
+		//default parameters for read elements
+		if($t.hasClass('bar') || $t.hasClass('knob')){
+			if(typeof $t.data("min") === 'undefined'){
+				$t.data("min", 0);
+			};
+			if(typeof $t.data("max") === 'undefined'){
+				$t.data("max", 1024);
+			};
+		};
+
 		//log the data on debug
 		involt.debug($t.data());
 
@@ -238,6 +249,7 @@ var Involt =  function (){
 //----------------------------------------------------------------------------------------------
 
 //CONNECTION FUNCTIONS
+//Depending on selected type the framework defines different functions.
 
 //SERIAL CONNECTION
 
@@ -285,7 +297,6 @@ if (isSerial){
 			if(connectionInfo){
 				for(var k=0; k<connectionInfo.length; k++){
 					involt.disconnect(connectionInfo[k].connectionId);
-					involt.debug(connectionInfo[k]);
 				};
 			}
 			//connect to selected port
@@ -316,7 +327,7 @@ if (isSerial){
 
 	Involt.prototype.receive = function(){
 		var onReceive = function(receiveInfo) {
-			console.log(receiveInfo);
+
 			if (receiveInfo.connectionId !== involt.id) return;
 
 			var encodedString = involt.receiveConvertString(receiveInfo);
@@ -334,6 +345,7 @@ if (isSerial){
 		chrome.serial.onReceiveError.addListener(onError);
 
 	};
+
 	Involt.prototype.createLoaderList = function(devices){
 		for(var u=0; u<devices.length; u++){
 			$(".loader-ports").append('<p>'+involt.devices[u]+'</p>');
@@ -346,7 +358,8 @@ if (isSerial){
 			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
 			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div>');
 			$("#loader").append('<div id="loader-button">Connect</div>');
-			
+			$(".knob, .knob-send, .rangeslider").hide();
+
 			$("#loader-button").click(function() {
 				involt.connect(defaultSerialPort, bitrate);
 			});
@@ -403,7 +416,7 @@ else if (isBluetooth){
 		chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
 
 		var newDevice = function(device){
-			console.log("New device found: " + device.name, device.address);
+			console.log("New device found: " + device.name, device);
 			involt.appendDeviceToList(device, false);	
 			involt.devices[device.name] = device;	 
 		};
@@ -432,6 +445,7 @@ else if (isBluetooth){
 			};
 		};
 
+		//check for previous connections and close remaining sockets
 		chrome.bluetoothSocket.getSockets(checkConnections);
 
 		chrome.bluetooth.getDevices(bluetoothDevices);
@@ -442,12 +456,13 @@ else if (isBluetooth){
 		chrome.bluetooth.startDiscovery(function() {
 
 			console.info("Start discovery");
-
 		  setTimeout(function() {
 
 		    chrome.bluetooth.stopDiscovery(function() {
 		    	console.info("Discovery stopped");  	
 
+		    	$("#discover-button").html("Search for more?");
+		    	$("#discover-button").fadeIn('fast');
 		    	if(!loaderOnLaunch){
 						involt.connect(defaultBtAddress, uuid);
 					}
@@ -464,6 +479,9 @@ else if (isBluetooth){
 		var onConnect = function() {
 			if (chrome.runtime.lastError) {
 				console.error("Connection failed: " + chrome.runtime.lastError.message);
+				$("body").append('<div id="loader-error">Could not connect, check if bluetooth device is paired. For more info open chrome console.</div>');
+				$("#loader-error").delay(2500).fadeOut('slow');
+				$("#loader-button").html("Connect");
 			} 
 			else {
 				console.log("Connection established");
@@ -479,8 +497,7 @@ else if (isBluetooth){
 		
 		};
 
-
-
+		//Create bluetooth socket and then connect to device.
 		chrome.bluetoothSocket.create(onCreate);
 
 	};
@@ -544,15 +561,19 @@ else if (isBluetooth){
 
 		$(function() {
 			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button">Refresh list</div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button">Discovering more devices... </div></div><div class="loader-ports"></div>');
 			$("#loader").append('<div id="loader-button">Connect</div>');
+			$("#discover-button").hide();
 
 			$("#loader-button").click(function() {
+				$(this).html("Connecting...");
+				console.log("Connection attempt to: " + defaultBtAddress);
 				involt.connect(defaultBtAddress, uuid);
 			});
 
 			$("#discover-button").click(function() {
 				involt.btDiscovery(discoveryDuration);
+				$(this).html("Searching for devices...");
 			});
 
 			$(document).on("click",".loader-ports > p",function() {
@@ -565,7 +586,11 @@ else if (isBluetooth){
 
 	};	
 
-};
+}
+
+//----------------------------------------------------------------------------------------------
+
+//ONLINE CONNECTION COMING SOON
 
 //----------------------------------------------------------------------------------------------
 
@@ -672,13 +697,24 @@ var involt = new Involt();
 
 $(document).ready(function() {
 
-	//hack for UI elements that somehow shows on loader background
-	$(".knob, .knob-send, .rangeslider").hide();
+	if(loaderOnLaunch){
+		$(".knob, .knob-send, .rangeslider").hide();
+	};
 
 	//check css classes and define framework elements
 	involt.debug("Involt UI generated elements:");
 	$(".ard").not(".custom-write").each(function(index, el) {
 		involt.defineElement($(this));
+	});
+
+	/*
+		INSERTION QUERY
+		Additional plugin for listening to new dom elements.
+		With this plugin Involt fully appends new framework elements.
+	*/
+	insertionQ('.ard').every(function(element){
+		element = $(element);
+		involt.defineElement(element);
 	});
 	
 });
@@ -703,5 +739,4 @@ else {
 };
 
 //DATA RECEIVE AND VALUE UPDATE
-
-	involt.receive();
+involt.receive();

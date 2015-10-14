@@ -60,6 +60,10 @@
 	background: white;
 }
 
+#discover-button:hover{
+	color:#0099e7;
+}
+
 #loader-error{
 	width:100%;
 	position: absolute;

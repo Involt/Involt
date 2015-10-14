@@ -74,12 +74,13 @@ var analogUpdate = function(){
       //map the value to bar pixel width
       var bar = {
 
-        maxValue : $t.data('value'),
+        minValue : $t.data('min'),
+        maxValue : $t.data('max'),
         maxWidth : parseInt($t.css('width'))
 
       };
-      //scaling the variable
-      var widthMap = (bar.maxWidth-0)/(bar.maxValue-0)*(analogPins[$t.data("pinNumber")]-bar.maxValue)+bar.maxWidth;
+      //scaling the css width of active element to total width
+      var widthMap = (analogPins[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
       //change bar width
       $t.children(".bar-value").css('width', widthMap);
       //display the value
@@ -109,6 +110,22 @@ $(document).ready(function() {
     $(this).updateValue().sendValue();
   });
 
+  //button-toggle
+  $(document).on("click",".button-toggle",function() {
+    var $t = $(this);
+
+    $t.toggleClass('state2');
+
+    if ($t.hasClass('state2')) {
+      digitalPins[$t.data("pinNumber")] = $t.data("value2");
+        $t.sendValue();
+    }
+    else {
+      digitalPins[$t.data("pinNumber")] = $t.data("value");
+        $t.sendValue();       
+    };
+  });
+
   //toggle
   $(document).on("click",".toggle",function() {
     var $t = $(this);
@@ -129,23 +146,6 @@ $(document).ready(function() {
     };
     $t.toggleClass('inactive');
 
-  });
-
-
-  //toggle-pwm
-  $(document).on("click",".toggle-pwm",function() {
-    var $t = $(this);
-
-    $t.toggleClass('state2');
-
-    if ($t.hasClass('state2')) {
-      digitalPins[$t.data("pinNumber")] = $t.data("value2");
-        $t.sendValue();
-    }
-    else {
-      digitalPins[$t.data("pinNumber")] = $t.data("value");
-        $t.sendValue();       
-    };
   });
 
   //increase
@@ -272,7 +272,7 @@ $(document).ready(function() {
     };
   });
 
-  //slider
+  //slider (plugin function)
   $(".slider").each(function() {
     var $t = $(this);
     var $tp = $(this).parent(".rangeslider");
@@ -297,7 +297,7 @@ $(document).ready(function() {
           $ts.css('left',cssPos).html(val);
           $t.siblings('.label').html(val);
             digitalPins[$tp.data("pinNumber")] = val;
-            arduinoSend($tp.data("pin"), val);
+            involt.arduinoSend($tp.data("pin"), val);
       },
       set: function(){
         $tp.sendFn();

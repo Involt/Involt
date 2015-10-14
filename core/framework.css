@@ -38,7 +38,7 @@ body{
 
 .button,
 .increase, .decrease, 
-.toggle, .toggle-pwm, .custom-button{
+.toggle, .button-toggle, .custom-button{
 	width: 180px;
 	height: 40px;
 	color: white;
@@ -55,7 +55,7 @@ body{
 
 .button:hover,
 .increase:hover, .decrease:hover, 
-.toggle:hover, .toggle-pwm:hover, .custom-button:hover {
+.toggle:hover, .button-toggle:hover, .custom-button:hover {
 	background-color: #0099e7;
 }
 
@@ -65,13 +65,13 @@ body{
 	width: 80px;
 }
 
-.toggle.inactive, .toggle-pwm.state2{
+.toggle.inactive, .button-toggle.state2{
 	color: #064f6d;
 	background: #dedede;
 	box-shadow: 0 2px 0px #c8c8c8;
 }
 
-.toggle.inactive:hover, .toggle-pwm.state2:hover{
+.toggle.inactive:hover, .button-toggle.state2:hover{
 	color: #0099e7;
 	box-shadow: 0 2px 0px #0099e7!important;
 }
