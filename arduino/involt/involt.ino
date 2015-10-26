@@ -1,4 +1,4 @@
-//INVOLT ARDUINO SKETCH
+//INVOLT ARDUINO SERIAL COMMUNICATION SKETCH
 /*
   AUTO PINMODE
   Involt by default automatically adds pinMode to received
@@ -6,86 +6,95 @@
   basic interactions. This mode is not recommended when
   mixing digital inputs and outputs.
 */
-boolean autoPinMode = true;
-
+boolean autoPinMode = false;
 /*
   DIRECT MODE
   Direct mode sends data from app to digital pins without storing
-  it in chromeDigital array and without additional code in void
+  it in involtDigital array and without additional code in void
   loop. It can be used for testing interaction with Arduino
   inside App. In direct mode digitalWrite/analogWrite is
   automatic only for values received from Involt.
 */
 boolean directMode = false;
-
 /*
-  Array for digital pins.
-  IMPORTANT: You need to declare the total number of variables.
-  Default is Arduino UNO total pin number +1.
+  ARRAY FOR DIGITAL/PWM PINS
+  IMPORTANT: You need to declare the beginning number of variables.
+  Without the declared length there may occur problems when sending
+  undeclared value to declared pin in void loop.
+  Default is Arduino UNO total pin number +1. 
 */
-int chromeDigital[14] = {};
+int involtDigital[14] = {};
+
 String fname;
 
 void setup() {
-  //Do not change the serial connection bitrate.
-  Serial.begin(115200);
+  //Bitrate must remain same as in app.
+  Serial.begin(57600);
 }
+
 
 void loop() {
   //receive data from your app, do not remove this line.
-  chromeReceive();
-  
+  involtReceive();
   
   //Add your code here
-  
   
   //clear the fname to prevent from duplicating functions
   fname = "";
 }
 
 //----------------------
-String V = "V";
+//INVOLT FUNCTIONS
 
-void chromeSend(int pinNumber, int sendValue) {
-  String A = "A";
-  String E = "E";
+String V = "V";
+String A = "A";
+String E = "E";
+
+void involtSend(int pinNumber, int sendValue) {
   Serial.println(A + pinNumber + V + sendValue + E);
 }
 
-void chromeReceive() {
-  String chrome;
+void involtSendString(int pinNumber, String sendString) {
+  Serial.println(A + pinNumber + V + sendString + E);
+}
+
+void involtReceive() {
+
+  String involt;
+  int involtLen;
+  int pin;
+  int val;
+  
   String pwm = "P";
   String dig = "D";
   String fn = "FN";
-  int pin;
-  int val;
-
+  
   if (Serial.available() > 0) {
-    String chrome = Serial.readStringUntil('\n');
-    int chromeLen = chrome.length();
+    involt = Serial.readStringUntil('\n');
+    involtLen = involt.length();
 
-    if (chrome.indexOf(fn) == 0) {
-      fname = chrome.substring(2, chromeLen);
+    if (involt.indexOf(fn) == 0) {
+      fname = involt.substring(2, involtLen);
     }
-    else if (chrome.indexOf(dig) == 0 || chrome.indexOf(pwm) == 0 ){
-      pin = chrome.substring(1, chrome.indexOf(V)).toInt();
-      String valRaw = chrome.substring(chrome.indexOf(V) + 1, chromeLen);
-      val = valRaw.toInt();
+    else if (involt.indexOf(dig) == 0 || involt.indexOf(pwm) == 0 ){
+      pin = involt.substring(1, involt.indexOf(V)).toInt();
+      val = involt.substring(involt.indexOf(V) + 1, involtLen).toInt();
+      
 
       if (autoPinMode) {
         pinMode(pin, OUTPUT);
       };
 
       if (directMode) {
-        if (chrome.indexOf(dig) == 0) {
+        if (involt.indexOf(dig) == 0) {
           digitalWrite(pin, val);
         }
-        else if (chrome.indexOf(pwm) == 0 ) {
+        else if (involt.indexOf(pwm) == 0 ) {
           analogWrite(pin, val);
         };
       }
       else {
-        chromeDigital[pin] = val;
+        involtDigital[pin] = val;
       };
 
     };

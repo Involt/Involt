@@ -1,695 +1,774 @@
 /*
-    INVOLT
-    ------------------------------
-    INVOLT CORE FILE
-    Ernest Warzocha 2014
-    involt.github.io
+		INVOLT FRAMEWORK CORE FILE
+		Ernest Warzocha 2015
+		involt.github.io
 */
 
-//--------------------------------
+//----------------------------------------------------------------------------------------------
 
-//LOADER SETTINGS:
-/*Set loaderOnLaunch to false if you dont want to run loader on every launch
-(direct connction is useful when creating your app but not recommended for finished project).*/
-var loaderOnLaunch = true;
-//If you want to work without launcher you must define your connected arduino port:
-var defaultSerialPort = "COM3";
+//INVOLT SETTINGS
 
-//--------------------------------
+	/*
+		CONNECTION
+		Select connection type, only ONE can be defined at once.
 
-//ADVANCED SETTINGS:
-//Connection bitrate (slow bitrate will send errors)
-var arduinoBitrate = 115200;
-//Set update rate of analog pins in miliseconds (lower value increases CPU usage).
-var updateRate = 50;
-//Debug mode logs into console object data on send (buttons sends on click).
-var debugMode = false;
+		IMPORTANT:
+		Serial and Bluetooth Classic are used for Chrome App.
+		isPhonegap is for mobile devices and uses BT low Energy only. Best used with Phonegap Build.
+	*/
+	var isSerial    = true;
+	var isBluetooth = false;
+	//New modes in future:
+	//var isPhonegap  = false;
+	//var isOnline = false;
+	/*
+		LOADING SCREEN
+		Set loaderOnLaunch to false and skip loading screen on every launch. 
+		Remember to set default connection because it's not possible when app is running.
+	*/
+	var loaderOnLaunch = true;
+	/*
+		BLUETOOTH AND SERIAL DEFAULT CONNECTION
+	*/
+	//Serial
+	var defaultSerialPort = "COM7";
+	//Keep the connection for longer time after app shutdown. 
+	//Default is false because it's problematic when working both on app code and Arduino code.
+	var isPersistent = false;
 
-//--------------------------------
+	//Bluetooth
+	var defaultBtAddress = "98:D3:31:90:4C:66";
+	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
+	//Bluetooth device discovery duration.
+	var discoveryDuration = 5000;
 
-//PORT DETECTION + LOADER PORT LIST
-var loaderCtaPort = defaultSerialPort;
-// ID of the connection, defined once.
-var involtID;
+	/*
+		BITRATE
+		The bitrate should remain unchanged. 
+		If you have to lower the speed don't overload the port from arduino.
+		Bitrate in software and hardware must be the same.
+	*/
+	var bitrate = 57600;
+	/*
+		RECEIVED VALUES UI UPDATE RATE
+		Set update rate of read-only elements in miliseconds. 
+		Lower value improves response of UI elements but increases CPU usage.
+	*/
+	var updateRate = 50;
+	/*
+		DEBUG MODE
+		Debug mode logs more information to console.
+	*/
+	var debugMode = false;
 
-var onGetDevices = function(ports) {
-  //create list of ports and print it to console 
-  console.log("Available port list:");
+//----------------------------------------------------------------------------------------------
 
-  for (var j=0; j<ports.length; j++) {
-    console.log(ports[j].path);
-    //create port buttons for loader
-    if (loaderOnLaunch){
-      $(".loader-ports").append('<p>'+ports[j].path+'</p>');
+//Array of values stored for sending to device with Involt functions and HTML elements.
+var digitalPins = [];
+//Array of values received from device.
+var analogPins = [];
 
-      //change selected port when clicked
-      $(".loader-ports > p").click(function() {
-        $(".loader-ports > p").removeClass("active-port");
-        $(this).addClass("active-port");
-          loaderCtaPort = $(this).html();
-      });
+//MAIN INVOLT OBJECT (COMMUNICATION BRIDGE)
 
-    };
-  };
+var Involt =  function (){
+	this.id = 0;
+	this.devices = [];
+	this.onSend =  function(){
+		if(debugMode){
+			involt.debug(digitalPins);
+		};
+	};
+	//involt.arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
+	this.arduinoSend = function(pin, value){
+		//convert pin and value to framework-friendly format
+		var ardSend = pin+"V"+value+"\n";
+		involt.send(ardSend);
+	};
+	this.arduinoFn = function(afn){
+		var ardFN = "FN" + afn + "\n";
+		involt.debug(ardFN);
+		involt.send(ardFN);
+	};
+	this.defineElement = function($t){
+
+		//read the classes of element and add them to object data
+		var splitCss = $t.attr('class').split(' ');
+		//index of the .ard class which defines Involt object
+		var ardIndex = splitCss.indexOf("ard");
+
+		//define arduino pin
+		var pin       = splitCss[ardIndex+2];
+		var pinNumber = parseInt(pin.substring(1,pin.length));
+		$t.data("pin", pin).data("pinNumber", pinNumber);
+
+		//define value parameter
+		var value = splitCss[ardIndex+3];
+		
+		if (typeof value !== 'undefined') {
+			//split if there are two values
+			var valueSplit = value.split("-");
+			//check if they are numbers and convert
+			for (var i = 0; i < valueSplit.length; i++){
+				var valueCheck = isNaN(valueSplit[i]);
+				if (valueCheck == false) {
+					valueSplit[i] = parseInt(valueSplit[i]);
+				};
+			};
+
+			$t.data("value", valueSplit[0]);
+
+			if (valueSplit.length > 1){
+				$t.data("value2", valueSplit[1]);
+			};
+		};
+		
+		//html string attribute instead of sending string as value
+		if($t.attr('string') !== 'undefined'){
+			$t.data('value', $t.attr('string'));
+		};
+
+		//check if there is a function to send
+		if($t.attr('fn') !== 'undefined'){
+			$t.data('fn', $t.attr('fn'));
+		};
+
+		//add values to array
+		if (pin.indexOf("A")<0){
+			//define default value for digital pins
+			digitalPins[pinNumber] = $t.data("value");
+		}
+		else if (pin.indexOf("A") == 0){
+			//define analog pins variables
+			analogPins[pinNumber] = pinNumber;
+		};
+
+		//find the range and step parameters and add them to data
+		for (var i = 0; i < splitCss.length; i++) {
+
+			if (splitCss[i].indexOf("range-") == 0) {
+				var range = splitCss[i].split('-');
+					$t.data('min', parseInt(range[1])).data('max', parseInt(range[2]));
+			}
+
+			else if (splitCss[i].indexOf("step-") == 0) {
+				var step = splitCss[i].split('-');
+					$t.data('step', parseInt(step[1]));
+			};
+
+		};
+
+		//define default parameters
+		if($t.hasClass("rangeslider") || $t.hasClass("knob-send") || $t.hasClass("increase") || $t.hasClass("decrease")){
+			if(typeof $t.data("min") === 'undefined'){
+				$t.data("min", 0);
+			};
+			if(typeof $t.data("max") === 'undefined'){
+				$t.data("max", 255);
+			};
+			if(typeof $t.data("step") === 'undefined'){
+				$t.data("step", 1);
+			};
+			if(typeof $t.data("value") === 'undefined'){
+				$t.data("value", 0);
+					digitalPins[pinNumber] = $t.data("value");
+			};
+		};
+
+		//default parameters for read elements
+		if($t.hasClass('bar') || $t.hasClass('knob')){
+			$t.data('value', 0);
+			if(typeof $t.data("min") === 'undefined'){
+				$t.data("min", 0);
+			};
+			if(typeof $t.data("max") === 'undefined'){
+				$t.data("max", 1024);
+			};
+		};
+
+		//log the data on debug
+		involt.debug($t.data());
+
+	};
+	this.onReceiveParse = function(encodedString){
+		var Atest = encodedString.indexOf("A");
+		var Btest = encodedString.indexOf("E");
+		var Ctest = encodedString.indexOf("V");
+		var Dtest = encodedString.length;
+
+		/*
+			Example block of encoded data (Pin A3 value 872):
+			A3V872E
+		*/
+
+		//corrupted serial data parameters (Based on my observations)
+		//remove corrupted serial data from array list
+		if (  Atest == 0 && 
+					Btest >= 2 && 
+					Ctest >= 1 && 
+					Dtest >= 4    ) {
+			
+			//pin counter
+			var i = parseInt(encodedString.substring(1,Ctest));
+
+			var stringValue = encodedString.substring(Ctest+1,Btest);
+			var stringValueCheck = isNaN(stringValue);
+
+			//count each analog pin number and create array of their values
+			if (stringValueCheck == false){
+				analogPins[i] = parseInt(stringValue);  
+			}
+			else {
+				analogPins[i] = stringValue; 
+			};
+
+		};
+	};
+	this.sendConvertString = function(ardSend){
+
+		var buf      = new ArrayBuffer(ardSend.length);
+		var bufView  = new Uint8Array(buf);
+
+		for (var i   = 0; i < ardSend.length; i++) {
+			bufView[i] = ardSend.charCodeAt(i);
+		};
+
+		return buf;
+
+	};
+	this.receiveConvertString = function(receiveInfo){
+
+		var Int8View  = new Int8Array(receiveInfo.data);
+		encodedString = String.fromCharCode.apply(null, Int8View);
+
+		return encodedString;
+
+	};
+	this.debug = function(data){
+		if(debugMode){
+			console.log(data);
+		};
+	};
+	this.bottomError = function(text){
+		$("body").append('<div id="loader-error">'+ text +'</div>');
+	    $("#loader-error").delay(2500).fadeOut("slow", function() {
+	    	$(this).remove();
+	    });
+	};
 };
 
-//Function when connecting to Arduino
-var onConnect = function(connectionInfo) {
-  //Error message
-  if (!connectionInfo) {
-    console.error('Could not open, check if Arduino is connected, try other serial port or relaunch Chrome.', "ヽ༼ຈل͜ຈ༽ﾉ RIOT ヽ༼ຈل͜ຈ༽ﾉ");
-    $("body").append('<div id="loader-error">Could not open, check if device is connected, try other serial port or relaunch Chrome.</div>');
-    $("#loader-error").delay(2500).fadeOut('slow');
-    return;
-  }
-  //Remove loader if connection is successful + hack for knob and slider
-  else {
-    $("#loader-bg, #loader-error").remove();
-    $(".knob, .knob-send, .rangeslider").show();
-  };
+//----------------------------------------------------------------------------------------------
 
-  console.log("Device connected:", loaderCtaPort);
+//CONNECTION FUNCTIONS
+//Depending on selected type the framework defines different functions.
 
-  this.connectionId = connectionInfo.connectionId;
+//SERIAL CONNECTION
 
-  console.log("Involt connection ID:", connectionInfo.connectionId);
+if (isSerial){
 
-  involtID = connectionInfo.connectionId;
+	Involt.prototype.getDevices = function(){
+		var onGetDevices = function(ports){
+			console.log("Available port list:");
+			for (var j=0; j<ports.length; j++) {
+				involt.devices[j] = ports[j].path;
+				console.log(involt.devices[j]);
+			};
+			if(loaderOnLaunch){
+				involt.createLoaderList(involt.devices);
+			}
+		};
 
-};
+		chrome.serial.getDevices(onGetDevices);
 
-//get the port list for loader
-chrome.serial.getDevices(onGetDevices);
+	};
 
-//LOADER
-if(loaderOnLaunch){
-  $(document).ready(function() {
-    //hack for UI elements that somehow shows on loader background
-    $(".knob, .knob-send, .rangeslider").hide();
-    //create loader elements
-    $("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-      $("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div><div id="loader-button">Connect</div>');
-    //connect button
-    $("#loader-button").click(function() {
-      chrome.serial.connect(loaderCtaPort, {bitrate: arduinoBitrate}, onConnect);
-    });
-  });
+	Involt.prototype.connect = function(port, speed, continuePrevious){
+		var onConnect = function(connectionInfo){
+			if (!connectionInfo) {
+				console.error('Could not open, check if Arduino is connected, try other serial port or relaunch Chrome.');
+				involt.bottomError('Could not open, check if device is connected, try other serial port or relaunch Chrome.');
+				return;
+			}
+			//Remove loader if connection is successful + hack for knob and slider
+			else {
+				$("#loader-bg, #loader-error").remove();
+				$(".knob, .knob-send, .rangeslider").show();
+			};
+
+			console.log("Device connected:", defaultSerialPort);
+
+			console.log("Involt connection ID:", connectionInfo.connectionId);
+
+			involt.id = connectionInfo.connectionId;
+
+		};
+		//check if there is existing connection from previous session and disconnect or continue(fixes reconnecting problems)
+		var checkConnections = function(connectionInfo){
+			if(continuePrevious){
+				if(connectionInfo){
+					involt.id = connectionInfo[0].connectionId;
+					$("#loader-bg, #loader-error").remove();
+					$(".knob, .knob-send, .rangeslider").show();
+
+					console.log("Session resumed:", involt.id, connectionInfo[0]);
+				}
+			}
+			else{
+				if(connectionInfo){
+					for(var k=0; k<connectionInfo.length; k++){
+						involt.disconnect(connectionInfo[k].connectionId);
+					};
+				}
+				//connect to selected port
+				chrome.serial.connect(port, {bitrate: speed, persistent: isPersistent}, onConnect);
+			};
+			
+		};
+
+		chrome.serial.getConnections(checkConnections);
+
+	};
+
+	Involt.prototype.disconnect = function(id){
+		var onDisconnect = function(){
+			console.log("disconnected from previous session (id:"+id+")");
+		}
+
+		chrome.serial.disconnect(id, onDisconnect)
+
+	};
+
+	Involt.prototype.send = function(sendString){
+
+		involt.debug(sendString);
+
+		chrome.serial.send(involt.id, involt.sendConvertString(sendString), involt.onSend);
+
+	};
+
+	Involt.prototype.receive = function(){
+		var onReceive = function(receiveInfo) {
+
+			if (receiveInfo.connectionId !== involt.id) return;
+
+			var encodedString = involt.receiveConvertString(receiveInfo);
+
+			involt.onReceiveParse(encodedString);
+
+		};
+
+		var onError = function (errorInfo) {
+			console.error("Received error on serial connection: " + errorInfo.error);
+		};
+
+		chrome.serial.onReceive.addListener(onReceive);
+
+		chrome.serial.onReceiveError.addListener(onError);
+
+	};
+
+	Involt.prototype.createLoaderList = function(devices){
+		for(var u=0; u<devices.length; u++){
+			$(".loader-ports").append('<p>'+involt.devices[u]+'</p>');
+		};	
+	};
+
+	Involt.prototype.createLoader = function(){
+
+		$(function() {
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+			$(".knob, .knob-send, .rangeslider").hide();
+
+			var checkForResume = function(connections){
+				if(connections.length > 0){
+					console.log("Previous connection detected");
+					involt.debug(connections);
+					$("#loader").append('<div id="resume-button">Continue previous session</div>');
+					$("#resume-button").click(function() {
+						involt.connect(defaultSerialPort, bitrate, true);
+					});
+				};
+			};
+			
+			chrome.serial.getConnections(checkForResume);
+
+			$("#loader-button").click(function() {
+				involt.connect(defaultSerialPort, bitrate, false);
+			});
+
+			$(document).on("click",".loader-ports > p",function() {
+				$(".loader-ports > p").removeClass("active-port");
+				$(this).addClass("active-port");
+				defaultSerialPort = $(this).html();
+			});		
+		});
+
+	};	
 
 }
-else{
-  chrome.serial.connect(defaultSerialPort, {bitrate: arduinoBitrate}, onConnect);
-};
 
-//IDENTIFY INVOLT OBJECTS AND DEFINE THEIR PARAMETERS
+//----------------------------------------------------------------------------------------------
 
-//analog pins values (real time update)
-var analogPins = [];
-//digital pins values (digital and PWM)
-var digitalPins = [];
-//identify involt elements
-$(document).ready(function() {
+//BLUETOOTH CONNECTION
 
-  $(".ard").not(".custom-write").each(function(index, el) {
+else if (isBluetooth){
 
-    var $t = $(this);
+	Involt.prototype.getDevices = function(){
 
-    //read the classes of element and add them to object data
-    var splitCss = $t.attr('class').split(' ');
-    //index of the .ard class which defines Involt object
-    var ardIndex = splitCss.indexOf("ard");
+		var adapterOn;
 
-    //define arduino pin
-    var pin       = splitCss[ardIndex+2];
-    var pinNumber = parseInt(pin.substring(1,pin.length));
-    $t.data("pin", pin).data("pinNumber", pinNumber);
+		var adapterOnLaunch = function(adapter) {
+			adapterOn = adapter.available;
+			if(adapterOn){
+				console.info("Involt for Classic Bluetooth is running")
+				involt.debug("Adapter " + adapter.address + ": " + adapter.name);
+			}
+			else{
+				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.");
+				involt.bottomError('Bluetooth adapter is turned OFF. Turn on and search again.');
+			};
+		}
 
-    var value = splitCss[ardIndex+3];
-    //define value parameter
-    if (typeof value !== 'undefined') {
-      //split if there are two values
-      var valueSplit = value.split("-");
-      //check if they are numbers and convert
-      for (var i = 0; i < valueSplit.length; i++){
-        var valueCheck = isNaN(valueSplit[i]);
-        if (valueCheck == false) {
-          valueSplit[i] = parseInt(valueSplit[i]);
-        };
-      };
+		//Check if there is adapter turned ON on startup.
+		chrome.bluetooth.getAdapterState(adapterOnLaunch);
 
-      $t.data("value", valueSplit[0]);
+		var adapterChange = function(adapter) {
+			if(adapterOn != adapter.available){
+				adapterOn = adapter.available;
+				if(adapterOn){
+					console.info("Bluetooth adapter is ON");
+					involt.debug("Adapter " + adapter.address + ": " + adapter.name);
+				}
+				else{
+					console.log("Bluetooth adapter is OFF");
+				};
+			};
+		};
 
-      if (valueSplit.length > 1){
-        $t.data("value2", valueSplit[1]);
-      };
-    };
-    
-    if($t.attr('string') !== 'undefined'){
-      $t.data('value', $t.attr('string'));
-    };
+		//Check if adapter state is changed
+		chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
 
-    //check if there is a function to send
-    if($t.attr('fn') !== 'undefined'){
-      $t.data('fn', $t.attr('fn'));
-    };
+		var newDevice = function(device){
+			console.log("New device found: " + device.name, device);
+			involt.appendDeviceToList(device, false);	
+			involt.devices[device.name] = device;	 
+		};
+		var removeDevice = function(device){
+			console.log("Device lost: " + device.name, device.address);
+			delete involt.devices[device.name];
+		};
 
-    //add values to array
-    if (pin.indexOf("A")<0){
-      //define default value for digital pins
-      digitalPins[pinNumber] = $t.data("value");
-    }
-    else if (pin.indexOf("A") == 0){
-      //define analog pins variables
-      analogPins[pinNumber] = pinNumber;
-    };
+		//Update the device list
+		chrome.bluetooth.onDeviceAdded.addListener(newDevice);
+		chrome.bluetooth.onDeviceChanged.addListener(newDevice);
+		chrome.bluetooth.onDeviceRemoved.addListener(removeDevice);
 
-    //find the range and step parameters and add them to data
-    for (var i = 0; i < splitCss.length; i++) {
+		var bluetoothDevices = function(devices){
+			console.log("Available devices:")
+		  for (var i = 0; i < devices.length; i++) {
+		  	involt.devices[devices[i].name] = devices[i];
+		    console.log(devices[i].name, devices[i]);
+		    involt.appendDeviceToList(devices[i], true);
+		  };
+		};
 
-      if (splitCss[i].indexOf("range-") == 0) {
-        var range = splitCss[i].split('-');
-          $t.data('min', parseInt(range[1])).data('max', parseInt(range[2]));
-      }
+		var checkConnections = function(socket){
+			for (var i=0; i<socket.length; i++) {
+				involt.disconnect(socket[i].socketId);
+			};
+		};
 
-      else if (splitCss[i].indexOf("step-") == 0) {
-        var step = splitCss[i].split('-');
-          $t.data('step', parseInt(step[1]));
-      };
+		//check for previous connections and close remaining sockets
+		chrome.bluetoothSocket.getSockets(checkConnections);
 
-    };
+		chrome.bluetooth.getDevices(bluetoothDevices);
 
-    //define default parameters
-    if($t.hasClass("rangeslider") || $t.hasClass("knob-send") || $t.hasClass("increase") || $t.hasClass("decrease")){
-      if(typeof $t.data("min") === 'undefined'){
-        $t.data("min", 0);
-      };
-      if(typeof $t.data("max") === 'undefined'){
-        $t.data("max", 255);
-      };
-      if(typeof $t.data("step") === 'undefined'){
-        $t.data("step", 1);
-      };
-      if(typeof $t.data("value") === 'undefined'){
-        $t.data("value", 0);
-          digitalPins[pinNumber] = $t.data("value");
-      };
-    };
+	};
 
-    //log the data on debug
-    if(debugMode) console.log($t.data());
+	Involt.prototype.btDiscovery = function(duration){
+		chrome.bluetooth.startDiscovery(function() {
 
-  });
+			console.info("Start discovery");
+		  setTimeout(function() {
 
-  //HTML GENERATED ELEMENTS OF FRAMEWORK
-  //html/css operations that create framework objects in html file 
+		    chrome.bluetooth.stopDiscovery(function() {
+		    	console.info("Discovery stopped");  	
 
-  //bar
-  $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
-  $(".bar-value").each(function() {
-    $(this).css('max-width', parseInt($(this).css('width')));
-  });
- 
-  //knob
-  $(".knob").append(function() {
-    var knobMax  = $(this).data('max');
-    var knobMin  = $(this).data('min');
-    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
-    $(this).children('.knob-read').data($(this).data());
-  });
+		    	$("#discover-button").html("Search for more?").fadeIn('fast');
+		    	if(!loaderOnLaunch){
+						involt.connect(defaultBtAddress, uuid);
+					}
+		  		
+		    });
 
-  //knob-send
-  $(".knob-send").append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+		  }, duration);
 
-  //rangeslider
-  $(".rangeslider").append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
+		});
+	};
 
-  $(function() {
-    $(".knob-read").knob();
-  });
+	Involt.prototype.connect = function(address, uuid){
 
-  //increase/decrease + and - when empty text
-  $(".increase").each(function() {
-    if($(this).html() == '') $(this).html("+").css('font-size', '30px');
-  });
-  $(".decrease").each(function() {
-    if($(this).html() == '') $(this).html("-").css('font-size', '30px');
-  });
+		var onConnect = function() {
+			if (chrome.runtime.lastError) {
+				console.error("Connection failed: " + chrome.runtime.lastError.message);
+				involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
+				$("#loader-button").html("Connect");
+			} 
+			else {
+				console.log("Connection established");
+				$("#loader-bg, #loader-error").remove();
+				$(".knob, .knob-send, .rangeslider").show();
+			}
+		};
 
-  //toggle ON/OFF when empty
-  $(".toggle").each(function() {
-    var $t = $(this);
-    if ($t.data("value") == 0){
-      if($t.html() == '') $t.html("OFF").addClass('inactive');
-    }
-    else if ($t.data("value") == 1){
-      if($t.html() == '') $t.html("ON");
-    };
-  });
-  
-});
+		var onCreate = function(createInfo){
+
+			chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
+			involt.id = createInfo.socketId;
+		
+		};
+
+		//Create bluetooth socket and then connect to device.
+		chrome.bluetoothSocket.create(onCreate);
+
+	};
+
+	Involt.prototype.disconnect = function(id){
+
+		var onDisconnect = function(){
+			console.log("disconnected from previous session (id:"+id+")");
+		};
+
+		chrome.bluetoothSocket.close(id, onDisconnect);
+
+	};
+
+	Involt.prototype.send = function(sendString){
+
+		involt.debug(sendString);
+
+		chrome.bluetoothSocket.send(involt.id, involt.sendConvertString(sendString), involt.onSend);
+
+	};
+
+	Involt.prototype.receive = function(){
+
+		var onReceive = function(receiveInfo) {
+	  	if (receiveInfo.socketId !== involt.id) return;
+
+	  	var encodedString = involt.receiveConvertString(receiveInfo);
+
+			involt.onReceiveParse(encodedString);
+
+		};
+
+		var onError = function (errorInfo) {
+			console.error("Received error on bluetooth connection: " + errorInfo.error);
+		};
+
+		chrome.bluetoothSocket.onReceive.addListener(onReceive);
+
+		chrome.bluetoothSocket.onReceiveError.addListener(onError);
+
+	};
+
+	Involt.prototype.appendDeviceToList = function(device, savedDevices){
+		//Saved devices are devices already paired with computer
+		if(savedDevices){
+			$(".loader-ports").append('<p>'+device.name+'</p>');
+		}
+		else{
+			//With this there are no duplicated devices on loader list
+			if(typeof involt.devices[device.name] !== 'object'){
+				$(".loader-ports").append('<p>'+device.name+'</p>');
+			}
+			else {
+				console.log("Device already on list")
+			};
+		};
+	};
+
+	Involt.prototype.createLoader = function(){
+
+		$(function() {
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button"></div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+			$("#discover-button").hide();
+
+			$("#loader-button").click(function() {
+				$(this).html("Connecting...");
+				console.log("Connection attempt to: " + defaultBtAddress);
+				involt.connect(defaultBtAddress, uuid);
+			});
+
+			$("#discover-button").click(function() {
+				involt.btDiscovery(discoveryDuration);
+				$(this).html("Searching for devices...");
+			});
+
+			$(document).on("click",".loader-ports > p",function() {
+				$(".loader-ports > p").removeClass("active-port");
+				$(this).addClass("active-port");
+				defaultBtAddress = involt.devices[$(this).html()].address;
+			});			
+
+		});
+
+	};	
+
+}
+
+//----------------------------------------------------------------------------------------------
+
+//ONLINE CONNECTION COMING SOON
+
+//----------------------------------------------------------------------------------------------
 
 //INVOLT JQUERY METHODS
 
 (function($) {
 
-  $.fn.sendFn = function(name) {
+	$.fn.sendFn = function(name) {
 
-    return this.each(function() {
-      var $t = $(this);
-      if (typeof name === 'undefined'){
-        if (typeof $t.data('fn') !== 'undefined'){
-          arduinoFn($t.data('fn'));
-        };
-      }
-      else{
-        arduinoFn(name);
-      };
-    });
+		return this.each(function() {
+			var $t = $(this);
+			if (typeof name === 'undefined'){
+				if (typeof $t.data('fn') !== 'undefined'){
+					involt.arduinoFn($t.data('fn'));
+				};
+			}
+			else{
+				involt.arduinoFn(name);
+			};
+		});
 
-  };
-  
-  $.fn.sendValue = function(value){
+	};
+	
+	$.fn.sendValue = function(value){
 
-    return this.each(function() {
-      var $t = $(this);
-      if (typeof value === 'undefined') {
-        arduinoSend($t.data("pin"), digitalPins[$t.data("pinNumber")]);
-      }
-      else{
-        arduinoSend($t.data("pin"), value);
-      };
-      $t.not('.knob-send').not('.rangeslider').sendFn();
-    });
+		return this.each(function() {
+			var $t = $(this);
+			if (typeof value === 'undefined') {
+				involt.arduinoSend($t.data("pin"), digitalPins[$t.data("pinNumber")]);
+			}
+			else{
+				involt.arduinoSend($t.data("pin"), value);
+			};
+			$t.not('.knob-send').not('.rangeslider').sendFn();
+		});
 
-  };
+	};
 
-  $.fn.updateValue = function(newValue){
+	$.fn.updateValue = function(newValue){
 
-    return this.each(function() {
-      var $t = $(this);
-      if (typeof newValue === 'undefined') {
-        digitalPins[$t.data("pinNumber")] = $t.data("value");
-      }
-      else{
-        var valueCheck = isNaN(newValue);
-        if(valueCheck == false) parseInt(newValue);
-          digitalPins[$t.data("pinNumber")] = newValue;
-          if (typeof $t.data("value2") === 'undefined') {
-            $t.data("value", newValue);
-          };       
-      };
-    });
+		return this.each(function() {
+			var $t = $(this);
+			if (typeof newValue === 'undefined') {
+				digitalPins[$t.data("pinNumber")] = $t.data("value");
+			}
+			else{
+				var valueCheck = isNaN(newValue);
+				if(valueCheck == false) parseInt(newValue);
+					digitalPins[$t.data("pinNumber")] = newValue;
+					if (typeof $t.data("value2") === 'undefined') {
+						$t.data("value", newValue);
+					};       
+			};
+		});
 
-  };
+	};
 
-  $.fn.sendString = function(string){
+	$.fn.sendString = function(string){
 
-    var directSend = string+"\n";
-      chrome.serial.send(involtID, sendConvertString(directSend), onSend);
-        return this;
+		var directSend = string+"\n";
+			involt.send(directSend);
+				return this;
 
-  };
+	};
 
-  $.fn.pinDefine = function(pin){
+	$.fn.pinDefine = function(pin){
 
-    return this.each(function() {
+		return this.each(function() {
 
-      $(this).data("pin", pin).data("pinNumber", parseInt(pin.substring(1,pin.length)));
+			$(this).data("pin", pin).data("pinNumber", parseInt(pin.substring(1,pin.length)));
 
-    });
+		});
 
-  };
+	};
 
-  $.fn.pinSwap = function(newPin){
+	$.fn.pinSwap = function(newPin){
 
-    return this.each(function() {
+		return this.each(function() {
 
-      var $t = $(this);
-      var previousPin = $t.data("pinNumber");
+			var $t = $(this);
+			var previousPin = $t.data("pinNumber");
 
-      $t.data("pin", newPin);
-      $t.data("pinNumber", parseInt(newPin.substring(1,newPin.length)));
+			$t.data("pin", newPin);
+			$t.data("pinNumber", parseInt(newPin.substring(1,newPin.length)));
 
-      //check if the new pin value is defined - if not - put the previous value
-      if (typeof digitalPins[$t.data("pinNumber")] == 'undefined') {
-        digitalPins[$t.data("pinNumber")] = digitalPins[previousPin];
-      };
+			//check if the new pin value is defined - if not - put the previous value
+			if (typeof digitalPins[$t.data("pinNumber")] == 'undefined') {
+				digitalPins[$t.data("pinNumber")] = digitalPins[previousPin];
+			};
 
-    });
+		});
 
-  };
+	};
 
 }(jQuery));
 
-//SERIAL DATA READ
-var onReceive = function(receiveInfo) {
-  //ID test
-  if (receiveInfo.connectionId !== involtID) return;
-  
-  //create array from received arduino data
-  var Int8View  = new Int8Array(receiveInfo.data);
-  encodedString = String.fromCharCode.apply(null, Int8View);
+//----------------------------------------------------------------------------------------------
 
-  //divide encoded string data (pin/value), it also verify the data.
-  var Atest = encodedString.indexOf("A");
-  var Btest = encodedString.indexOf("E");
-  var Ctest = encodedString.indexOf("V");
-  var Dtest = encodedString.length;
+//CREATE INVOLT APP
 
-  /*
-    Example block of encoded data (Pin A3 value 872):
-    A3V872E
-  */
+var involt = new Involt();
 
-  //corrupted serial data parameters (Based on my observations)
-  //remove corrupted serial data from array list
-  if (  Atest == 0 && 
-        Btest >= 2 && 
-        Ctest >= 1 && 
-        Dtest >= 4    ) {
-    
-    //pin counter
-    var i = parseInt(encodedString.substring(1,Ctest));
-
-    var stringValue = encodedString.substring(Ctest+1,Btest);
-    var stringValueCheck = isNaN(stringValue);
-
-    //count each analog pin number and create array of their values
-    if (stringValueCheck == false){
-      analogPins[i] = parseInt(stringValue);  
-    }
-    else {
-      analogPins[i] = stringValue; 
-    };
-
-  };
-
-};
-
-//READ ONLY EVENTS 
-//Updated in 50ms interval to reduce CPU usage
-var analogUpdate = function(){
-
-  //show
-  $(".show").each(function() {
-    $(this).html(analogPins[$(this).data("pinNumber")]);
-  });
-
-  //bar
-  $(".bar").each(function() {
-      var $t = $(this);
-      //map the value to bar pixel width
-      var bar = {
-
-        maxValue : $t.data('value'),
-        maxWidth : parseInt($t.css('width'))
-
-      };
-      //scaling the variable
-      var widthMap = (bar.maxWidth-0)/(bar.maxValue-0)*(analogPins[$t.data("pinNumber")]-bar.maxValue)+bar.maxWidth;
-      //change bar width
-      $t.children(".bar-value").css('width', widthMap);
-      //display the value
-      $t.children(".bar-value").children('div').html(analogPins[$t.data("pinNumber")]);
-  });
-
-  //knob
-  $(".knob").each(function() {
-    $(this).children().children('.knob-read').val(analogPins[$(this).data("pinNumber")]).trigger('change');
-  });
-
-  //value
-  $(".value").each(function() {
-    $(this).attr('value', analogPins[$(this).data("pinNumber")]);
-  });
-
-};
-
-setInterval(analogUpdate, updateRate);
-
-//Error message when connection is interrupted
-var onError = function (errorInfo) {
-  console.error("Received error on serial connection: " + errorInfo.error);
-};
-
-chrome.serial.onReceive.addListener(onReceive);
-
-chrome.serial.onReceiveError.addListener(onError);
-
-//SERIAL DATA SEND
-//Events triggered on action
-
-//Empty function for testing
-var onSend = function(){
-  if(debugMode){
-    console.log(ardSend);
-    console.log(digitalPins);
-  };
-};
-
-//Sends data to arduino based on event
-var arduinoSend = function(pin, value){
-
-  ardSend = pin+"V"+value+"\n";
-  
-  chrome.serial.send(involtID, sendConvertString(ardSend), onSend);
-
-};
-
-//Send function parameter to device
-var arduinoFn = function(afn){
-
-  var ardFN = "FN" + afn + "\n";
-
-  if(debugMode) console.log(ardFN);
-
-  chrome.serial.send(involtID, sendConvertString(ardFN), onSend);
-
-};
-
-//convert "ardSend" string to arduino serial-friendly format
-var sendConvertString = function(ardSend) {
-
-  var buf      = new ArrayBuffer(ardSend.length);
-  var bufView  = new Uint8Array(buf);
-
-  for (var i   = 0; i < ardSend.length; i++) {
-    bufView[i] = ardSend.charCodeAt(i);
-  };
-  return buf;
-
-};
+//IDENTIFY INVOLT OBJECTS AND DEFINE THEIR PARAMETERS
 
 $(document).ready(function() {
 
-  //button
-  $(".button").click(function() {
-    $(this).updateValue().sendValue();
-  });
+	if(loaderOnLaunch){
+		$(".knob, .knob-send, .rangeslider").hide();
+	};
 
-  //toggle
-  $(".toggle").click(function() {
-    var $t = $(this);
-    var index = $t.data('pinNumber');
-    if (digitalPins[index] == 0){
-      if ($t.html() == "OFF") {
-        $t.html("ON");
-      };
-      digitalPins[index] = 1;
-        $t.sendValue();
-    }
-    else if (digitalPins[index] == 1){
-      if ($t.html() == "ON") {
-        $t.html("OFF");
-      };
-        digitalPins[index] = 0; 
-          $t.sendValue();    
-    };
-    $t.toggleClass('inactive');
+	//check css classes and define framework elements
+	involt.debug("Involt UI generated elements:");
+	$(".ard").not(".custom-write").each(function(index, el) {
+		involt.defineElement($(this));
+	});
 
-  });
-
-  //toggle-pwm
-  $(".toggle-pwm").each(function() {
-    var $t = $(this);
-
-    $t.click(function() {
-      $t.toggleClass('state2');
-
-      if ($t.hasClass('state2')) {
-        digitalPins[$t.data("pinNumber")] = $t.data("value2");
-          $t.sendValue();
-      }
-      else {
-        digitalPins[$t.data("pinNumber")] = $t.data("value");
-          $t.sendValue();       
-      };
-    });
-  });
-
-  //increase
-  $(".increase").click(function() {
-    var $t = $(this);
-    var index = $t.data("pinNumber");
-
-      digitalPins[index] = digitalPins[index]+$t.data("step");
-      digitalPins[index] = Math.min(Math.max(digitalPins[index], $t.data("min")), $t.data("max"));
-        $t.sendValue(); 
-  });
-
-  //decrease
-  $(".decrease").click(function() {
-    var $t = $(this);
-    var index = $t.data("pinNumber");
-
-      digitalPins[index] = digitalPins[index]-$t.data("step");
-      digitalPins[index] = Math.min(Math.max(digitalPins[index], $t.data("min")), $t.data("max"));
-        $t.sendValue(); 
-  });
-
-  //hover
-  $(".hover").hover(function() {
-
-    var $t = $(this);
-    digitalPins[$t.data("pinNumber")] = $t.data("value");
-      $t.sendValue();
-
-  }, function() {
-
-    var $t = $(this);
-    digitalPins[$t.data("pinNumber")] = $t.data("value2");
-      $t.sendValue();
-
-  });
-
-  //knob-send (plugin function)
-  $(".knob-send").each(function() {
-    //definePin will not work
-    var $t = $(this);
-
-      var index = $t.data("pinNumber");
-      var currentValue = $t.data("value");
-      var max = $t.data("max");
-        $t.children('.knob-write').val(currentValue).data($t.data());
-
-    $t.children('.knob-write').knob({
-      'min':  $t.data("min"),
-      'max':  max,
-      'step': $t.data("step"),
-      'change' : function (value) {
-        //prevent from sending duplicated values when step is higher than 1
-        if (digitalPins[index] !== this.cv){
-
-          if (this.cv <= max){
-            digitalPins[index] = this.cv;
-             $t.sendValue();
-          }
-          else {
-            digitalPins[index] = max;
-          };
-
-        };
-
-      },
-      'release' : function (value){
-
-        if (digitalPins[index] !== value){
-
-          if (value <= max){
-            digitalPins[index] = value;
-          }
-          else {
-            digitalPins[index] = max;
-          };
-
-          $t.sendValue(); 
-
-        };
-        $t.sendFn()
-      }
-    });
-
-  });
-
-  //custom-button
-  $(".custom-button").click(function() {
-    var customBut = $(this).data("pin");
-      chrome.serial.send(involtID, sendConvertString(customBut), onSend);
-      $(this).sendFn();
-  });
-
-  //input-write
-  $(".input-write").change(function() {
-    var $t = $(this);
-      $t.updateValue($t.val()).sendValue();
-  });
-
-  //custom-write
-  $(".custom-write").change(function() {
-    var valCustom = $(this).val();
-    var valCustomSend = valCustom+"\n";
-      chrome.serial.send(involtID, sendConvertString(valCustomSend), onSend);
-      $(this).sendFn();
-  });
-
-  //checkbox
-  $(".checkbox").change(function() {
-    var $t = $(this);
-    if (this.checked) {
-      digitalPins[$t.data("pinNumber")] = $t.data("value");
-        $t.sendValue();
-    }
-    else {
-      digitalPins[$t.data("pinNumber")] = $t.data("value2");
-        $t.sendValue();
-    };
-  });
-
-  //radio 
-  $(".radio").change(function() {
-    if (this.checked) {
-      $(this).updateValue().sendValue(); 
-    }
-  });
-
-  //slider
-  $(".slider").each(function() {
-    var $t = $(this);
-    var $tp = $(this).parent(".rangeslider");
-    var $ts = $t.siblings('.tooltip');
-
-    $ts.html($tp.data('value')).hide();
-    $t.siblings('.label').html($tp.data('value')).hide();
-
-    $t.noUiSlider({
-      start: [$tp.data("value")],
-      range: {
-        'min': [$tp.data("min")],
-        'max': [$tp.data("max")]
-      },
-      step: $tp.data("step")
-    });
-    
-    $t.on({
-      slide: function(){
-        var cssPos = $t.children('.noUi-base').children('.noUi-origin').css('left');
-        var val = parseInt($t.val());
-          $ts.css('left',cssPos).html(val);
-          $t.siblings('.label').html(val);
-            digitalPins[$tp.data("pinNumber")] = val;
-            arduinoSend($tp.data("pin"), val);
-      },
-      set: function(){
-        $tp.sendFn();
-      }
-    });
-
-    $tp.hover(function() {
-      $ts.css('left', $t.children('.noUi-base').children('.noUi-origin').css('left'));
-      $ts.fadeIn(250);
-    }, function() {
-      $ts.fadeOut(250);
-    });
-
-  });
-
+	/*
+		INSERTION QUERY
+		Additional plugin for listening to new dom elements.
+		With this plugin Involt fully appends new framework elements.
+	*/
+	insertionQ('.ard').every(function(element){
+		element = $(element);
+		involt.defineElement(element);
+	});
+	
 });
+
+//GET DEVICES AND THEIR STATE
+//For bluetooth: getDevices also updates device/adapter status.
+involt.getDevices();
+//search for devices on startup
+if (isBluetooth){
+	involt.btDiscovery(discoveryDuration);
+};
+
+//CREATE LOADER TO CONNECT WITH BUTTON OR CONNECT DIRECTLY
+if (loaderOnLaunch){
+	involt.createLoader();
+}
+else {
+	//For bluetooth: connection without launcher is right after btDiscovery
+	if(isSerial){
+		involt.connect(defaultSerialPort, bitrate, false);
+	};
+};
+
+//DATA RECEIVE AND VALUE UPDATE
+involt.receive();
