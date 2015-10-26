@@ -32,7 +32,7 @@ It's also possible to do the same with JQuery:
 	$(this).pinDefine("P5").sendValue(255); 
     
 Getting started:
-http://involt.github.io/gettingstarted
+http://involt.github.io/getting-started
 
 Reference:
 http://involt.github.io/reference
@@ -52,7 +52,7 @@ Now you can open your project with launch button or Chrome App Launcher.
 Basic blink example
 -------------------
 
-http://involt.github.io/examples/ex1.html
+http://involt.github.io/examples/blink.html
 -
 
 Other examples can be found on http://involt.github.io/examples.html or https://github.com/Involt/examples

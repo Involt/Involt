@@ -6,7 +6,7 @@
   basic interactions. This mode is not recommended when
   mixing digital inputs and outputs.
 */
-boolean autoPinMode = true;
+boolean autoPinMode = false;
 /*
   DIRECT MODE
   Direct mode sends data from app to digital pins without storing
@@ -15,7 +15,7 @@ boolean autoPinMode = true;
   inside App. In direct mode digitalWrite/analogWrite is
   automatic only for values received from Involt.
 */
-boolean directMode = true;
+boolean directMode = false;
 /*
   ARRAY FOR DIGITAL/PWM PINS
   IMPORTANT: You need to declare the beginning number of variables.
@@ -36,13 +36,8 @@ void setup() {
 void loop() {
   //receive data from your app, do not remove this line.
   involtReceive();
-
-  involtSend(0, map(analogRead(A0),0,1024,100,300));
-  delay(2);
-  involtSend(1, analogRead(A1));
   
   //Add your code here
-  delay(2);
   
   //clear the fname to prevent from duplicating functions
   fname = "";
