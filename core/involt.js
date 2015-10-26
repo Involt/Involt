@@ -32,9 +32,14 @@
 	*/
 	//Serial
 	var defaultSerialPort = "COM3";
+	//Keep the connection for longer time after app shutdown. 
+	//Default is false because it's problematic when working both on app code and Arduino code.
+	var isPersistent = false;
+
 	//Bluetooth
 	var defaultBtAddress = "98:D3:31:90:4C:66";
 	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
+	//Bluetooth device discovery duration.
 	var discoveryDuration = 5000;
 
 	/*
@@ -54,7 +59,7 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = false;
+	var debugMode = true;
 
 //----------------------------------------------------------------------------------------------
 
@@ -73,7 +78,7 @@ var Involt =  function (){
 			involt.debug(digitalPins);
 		};
 	};
-	//arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
+	//involt.arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
 	this.arduinoSend = function(pin, value){
 		//convert pin and value to framework-friendly format
 		var ardSend = pin+"V"+value+"\n";
@@ -84,9 +89,7 @@ var Involt =  function (){
 		involt.debug(ardFN);
 		involt.send(ardFN);
 	};
-	this.defineElement = function(element){
-
-		var $t = element;
+	this.defineElement = function($t){
 
 		//read the classes of element and add them to object data
 		var splitCss = $t.attr('class').split(' ');
@@ -173,6 +176,7 @@ var Involt =  function (){
 
 		//default parameters for read elements
 		if($t.hasClass('bar') || $t.hasClass('knob')){
+			$t.data('value', 0);
 			if(typeof $t.data("min") === 'undefined'){
 				$t.data("min", 0);
 			};
@@ -244,6 +248,12 @@ var Involt =  function (){
 			console.log(data);
 		};
 	};
+	this.bottomError = function(text){
+		$("body").append('<div id="loader-error">'+ text +'</div>');
+	    $("#loader-error").delay(2500).fadeOut("slow", function() {
+	    	$(this).remove();
+	    });
+	};
 };
 
 //----------------------------------------------------------------------------------------------
@@ -271,12 +281,11 @@ if (isSerial){
 
 	};
 
-	Involt.prototype.connect = function(port, speed){
+	Involt.prototype.connect = function(port, speed, continuePrevious){
 		var onConnect = function(connectionInfo){
 			if (!connectionInfo) {
 				console.error('Could not open, check if Arduino is connected, try other serial port or relaunch Chrome.');
-				$("body").append('<div id="loader-error">Could not open, check if device is connected, try other serial port or relaunch Chrome.</div>');
-				$("#loader-error").delay(2500).fadeOut('slow');
+				involt.bottomError('Could not open, check if device is connected, try other serial port or relaunch Chrome.');
 				return;
 			}
 			//Remove loader if connection is successful + hack for knob and slider
@@ -292,15 +301,26 @@ if (isSerial){
 			involt.id = connectionInfo.connectionId;
 
 		};
-		//check if there is existing connection from previous session and disconnect (fixes reconnecting problems)
+		//check if there is existing connection from previous session and disconnect or continue(fixes reconnecting problems)
 		var checkConnections = function(connectionInfo){
-			if(connectionInfo){
-				for(var k=0; k<connectionInfo.length; k++){
-					involt.disconnect(connectionInfo[k].connectionId);
-				};
+			if(continuePrevious){
+				if(connectionInfo){
+					involt.id = connectionInfo[0].connectionId;
+					$("#loader-bg, #loader-error").remove();
+					$(".knob, .knob-send, .rangeslider").show();
+
+					console.log("Session resumed:", involt.id, connectionInfo[0]);
+				}
 			}
-			//connect to selected port
-			chrome.serial.connect(port, {bitrate: speed}, onConnect);
+			else{
+				if(connectionInfo){
+					for(var k=0; k<connectionInfo.length; k++){
+						involt.disconnect(connectionInfo[k].connectionId);
+					};
+				}
+				//connect to selected port
+				chrome.serial.connect(port, {bitrate: speed, persistent: isPersistent}, onConnect);
+			};
 			
 		};
 
@@ -360,8 +380,21 @@ if (isSerial){
 			$("#loader").append('<div id="loader-button">Connect</div>');
 			$(".knob, .knob-send, .rangeslider").hide();
 
+			var checkForResume = function(connections){
+				if(connections.length > 0){
+					console.log("Previous connection detected");
+					involt.debug(connections);
+					$("#loader").append('<div id="resume-button">Continue previous session</div>');
+					$("#resume-button").click(function() {
+						involt.connect(defaultSerialPort, bitrate, true);
+					});
+				};
+			};
+			
+			chrome.serial.getConnections(checkForResume);
+
 			$("#loader-button").click(function() {
-				involt.connect(defaultSerialPort, bitrate);
+				involt.connect(defaultSerialPort, bitrate, false);
 			});
 
 			$(document).on("click",".loader-ports > p",function() {
@@ -392,7 +425,8 @@ else if (isBluetooth){
 				involt.debug("Adapter " + adapter.address + ": " + adapter.name);
 			}
 			else{
-				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.")
+				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.");
+				involt.bottomError('Bluetooth adapter is turned OFF. Turn on and search again.');
 			};
 		}
 
@@ -461,8 +495,7 @@ else if (isBluetooth){
 		    chrome.bluetooth.stopDiscovery(function() {
 		    	console.info("Discovery stopped");  	
 
-		    	$("#discover-button").html("Search for more?");
-		    	$("#discover-button").fadeIn('fast');
+		    	$("#discover-button").html("Search for more?").fadeIn('fast');
 		    	if(!loaderOnLaunch){
 						involt.connect(defaultBtAddress, uuid);
 					}
@@ -479,8 +512,7 @@ else if (isBluetooth){
 		var onConnect = function() {
 			if (chrome.runtime.lastError) {
 				console.error("Connection failed: " + chrome.runtime.lastError.message);
-				$("body").append('<div id="loader-error">Could not connect, check if bluetooth device is paired. For more info open chrome console.</div>');
-				$("#loader-error").delay(2500).fadeOut('slow');
+				involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
 				$("#loader-button").html("Connect");
 			} 
 			else {
@@ -548,7 +580,7 @@ else if (isBluetooth){
 		}
 		else{
 			//With this there are no duplicated devices on loader list
-			if(typeof involt.devices[device.name] === undefined){
+			if(typeof involt.devices[device.name] !== 'object'){
 				$(".loader-ports").append('<p>'+device.name+'</p>');
 			}
 			else {
@@ -561,7 +593,7 @@ else if (isBluetooth){
 
 		$(function() {
 			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button">Discovering more devices... </div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button"></div></div><div class="loader-ports"></div>');
 			$("#loader").append('<div id="loader-button">Connect</div>');
 			$("#discover-button").hide();
 
@@ -734,7 +766,7 @@ if (loaderOnLaunch){
 else {
 	//For bluetooth: connection without launcher is right after btDiscovery
 	if(isSerial){
-		involt.connect(defaultSerialPort, bitrate);
+		involt.connect(defaultSerialPort, bitrate, false);
 	};
 };
 

@@ -37,7 +37,7 @@ void loop() {
   //receive data from your app, do not remove this line.
   involtReceive();
 
-  involtSend(0, analogRead(A0));
+  involtSend(0, map(analogRead(A0),0,1024,100,300));
   delay(2);
   involtSend(1, analogRead(A1));
   
