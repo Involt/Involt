@@ -185,6 +185,57 @@ var Involt =  function (){
 			};
 		};
 
+		//HTML GENERATED ELEMENTS OF FRAMEWORK
+		  
+		//html/css operations that create framework objects in html file 
+		//bar
+		if($t.hasClass('bar')){
+			$t.append('<div class="bar-value"><div>Loading...</div></div>');
+			$t.children('.bar-value').css('max-width', parseInt($t.children('.bar-value').css('width')));
+		};
+
+		//knob
+		if($t.hasClass('knob')){
+			$t.append(function() {
+				var knobMax  = $t.data('max');
+				var knobMin  = $t.data('min');
+				$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
+				$t.children('.knob-read').data($t.data());
+			});
+
+			$(function() {
+		  		$t.children(".knob-read").knob();
+		    });
+		};
+
+		//knob-send
+		if($t.hasClass('knob-send')){
+			$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+		};
+		
+		//rangeslider
+		if($t.hasClass('rangeslider')){
+			$t.append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
+		};
+		
+		//increase/decrease + and - when empty text
+		if($t.hasClass('increase')){
+			if($t.html() == '') $t.html("+").css('font-size', '30px');
+		};
+		if($t.hasClass('decrease')){
+			if($t.html() == '') $t.html("-").css('font-size', '30px');
+		};
+
+		//toggle ON/OFF when empty
+		if($t.hasClass('toggle')){
+			if ($t.data("value") == 0){
+		  		if($t.html() == '') $t.html("OFF").addClass('inactive');
+		  	}
+		  	else if ($t.data("value") == 1){
+		  		if($t.html() == '') $t.html("ON");
+		  	};
+		};	
+
 		//log the data on debug
 		involt.debug($t.data());
 
