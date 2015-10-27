@@ -16,8 +16,8 @@
 		Serial and Bluetooth Classic are used for Chrome App.
 		isPhonegap is for mobile devices and uses BT low Energy only. Best used with Phonegap Build.
 	*/
-	var isSerial    = true;
-	var isBluetooth = false;
+	var isSerial    = false;
+	var isBluetooth = true;
 	//New modes in future:
 	//var isPhonegap  = false;
 	//var isOnline = false;
@@ -59,7 +59,7 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = false;
+	var debugMode = true;
 
 //----------------------------------------------------------------------------------------------
 
@@ -211,11 +211,13 @@ var Involt =  function (){
 		//knob-send
 		if($t.hasClass('knob-send')){
 			$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+			involt.knobSendCreate($t);
 		};
 		
 		//rangeslider
 		if($t.hasClass('rangeslider')){
 			$t.append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
+			involt.rangesliderCreate($t);
 		};
 		
 		//increase/decrease + and - when empty text
@@ -240,6 +242,94 @@ var Involt =  function (){
 		involt.debug($t.data());
 
 	};
+	//JQuery Knob plugin function
+	//this is required to be here to support appending
+	this.knobSendCreate = function($t){
+    //definePin will not work
+
+      var index = $t.data("pinNumber");
+      var currentValue = $t.data("value");
+      var max = $t.data("max");
+        $t.children('.knob-write').val(currentValue).data($t.data());
+
+	    $t.children('.knob-write').knob({
+	      'min':  $t.data("min"),
+	      'max':  max,
+	      'step': $t.data("step"),
+	      'change' : function (value) {
+	        //prevent from sending duplicated values when step is higher than 1
+	        if (digitalPins[index] !== this.cv){
+
+	          if (this.cv <= max){
+	            digitalPins[index] = this.cv;
+	             $t.sendValue();
+	          }
+	          else {
+	            digitalPins[index] = max;
+	          };
+
+	        };
+
+	      },
+	    'release' : function (value){
+
+	        if (digitalPins[index] !== value){
+
+	          if (value <= max){
+	            digitalPins[index] = value;
+	          }
+	          else {
+	            digitalPins[index] = max;
+	          };
+
+	          $t.sendValue(); 
+
+	        };
+	        $t.sendFn()
+	      }
+	    });
+
+  	};
+  	//JQuery slider plugin
+  	this.rangesliderCreate = function($t){
+
+	  	var $slider = $t.children('.slider');
+	  	var $tooltip = $slider.siblings('.tooltip');
+
+	    $tooltip.html($t.data('value')).hide();
+	    $slider.siblings('.label').html($t.data('value')).hide();
+
+	    $slider.noUiSlider({
+	      start: [$t.data("value")],
+	      range: {
+	        'min': [$t.data("min")],
+	        'max': [$t.data("max")]
+	      },
+	      step: $t.data("step")
+	    });
+	    
+	    $slider.on({
+	      slide: function(){
+	        var cssPos = $slider.children('.noUi-base').children('.noUi-origin').css('left');
+	        var val = parseInt($slider.val());
+	          $tooltip.css('left',cssPos).html(val);
+	          $slider.siblings('.label').html(val);
+	            digitalPins[$t.data("pinNumber")] = val;
+	            involt.arduinoSend($t.data("pin"), val);
+	      },
+	      set: function(){
+	        $t.sendFn();
+	      }
+	    });
+
+	    $t.hover(function() {
+	      $tooltip.css('left', $slider.children('.noUi-base').children('.noUi-origin').css('left'));
+	      $tooltip.fadeIn(250);
+	    }, function() {
+	      $tooltip.fadeOut(250);
+	    });
+
+  	};
 	this.onReceiveParse = function(encodedString){
 		var Atest = encodedString.indexOf("A");
 		var Btest = encodedString.indexOf("E");

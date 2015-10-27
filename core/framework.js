@@ -52,6 +52,10 @@ setInterval(analogUpdate, updateRate);
 
 //USER INTERFACE AND SEND EVENTS
 
+
+//knob-send (plugin function) is in core.js as knobSendCreate function
+//rangeslider is in rangesliderCreate function
+
 $(document).ready(function() {
 
   //button
@@ -131,55 +135,6 @@ $(document).ready(function() {
       }
   }, ".hover");
 
-  //knob-send (plugin function)
-  $(".knob-send").each(function() {
-    //definePin will not work
-    var $t = $(this);
-
-      var index = $t.data("pinNumber");
-      var currentValue = $t.data("value");
-      var max = $t.data("max");
-        $t.children('.knob-write').val(currentValue).data($t.data());
-
-    $t.children('.knob-write').knob({
-      'min':  $t.data("min"),
-      'max':  max,
-      'step': $t.data("step"),
-      'change' : function (value) {
-        //prevent from sending duplicated values when step is higher than 1
-        if (digitalPins[index] !== this.cv){
-
-          if (this.cv <= max){
-            digitalPins[index] = this.cv;
-             $t.sendValue();
-          }
-          else {
-            digitalPins[index] = max;
-          };
-
-        };
-
-      },
-      'release' : function (value){
-
-        if (digitalPins[index] !== value){
-
-          if (value <= max){
-            digitalPins[index] = value;
-          }
-          else {
-            digitalPins[index] = max;
-          };
-
-          $t.sendValue(); 
-
-        };
-        $t.sendFn()
-      }
-    });
-
-  });
-
   //custom-button
   $(document).on("click",".custom-button",function() {
     var customBut = $(this).data("pin");
@@ -219,47 +174,6 @@ $(document).ready(function() {
     if (this.checked) {
       $(this).updateValue().sendValue(); 
     };
-  });
-
-  //slider (plugin function)
-  $(".slider").each(function() {
-    var $t = $(this);
-    var $tp = $(this).parent(".rangeslider");
-    var $ts = $t.siblings('.tooltip');
-
-    $ts.html($tp.data('value')).hide();
-    $t.siblings('.label').html($tp.data('value')).hide();
-
-    $t.noUiSlider({
-      start: [$tp.data("value")],
-      range: {
-        'min': [$tp.data("min")],
-        'max': [$tp.data("max")]
-      },
-      step: $tp.data("step")
-    });
-    
-    $t.on({
-      slide: function(){
-        var cssPos = $t.children('.noUi-base').children('.noUi-origin').css('left');
-        var val = parseInt($t.val());
-          $ts.css('left',cssPos).html(val);
-          $t.siblings('.label').html(val);
-            digitalPins[$tp.data("pinNumber")] = val;
-            involt.arduinoSend($tp.data("pin"), val);
-      },
-      set: function(){
-        $tp.sendFn();
-      }
-    });
-
-    $tp.hover(function() {
-      $ts.css('left', $t.children('.noUi-base').children('.noUi-origin').css('left'));
-      $ts.fadeIn(250);
-    }, function() {
-      $ts.fadeOut(250);
-    });
-
   });
 
 });
