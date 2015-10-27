@@ -32,7 +32,7 @@ It's also possible to do the same with JQuery:
 	$(this).pinDefine("P5").sendValue(255); 
     
 Getting started:
-http://involt.github.io/getting-started
+http://involt.github.io/getting-started.html
 
 Reference:
 http://involt.github.io/reference
