@@ -7,57 +7,6 @@
     If you don't need Involt UI kit just remove this file.
 */
 
-//HTML GENERATED ELEMENTS OF FRAMEWORK
-
-$(document).ready(function() {
-  
-  //html/css operations that create framework objects in html file 
-
-  //bar
-  $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
-  $(".bar-value").each(function() {
-    $(this).css('max-width', parseInt($(this).css('width')));
-  });
- 
-  //knob
-  $(".knob").append(function() {
-    var knobMax  = $(this).data('max');
-    var knobMin  = $(this).data('min');
-    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
-    $(this).children('.knob-read').data($(this).data());
-  });
-
-  //knob-send
-  $(".knob-send").append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
-
-  //rangeslider
-  $(".rangeslider").append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
-
-  $(function() {
-    $(".knob-read").knob();
-  });
-
-  //increase/decrease + and - when empty text
-  $(".increase").each(function() {
-    if($(this).html() == '') $(this).html("+").css('font-size', '30px');
-  });
-  $(".decrease").each(function() {
-    if($(this).html() == '') $(this).html("-").css('font-size', '30px');
-  });
-
-  //toggle ON/OFF when empty
-  $(".toggle").each(function() {
-    var $t = $(this);
-    if ($t.data("value") == 0){
-      if($t.html() == '') $t.html("OFF").addClass('inactive');
-    }
-    else if ($t.data("value") == 1){
-      if($t.html() == '') $t.html("ON");
-    };
-  });
-  
-});
-
 //UPDATE OF READ-ONLY ELEMENTS
 
 //Updated in 50ms interval to reduce CPU usage
