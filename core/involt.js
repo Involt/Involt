@@ -16,8 +16,8 @@
 		Serial and Bluetooth Classic are used for Chrome App.
 		isPhonegap is for mobile devices and uses BT low Energy only. Best used with Phonegap Build.
 	*/
-	var isSerial    = false;
-	var isBluetooth = true;
+	var isSerial    = true;
+	var isBluetooth = false;
 	//New modes in future:
 	//var isPhonegap  = false;
 	//var isOnline = false;
@@ -59,7 +59,7 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = true;
+	var debugMode = false;
 
 //----------------------------------------------------------------------------------------------
 
