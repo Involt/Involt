@@ -7,57 +7,6 @@
     If you don't need Involt UI kit just remove this file.
 */
 
-//HTML GENERATED ELEMENTS OF FRAMEWORK
-
-$(document).ready(function() {
-  
-  //html/css operations that create framework objects in html file 
-
-  //bar
-  $(".bar").append('<div class="bar-value"><div>Loading...</div></div>');
-  $(".bar-value").each(function() {
-    $(this).css('max-width', parseInt($(this).css('width')));
-  });
- 
-  //knob
-  $(".knob").append(function() {
-    var knobMax  = $(this).data('max');
-    var knobMin  = $(this).data('min');
-    $(this).append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
-    $(this).children('.knob-read').data($(this).data());
-  });
-
-  //knob-send
-  $(".knob-send").append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
-
-  //rangeslider
-  $(".rangeslider").append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
-
-  $(function() {
-    $(".knob-read").knob();
-  });
-
-  //increase/decrease + and - when empty text
-  $(".increase").each(function() {
-    if($(this).html() == '') $(this).html("+").css('font-size', '30px');
-  });
-  $(".decrease").each(function() {
-    if($(this).html() == '') $(this).html("-").css('font-size', '30px');
-  });
-
-  //toggle ON/OFF when empty
-  $(".toggle").each(function() {
-    var $t = $(this);
-    if ($t.data("value") == 0){
-      if($t.html() == '') $t.html("OFF").addClass('inactive');
-    }
-    else if ($t.data("value") == 1){
-      if($t.html() == '') $t.html("ON");
-    };
-  });
-  
-});
-
 //UPDATE OF READ-ONLY ELEMENTS
 
 //Updated in 50ms interval to reduce CPU usage
@@ -102,6 +51,10 @@ var analogUpdate = function(){
 setInterval(analogUpdate, updateRate);
 
 //USER INTERFACE AND SEND EVENTS
+
+
+//knob-send (plugin function) is in core.js as knobSendCreate function
+//rangeslider is in rangesliderCreate function
 
 $(document).ready(function() {
 
@@ -182,55 +135,6 @@ $(document).ready(function() {
       }
   }, ".hover");
 
-  //knob-send (plugin function)
-  $(".knob-send").each(function() {
-    //definePin will not work
-    var $t = $(this);
-
-      var index = $t.data("pinNumber");
-      var currentValue = $t.data("value");
-      var max = $t.data("max");
-        $t.children('.knob-write').val(currentValue).data($t.data());
-
-    $t.children('.knob-write').knob({
-      'min':  $t.data("min"),
-      'max':  max,
-      'step': $t.data("step"),
-      'change' : function (value) {
-        //prevent from sending duplicated values when step is higher than 1
-        if (digitalPins[index] !== this.cv){
-
-          if (this.cv <= max){
-            digitalPins[index] = this.cv;
-             $t.sendValue();
-          }
-          else {
-            digitalPins[index] = max;
-          };
-
-        };
-
-      },
-      'release' : function (value){
-
-        if (digitalPins[index] !== value){
-
-          if (value <= max){
-            digitalPins[index] = value;
-          }
-          else {
-            digitalPins[index] = max;
-          };
-
-          $t.sendValue(); 
-
-        };
-        $t.sendFn()
-      }
-    });
-
-  });
-
   //custom-button
   $(document).on("click",".custom-button",function() {
     var customBut = $(this).data("pin");
@@ -270,47 +174,6 @@ $(document).ready(function() {
     if (this.checked) {
       $(this).updateValue().sendValue(); 
     };
-  });
-
-  //slider (plugin function)
-  $(".slider").each(function() {
-    var $t = $(this);
-    var $tp = $(this).parent(".rangeslider");
-    var $ts = $t.siblings('.tooltip');
-
-    $ts.html($tp.data('value')).hide();
-    $t.siblings('.label').html($tp.data('value')).hide();
-
-    $t.noUiSlider({
-      start: [$tp.data("value")],
-      range: {
-        'min': [$tp.data("min")],
-        'max': [$tp.data("max")]
-      },
-      step: $tp.data("step")
-    });
-    
-    $t.on({
-      slide: function(){
-        var cssPos = $t.children('.noUi-base').children('.noUi-origin').css('left');
-        var val = parseInt($t.val());
-          $ts.css('left',cssPos).html(val);
-          $t.siblings('.label').html(val);
-            digitalPins[$tp.data("pinNumber")] = val;
-            involt.arduinoSend($tp.data("pin"), val);
-      },
-      set: function(){
-        $tp.sendFn();
-      }
-    });
-
-    $tp.hover(function() {
-      $ts.css('left', $t.children('.noUi-base').children('.noUi-origin').css('left'));
-      $ts.fadeIn(250);
-    }, function() {
-      $ts.fadeOut(250);
-    });
-
   });
 
 });

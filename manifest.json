@@ -1,14 +1,14 @@
 {
   //Basic info (you can change it)
   "name": "Involt",
-  "description": "Arduino to HTML framework for designers.",
+  "description": "Arduino to HTML prototyping framework for designers.",
   "author": "Involt, Ernest Warzocha",
   "version": "1.0.6",
   
   //Requied
   "permissions": ["serial"],
   "bluetooth": {
-    "uuids": [ "00001101-0000-1000-8000-00805f9b34fb", "1106" ],
+    "uuids": [ "00001101-0000-1000-8000-00805f9b34fb" ],
     "socket": true
   },
   "app": {
