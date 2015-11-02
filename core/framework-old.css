@@ -2,15 +2,18 @@
 * { -webkit-box-sizing: border-box; box-sizing: border-box; }
 /*Import font from core/font */
 @font-face {
-	font-family: 'SourceSansProLight'; src: url('font/SourceSansPro-Light.ttf');
+	font-family: 'SourceSansProLight';
+	src: url('font/SourceSansPro-Light.ttf');
 }
 
 @font-face {
-	font-family: 'SourceSansProRegular'; src: url('font/SourceSansPro-Regular.ttf');
+	font-family: 'SourceSansProRegular';
+	src: url('font/SourceSansPro-Regular.ttf');
 }
 
 @font-face {
-	font-family: 'SourceSansProBold'; src: url('font/SourceSansPro-Bold.ttf');
+	font-family: 'SourceSansProBold';
+	src: url('font/SourceSansPro-Bold.ttf');
 }
 
 html{
@@ -22,12 +25,13 @@ body{
 	padding: 0px;
 	background: white;
 	font-size: 100%;
+	font-family: 'SourceSansProLight';
 }
 
 .ard{
 	margin: 10px;
+	float:left;
 	border-radius: 4px;
-	font-family: "SourceSansProRegular";
 }
 
 /*Clickable elements (buttons)*/
@@ -37,17 +41,22 @@ body{
 .toggle, .button-toggle, .custom-button{
 	width: 180px;
 	height: 40px;
-	border: 1px solid black;
-	border-bottom: 2px solid black;
-	line-height: 37px;
+	color: white;
+	background: #064f6d;
+	box-shadow: 0 2px 0px #0099e7;
 	text-align: center;
+	font-size: 12px;
+	line-height: 40px;
+	text-transform: uppercase;
+	letter-spacing:2px;
+	font-family: 'SourceSansProRegular';
 	cursor: pointer;
 }
 
 .button:hover,
 .increase:hover, .decrease:hover, 
 .toggle:hover, .button-toggle:hover, .custom-button:hover {
-	background: lightgray;
+	background-color: #0099e7;
 }
 
 /*Small buttons*/
@@ -57,77 +66,14 @@ body{
 }
 
 .toggle.inactive, .button-toggle.state2{
-	border-color: lightgray;
-	color: gray;
+	color: #064f6d;
+	background: #dedede;
+	box-shadow: 0 2px 0px #c8c8c8;
 }
 
 .toggle.inactive:hover, .button-toggle.state2:hover{
-	background-color: lightgray;
-}
-
-/*Inputs - input-write, custom-write*/
-
-input:focus {
-	outline: 0;
-}
-
-.input-write, .custom-write  {
-	width: 180px;
-	height: 40px;
-	padding-left: 10px;
-	border-radius: 0;
-	border:none;
-	border-bottom: 2px solid gray;
-	font-size: 16px;
-	line-height: 37px;
-}
-
-.input-write:hover, .custom-write:hover{
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	padding-left: 9px;
-	border: 1px solid lightgray;
-	border-bottom: 2px solid gray;
-}
-
-.input-write:focus, .custom-write:focus{
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	padding-left: 9px;
-	border: 1px solid lightgray;
-	border-bottom: 2px solid black;
-}
-
-/*Knob-send*/
-
-.knob-send{
-	cursor:pointer;
-}
-
-/*.hover*/
-
-.hover{
-	min-width: 80px;
-	min-height: 40px;
-	border: 1px solid lightgray;
-}
-
-.hover:hover{
-	border: 1px solid gray;
-}
-
-/*show*/
-
-.show{
-	width: 180px;
-	height: 100px;
-	color: #282828;
-	border-radius: 0;
-	border-bottom: 1px solid #0099e7;
-	text-align: right;
-	font-size: 72px;
-	line-height: 100px;
-	font-family: "SourceSansProBold";
+	color: #0099e7;
+	box-shadow: 0 2px 0px #0099e7!important;
 }
 
 /*Rangelider & Bar*/
@@ -135,6 +81,8 @@ input:focus {
 .rangeslider, .bar{
 	width: 380px;
 	height: 40px;
+	background: #dedede;
+	box-shadow: 0 2px 0px #c8c8c8;
 	max-height: 40px;
 }
 
@@ -145,20 +93,20 @@ input:focus {
 .noUi-base{
 	width: 100%;
 	height: 100%;
-	background: gray;
+	background: #0099e7;
 	position: relative;
 	height: 3px;
 }
 
 .noUi-handle{
-	width: 16px;
-	height: 16px;
-	background: black;
+	width: 20px;
+	height: 20px;
+	background: #064f6d;
 	position: relative;
 	z-index: 1;
 	border-radius: 20px;
 	left: -10px;
-	top: -7px;
+	top: -8px;
 	cursor:pointer;
 }
 
@@ -179,12 +127,13 @@ input:focus {
 	height: 40px;
 	margin-top: 20px;
 	margin-left:-40px;
-	color:black;
-	background: lightgray;
+	color:white;
+	background: #0099e7;
 	border-radius: 4px;
 	text-align: center;
 	font-size:16px;
 	line-height: 40px;
+	letter-spacing:2px;
 }
 
 
@@ -194,7 +143,7 @@ input:focus {
 	top: 100%;
 	left: 50%;
 	border: solid transparent; 
-	border-top-color: lightgray; 
+	border-top-color: #0099e7; 
 	border-width: 8px; 
 	margin-left: -8px;
 }
@@ -218,23 +167,83 @@ input:focus {
 */
 
 /*Bar*/
-.bar {
-	background-color: lightgray;
-}
 
 .bar-value{
+	height: 40px;
+	background: #0099e7;
+	box-shadow: 0 2px 0px #0099e7;
 	border-radius: 4px;
-	background: gray;
-	height: 40px
 }
 
 /*Number on bar*/
 
 .bar-value>div{
 	padding-left: 20px;
-	color:black;
+	color:#003e53;
 	text-align: left;
 	font-size: 24px;
-	font-family: "SourceSansProBold";
 	line-height: 40px;
+	font-family: "SourceSansProBold";
+}
+
+/*Knob-send*/
+
+.knob-send{
+	cursor:pointer;
+}
+
+/*.hover*/
+
+.hover{
+	min-width: 80px;
+	min-height: 40px;
+	border: 1px solid #dedede;
+}
+
+.hover:hover{
+	border: 1px solid #0099e7;
+}
+
+/*show*/
+
+.show{
+	width: 180px;
+	height: 100px;
+	color: #282828;
+	border-radius: 0;
+	border-bottom: 1px solid #0099e7;
+	text-align: right;
+	font-size: 72px;
+	line-height: 100px;
+	font-family: "SourceSansProBold";
+}
+
+/*Inputs - input-write, custom-write*/
+
+input:focus {
+	outline: 0;
+}
+
+.input-write, .custom-write  {
+	width: 180px;
+	height: 40px;
+	padding-left: 10px;
+	color:#0099e7;
+	background: #dedede;
+	box-shadow: 0 2px 0px #c8c8c8;	
+	border: 0px solid white; 
+	font-size: 26px;
+	font-family: "SourceSansProLight";
+}
+
+.input-write:hover, .custom-write:hover, 
+.input-write:focus, .custom-write:focus {
+	padding-left: 9px;
+	border: 1px solid #00aae2;
+	box-shadow: 0 2px 0px #c8c8c8;	
+}
+
+.input-write:focus, .custom-write:focus{
+	color: #064f6d;
+	box-shadow: 0 2px 0px #00aae2;	
 }

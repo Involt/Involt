@@ -59,7 +59,7 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = false;
+	var debugMode = true;
 
 //----------------------------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ var Involt =  function (){
 	};
 	this.arduinoFn = function(afn){
 		var ardFN = "FN" + afn + "\n";
-		involt.debug(ardFN);
+		involt.debug("Triggered function:" + ardFN);
 		involt.send(ardFN);
 	};
 	this.defineElement = function($t){
@@ -823,9 +823,10 @@ else if (isBluetooth){
 
 	$.fn.sendString = function(string){
 
-		var directSend = string+"\n";
-			involt.send(directSend);
-				return this;
+		return this.each(function() {
+			var directSend = string+"\n";
+				involt.send(directSend);
+		});
 
 	};
 
@@ -876,7 +877,7 @@ $(document).ready(function() {
 
 	//check css classes and define framework elements
 	involt.debug("Involt UI generated elements:");
-	$(".ard").not(".custom-write").each(function(index, el) {
+	$(".ard").not(".custom-write").not(".submit-button").each(function(index, el) {
 		involt.defineElement($(this));
 	});
 
