@@ -31,7 +31,7 @@
 		BLUETOOTH AND SERIAL DEFAULT CONNECTION
 	*/
 	//Serial
-	var defaultSerialPort = "COM7";
+	var defaultSerialPort = "COM3";
 	//Keep the connection for longer time after app shutdown. 
 	//Default is false because it's problematic when working both on app code and Arduino code.
 	var isPersistent = false;
@@ -86,7 +86,7 @@ var Involt =  function (){
 	};
 	this.arduinoFn = function(afn){
 		var ardFN = "FN" + afn + "\n";
-		involt.debug(ardFN);
+		involt.debug("Triggered function:" + ardFN);
 		involt.send(ardFN);
 	};
 	this.defineElement = function($t){
@@ -190,8 +190,8 @@ var Involt =  function (){
 		//html/css operations that create framework objects in html file 
 		//bar
 		if($t.hasClass('bar')){
-			$t.append('<div class="bar-value"><div>Loading...</div></div>');
-			$t.children('.bar-value').css('max-width', parseInt($t.children('.bar-value').css('width')));
+			$t.append('<div class="bar-label">0</div><div class="bar-background"><div class="bar-value"></div></div>');
+			$t.children('.bar-background').children('.bar-value').css('max-width', parseInt($t.children('.bar-background').css('width')));
 		};
 
 		//knob
@@ -199,7 +199,12 @@ var Involt =  function (){
 			$t.append(function() {
 				var knobMax  = $t.data('max');
 				var knobMin  = $t.data('min');
-				$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
+				if($t.hasClass('proto')){
+					$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#626262" data-inputColor="#363636" data-bgColor="#d9d9d9" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
+				}
+				else{
+					$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#00C5FF" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
+				};
 				$t.children('.knob-read').data($t.data());
 			});
 
@@ -210,7 +215,12 @@ var Involt =  function (){
 
 		//knob-send
 		if($t.hasClass('knob-send')){
-			$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#0099e7" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+			if($t.hasClass('proto')){
+				$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#626262" data-inputColor="#363636" data-bgColor="#d9d9d9" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+			}
+			else{
+				$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#00C5FF" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
+			};
 			involt.knobSendCreate($t);
 		};
 		
@@ -252,42 +262,42 @@ var Involt =  function (){
       var max = $t.data("max");
         $t.children('.knob-write').val(currentValue).data($t.data());
 
-	    $t.children('.knob-write').knob({
-	      'min':  $t.data("min"),
-	      'max':  max,
-	      'step': $t.data("step"),
-	      'change' : function (value) {
-	        //prevent from sending duplicated values when step is higher than 1
-	        if (digitalPins[index] !== this.cv){
+        $t.children('.knob-write').knob({
+        	'min':  $t.data("min"),
+        	'max':  max,
+        	'step': $t.data("step"),
+        	'change' : function (value) {
+		        //prevent from sending duplicated values when step is higher than 1
+		        if (digitalPins[index] !== this.cv){
 
-	          if (this.cv <= max){
-	            digitalPins[index] = this.cv;
-	             $t.sendValue();
-	          }
-	          else {
-	            digitalPins[index] = max;
-	          };
+		        	if (this.cv <= max){
+		        		digitalPins[index] = this.cv;
+		        		if ($t.parent("form").length == 0) $t.sendValue();
+		        	}
+		        	else {
+		        		digitalPins[index] = max;
+		        	};
 
-	        };
+		        };
 
-	      },
-	    'release' : function (value){
+	    	},
+		    'release' : function (value){
 
-	        if (digitalPins[index] !== value){
+		    	if (digitalPins[index] !== value){
 
-	          if (value <= max){
-	            digitalPins[index] = value;
-	          }
-	          else {
-	            digitalPins[index] = max;
-	          };
+		    		if (value <= max){
+		    			digitalPins[index] = value;
+		    		}
+		    		else {
+		    			digitalPins[index] = max;
+		    		};
 
-	          $t.sendValue(); 
+		    		if ($t.parent("form").length == 0) $t.sendValue(); 
 
-	        };
-	        $t.sendFn()
-	      }
-	    });
+		    	};
+		    	if ($t.parent("form").length == 0) $t.sendFn()
+		    }
+		});
 
   	};
   	//JQuery slider plugin
@@ -297,7 +307,7 @@ var Involt =  function (){
 	  	var $tooltip = $slider.siblings('.tooltip');
 
 	    $tooltip.html($t.data('value')).hide();
-	    $slider.siblings('.label').html($t.data('value')).hide();
+	    $slider.siblings('.label').html($t.data('value'));
 
 	    $slider.noUiSlider({
 	      start: [$t.data("value")],
@@ -315,10 +325,10 @@ var Involt =  function (){
 	          $tooltip.css('left',cssPos).html(val);
 	          $slider.siblings('.label').html(val);
 	            digitalPins[$t.data("pinNumber")] = val;
-	            involt.arduinoSend($t.data("pin"), val);
+	            if ($t.parent("form").length == 0) involt.arduinoSend($t.data("pin"), val);
 	      },
 	      set: function(){
-	        $t.sendFn();
+	        if ($t.parent("form").length == 0) $t.sendFn();
 	      }
 	    });
 
@@ -343,10 +353,10 @@ var Involt =  function (){
 
 		//corrupted serial data parameters (Based on my observations)
 		//remove corrupted serial data from array list
-		if (  Atest == 0 && 
-					Btest >= 2 && 
-					Ctest >= 1 && 
-					Dtest >= 4    ) {
+		if (  	Atest == 0 && 
+				Btest >= 2 && 
+				Ctest >= 1 && 
+				Dtest >= 4    ) {
 			
 			//pin counter
 			var i = parseInt(encodedString.substring(1,Ctest));
@@ -433,6 +443,7 @@ if (isSerial){
 			else {
 				$("#loader-bg, #loader-error").remove();
 				$(".knob, .knob-send, .rangeslider").show();
+				$("html").css('overflow', 'auto');
 			};
 
 			console.log("Device connected:", defaultSerialPort);
@@ -449,6 +460,7 @@ if (isSerial){
 					involt.id = connectionInfo[0].connectionId;
 					$("#loader-bg, #loader-error").remove();
 					$(".knob, .knob-send, .rangeslider").show();
+					$("html").css('overflow', 'auto');
 
 					console.log("Session resumed:", involt.id, connectionInfo[0]);
 				}
@@ -517,9 +529,10 @@ if (isSerial){
 
 		$(function() {
 			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device:</div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device:</span></div><div class="loader-ports"></div>');
 			$("#loader").append('<div id="loader-button">Connect</div>');
 			$(".knob, .knob-send, .rangeslider").hide();
+			$("html").css('overflow:', 'hidden');
 
 			var checkForResume = function(connections){
 				if(connections.length > 0){
@@ -635,7 +648,7 @@ else if (isBluetooth){
 
 		    chrome.bluetooth.stopDiscovery(function() {
 		    	console.info("Discovery stopped");  	
-
+		    	$(".loader-txt>span").hide();
 		    	$("#discover-button").html("Search for more?").fadeIn('fast');
 		    	if(!loaderOnLaunch){
 						involt.connect(defaultBtAddress, uuid);
@@ -660,6 +673,7 @@ else if (isBluetooth){
 				console.log("Connection established");
 				$("#loader-bg, #loader-error").remove();
 				$(".knob, .knob-send, .rangeslider").show();
+				$("html").css('overflow', 'auto');
 			}
 		};
 
@@ -734,9 +748,10 @@ else if (isBluetooth){
 
 		$(function() {
 			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div>Please select your device: <div id="discover-button"></div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
 			$("#loader").append('<div id="loader-button">Connect</div>');
 			$("#discover-button").hide();
+			$("html").css('overflow:', 'hidden');
 
 			$("#loader-button").click(function() {
 				$(this).html("Connecting...");
@@ -823,9 +838,10 @@ else if (isBluetooth){
 
 	$.fn.sendString = function(string){
 
-		var directSend = string+"\n";
-			involt.send(directSend);
-				return this;
+		return this.each(function() {
+			var directSend = string+"\n";
+				involt.send(directSend);
+		});
 
 	};
 
@@ -876,7 +892,7 @@ $(document).ready(function() {
 
 	//check css classes and define framework elements
 	involt.debug("Involt UI generated elements:");
-	$(".ard").not(".custom-write").each(function(index, el) {
+	$(".ard").not(".custom-write").not(".submit-button").each(function(index, el) {
 		involt.defineElement($(this));
 	});
 

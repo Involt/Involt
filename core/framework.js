@@ -31,9 +31,9 @@ var analogUpdate = function(){
       //scaling the css width of active element to total width
       var widthMap = (analogPins[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
       //change bar width
-      $t.children(".bar-value").css('width', widthMap);
+      $t.children('.bar-background').children(".bar-value").css('width', widthMap);
       //display the value
-      $t.children(".bar-value").children('div').html(analogPins[$t.data("pinNumber")]);
+      $t.children(".bar-label").css('width', widthMap).html(analogPins[$(this).data("pinNumber")]);
   });
 
   //knob
@@ -59,12 +59,12 @@ setInterval(analogUpdate, updateRate);
 $(document).ready(function() {
 
   //button
-  $(document).on("click",".button",function() {
+  $(document).on("click",".ard.button",function() {
     $(this).updateValue().sendValue();
   });
 
   //button-toggle
-  $(document).on("click",".button-toggle",function() {
+  $(document).on("click",".ard.button-toggle",function() {
     var $t = $(this);
 
     $t.toggleClass('state2');
@@ -80,7 +80,7 @@ $(document).ready(function() {
   });
 
   //toggle
-  $(document).on("click",".toggle",function() {
+  $(document).on("click",".ard.toggle",function() {
     var $t = $(this);
     var index = $t.data('pinNumber');
     if (digitalPins[index] == 0){
@@ -102,7 +102,7 @@ $(document).ready(function() {
   });
 
   //increase
-  $(document).on("click",".increase",function() {
+  $(document).on("click",".ard.increase",function() {
     var $t = $(this);
     var index = $t.data("pinNumber");
 
@@ -112,7 +112,7 @@ $(document).ready(function() {
   });
 
   //decrease
-  $(document).on("click",".decrease",function() {
+  $(document).on("click",".ard.decrease",function() {
     var $t = $(this);
     var index = $t.data("pinNumber");
 
@@ -133,47 +133,74 @@ $(document).ready(function() {
         digitalPins[$t.data("pinNumber")] = $t.data("value2");
           $t.sendValue();
       }
-  }, ".hover");
+  }, ".ard.hover");
 
   //custom-button
-  $(document).on("click",".custom-button",function() {
+  $(document).on("click",".ard.custom-button",function() {
     var customBut = $(this).data("pin");
       involt.send(customBut);
       $(this).sendFn();
   });
 
   //input-write
- $(document).on("change",".input-write",function() {
+ $(document).on("change",".ard.input-write",function() {
     var $t = $(this);
-      $t.updateValue($t.val()).sendValue();
+      $t.updateValue($t.val());
+      if ($t.parent("form").length == 0) $t.sendValue();
   });
 
   //custom-write
-  $(document).on("change",".custom-write",function() {
+  $(document).on("change",".ard.custom-write",function() {
     var valCustom = $(this).val();
     var valCustomSend = valCustom+"\n";
+    if ($(this).parent("form").length == 0){
       involt.send(valCustomSend);
       $(this).sendFn();
+    };
   });
 
   //checkbox
-  $(document).on("change",".checkbox",function() {
+  $(document).on("change",".ard.checkbox",function() {
     var $t = $(this);
     if (this.checked) {
       digitalPins[$t.data("pinNumber")] = $t.data("value");
-        $t.sendValue();
     }
     else {
       digitalPins[$t.data("pinNumber")] = $t.data("value2");
-        $t.sendValue();
     };
+    if ($t.parent("form").length == 0) $t.sendValue();
   });
 
   //radio 
-  $(document).on("change",".radio",function() {
+  $(document).on("change",".ard.radio",function() {
+    var $t = $(this);
     if (this.checked) {
-      $(this).updateValue().sendValue(); 
+      $t.updateValue();
+      if ($t.parent("form").length == 0) $t.sendValue();
     };
+  });
+
+  //form submit button
+  $(document).on("click",".ard.submit-button", function(){
+    var $t = $(this);
+    if($t.parent("form").length>0){
+      $t.siblings('input.ard').not(".custom-write").not(".radio").sendValue();
+      $t.siblings('.ard.custom-write').each(function() {
+        $(this).sendString($(this).val()+'\n');
+      });
+      $t.siblings('.ard.knob-send').each(function() {
+        $(this).sendValue();
+      });
+      $t.siblings('.ard.rangeslider').each(function() {
+        $(this).sendValue();
+      });
+      $t.siblings('.ard.radio').each(function() {
+        if(this.checked){
+          $(this).sendValue();
+        };
+      });
+    };
+    $t.sendFn($t.attr('fn'));
   });
 
 });

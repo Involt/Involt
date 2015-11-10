@@ -1,4 +1,4 @@
-//INVOLT ARDUINO SERIAL COMMUNICATION SKETCH
+//INVOLT ARDUINO BASIC SKETCH
 /*
   AUTO PINMODE
   Involt by default automatically adds pinMode to received
@@ -24,7 +24,16 @@ boolean directMode = false;
   Default is Arduino UNO total pin number +1. 
 */
 int involtDigital[14] = {};
-
+/*
+  ARRAY FOR RECEIVED STRINGS
+  You can save the received data as string if pin parameter of HTML 
+  element is S0,S1 etc.
+*/
+String receivedString[] = {};
+/*
+  FUNCTION TRIGGER
+  Used if something is received with fn HTML attribute.
+*/
 String fname;
 
 void setup() {
@@ -37,7 +46,7 @@ void loop() {
   //receive data from your app, do not remove this line.
   involtReceive();
   
-  //Add your code here
+  //ADD YOUR CODE HERE
   
   //clear the fname to prevent from duplicating functions
   fname = "";
@@ -97,6 +106,10 @@ void involtReceive() {
         involtDigital[pin] = val;
       };
 
+    }
+    else if(involt.indexOf("S") == 0){
+       pin = involt.substring(1, involt.indexOf(V)).toInt();
+       receivedString[pin] = involt.substring(involt.indexOf(V) + 1, involtLen);
     };
     
   };

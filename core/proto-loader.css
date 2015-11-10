@@ -6,7 +6,7 @@
 	height: 100%;
 	margin: 0;
 	padding: 0;
-	background: #00C5FF;
+	background: #f4f4f4;
 }
 
 #loader{
@@ -17,13 +17,11 @@
    	height: 480px;
 	text-align: center;
 	background: #d9d9d9;
-	box-shadow: 0 0 38px rgba(0,0,0,0.25);
-	color: #363636;
 }
 
 #loader-logo{
-	height: 100px;
-	background: #f4f4f4;
+	height: 120px;
+	background: white;
 }
 #loader-logo>img{
 	margin-top: 20px;
@@ -32,12 +30,13 @@
 
 .loader-txt{
 	margin: 20px;
-	margin-bottom:10px;
+	color: #363636;
+	
 }
 
 .loader-ports{
 	padding: 0 20px;
-	height: 250px;
+	height: 210px;
 	overflow-y:auto;
 }
 
@@ -54,45 +53,36 @@
 }
 
 .loader-ports>p:hover{
-	border:1px solid white;
+	border:1px solid #4f4f4f;
 	color: #363636;
 }
 
 .active-port{
-	background: #004f57!important;
+	background: #4f4f4f!important;
 	color: #d9d9d9!important;
-	cursor:inherit!important;
-	transition: background 0.1s linear;
-}
-
-.active-port:hover{
-	border:none!important;
 }
 
 #loader-button{
+	color: #363636;
 	margin: 0 20px;
-	background: #ffde00;
-	border-bottom: 1px solid #e1c400;
-	transition: background 0.1s linear;
+	background: #f4f4f4;
+	border:1px solid #4f4f4f;
 }
 
 #loader-button:hover{
-	background: #ffba00;
-	border-color: #ca9300;
+	color: #d9d9d9;
+	background: #4f4f4f;
 }
 
 #discover-button, #resume-button{
 	text-decoration: underline;
-	display: block;
-	width: 200px;
-	margin:10px auto;
-	cursor:pointer;
+	display: inline-block;
+	margin-top: 10px;
 }
 
 
 #discover-button:hover, #resume-button:hover{
 	font-family:"SourceSansProBold";
-	color: #00C5FF;
 }
 
 #loader-error{
