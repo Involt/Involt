@@ -31,9 +31,9 @@ var analogUpdate = function(){
       //scaling the css width of active element to total width
       var widthMap = (analogPins[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
       //change bar width
-      $t.children(".bar-value").css('width', widthMap);
+      $t.children('.bar-background').children(".bar-value").css('width', widthMap);
       //display the value
-      $t.children(".bar-value").children('div').html(analogPins[$t.data("pinNumber")]);
+      $t.children(".bar-label").css('width', widthMap).html(analogPins[$(this).data("pinNumber")]);
   });
 
   //knob
@@ -184,9 +184,20 @@ $(document).ready(function() {
   $(document).on("click",".ard.submit-button", function(){
     var $t = $(this);
     if($t.parent("form").length>0){
-      $t.siblings('.ard').not(".custom-write").sendValue();
+      $t.siblings('input.ard').not(".custom-write").not(".radio").sendValue();
       $t.siblings('.ard.custom-write').each(function() {
         $(this).sendString($(this).val()+'\n');
+      });
+      $t.siblings('.ard.knob-send').each(function() {
+        $(this).sendValue();
+      });
+      $t.siblings('.ard.rangeslider').each(function() {
+        $(this).sendValue();
+      });
+      $t.siblings('.ard.radio').each(function() {
+        if(this.checked){
+          $(this).sendValue();
+        };
       });
     };
     $t.sendFn($t.attr('fn'));

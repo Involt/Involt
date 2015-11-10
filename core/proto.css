@@ -1,5 +1,5 @@
 /*
-	FRAMEWORK.CSS - INVOLT CSS UI:
+	PROTO.CSS - INVOLT CSS UI FOR WIREFRAMING:
 	1. Global CSS
 	2. Clickable elements (buttons)
 	3. HTML inputs
@@ -25,9 +25,9 @@
 }
 
 body{
-	background: white;
 	margin: 0px;
 	padding: 0px;
+	background: white;
 	font-size: 100%;
 	font-family: 'SourceSansProRegular';
 }
@@ -41,25 +41,24 @@ body{
 
 .button,
 .increase, .decrease, 
-.toggle, .button-toggle, .custom-button{
-	background: #00c5ff;
-	color:white;
+.toggle, .button-toggle, .custom-button, .submit-button{
 	width: 180px;
 	height: 40px;
-	border-bottom:1px solid #0092bd;
-	font-family: 'SourceSansProBold';
-	text-align: center;
+	background: #f4f4f4;
+	color:#363636;
+	border:1px solid #d9d9d9;
 	line-height: 38px;
+	text-align: center;
 	cursor: pointer;
-	transition: background 0.1s linear;
+	font-family: 'SourceSansProBold';
 }
 
 .button:hover,
 .increase:hover, .decrease:hover, 
-.toggle:hover, .button-toggle:hover, .custom-button:hover {
-	background: #004f57;
-	border-color:#004f57;
-	line-height: 40px;
+.toggle:hover, .button-toggle:hover, .custom-button:hover, .submit-button:hover {
+	border-color:#4f4f4f;
+	background: #4f4f4f;
+	color: #d9d9d9;
 }
 
 /*Small buttons*/
@@ -68,31 +67,13 @@ body{
 	width: 80px;
 }
 
-.toggle.inactive{
-	background: #f4f4f4;
+.toggle.inactive, .button-toggle.state2{
 	color: #d9d9d9;
-	border-color:#8ab6c6;
 }
 
-.toggle.inactive:hover{
+.toggle.inactive:hover, .button-toggle.state2:hover{
 	background: #f4f4f4;
-	color: #00c5ff;
-	border:1px solid #00c5ff;
-	line-height: 38px;
-	transition: color 0.1s linear;
-}
-
-/*Button-toggle two states (blue/yellow)*/
-
-.button-toggle.state2{
-	background: #ffde00;
-	color:#363636;
-	border-color:#e1c400;
-}
-
-.button-toggle.state2:hover{
-	background: #ffba00;
-	border-color: #ca9300;
+	color: #626262;
 }
 
 /*Inputs - input-write, custom-write*/
@@ -102,7 +83,6 @@ input:focus, button:focus {
 }
 
 .input-write, .custom-write  {
-	color:#363636;
 	width: 180px;
 	height: 40px;
 	padding-left: 10px;
@@ -110,58 +90,35 @@ input:focus, button:focus {
 	border:none;
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
-	border-bottom: 2px solid #00C5FF;
+	border-bottom: 2px solid #626262;
 	font-size: 16px;
-	font-family: "SourceSansProBold";
+	font-family: "SourceSansProRegular";
 	line-height: 37px;
 }
 
-.input-write:hover, .custom-write:hover{
-	background:#f9f9f9;
+.input-write:hover, .custom-write:hover, .input-write:focus, .custom-write:focus{
+	padding-left: 9px;
+	padding-top:0px;
+	border: 1px solid #d9d9d9;
+	border-bottom: 2px solid #363636;
 }
 
 .input-write:focus, .custom-write:focus{
-	background: white;
-	padding-top:0;
-	padding-left: 9px;
-	border:1px solid #ffde00;
-	border-bottom: 2px solid #00C5FF;
-	font-family: "SourceSansProRegular";
-	transition: background 0.3s linear;
-}
-
-::-webkit-input-placeholder {
-	font-family: "SourceSansProLight";
+	border: 1px solid #626262;
+	border-bottom: 2px solid #363636;
 }
 
 button{
-	background: #ffde00;
-	color:#363636;
-	width: 180px;
-	height: 40px;
-	border:0;
-	border-bottom: 1px solid #e1c400;
 	font-size: 16px;
 	font-family: "SourceSansProBold";
-	line-height:40px;
-	cursor:pointer;
-}
-button:hover{
-	background: #ffba00;
-	border-color: #ca9300;
-	transition: background 0.1s linear;
 }
 
 /*Knob-send*/
 /*For editing Knobs visually check references*/
-.knob-send>div>input, .knob>div>input{
-	font-size:36px!important;
-	font-family: "SourceSansProBold"!important;
-}
 
 .knob-send{
-	width: 180px;
 	cursor:pointer;
+	width: 180px
 }
 
 /*Knob*/
@@ -179,21 +136,20 @@ button:hover{
 }
 
 .hover:hover{
-	border: 1px solid #00c5ff;
+	border: 1px solid #626262;
 }
 
 /*show*/
 
 .show{
-	display: inline;
 	width: 80px;
 	height: 40px;
 	border-radius: 0;
-	border-bottom: 2px solid #00C5FF;
+	border-bottom: 1px solid #626262;
 	text-align: right;
 	font-size: 28px;
-	font-family: "SourceSansProBold";
 	line-height: 40px;
+	font-family: "SourceSansProBold";
 }
 
 /*Rangelider*/
@@ -215,26 +171,21 @@ button:hover{
 
 .noUi-base{
 	position: relative;
-	background: #00C5FF;
 	width: 100%;
 	height: 2px;
+	background: #626262;
 }
 
 .noUi-handle{
-	background: #00C5FF;
 	width: 16px;
 	height: 16px;
+	background: #363636;
 	position: relative;
-	left: -10px;
-	top: -7px;
 	z-index: 1;
 	border-radius: 20px;
+	left: -10px;
+	top: -7px;
 	cursor:pointer;
-	transition: background 0.2s linear;
-}
-
-.noUi-handle:hover, .noUi-handle:active{
-	background: #ffba00;
 }
 
 .noUi-origin{
@@ -247,8 +198,6 @@ button:hover{
 }
 
 .tooltip{
-	color:#363636;
-	background: #d9d9d9;
 	position: relative;
 	float:left;
 	bottom: 55px;
@@ -256,9 +205,11 @@ button:hover{
 	height: 40px;
 	margin-top: 20px;
 	margin-left:-42px;
+	color:#363636;
+	background: #d9d9d9;
 	border-radius: 4px;
-	font-size:16px;
 	text-align: center;
+	font-size:16px;
 	line-height: 40px;
 }
 
@@ -314,19 +265,17 @@ button:hover{
 }
 
 .bar-value{
-	background: #00C5FF;
+	background: #626262;
 	height: 4px;
-	border-right: 6px solid #ffba00;
 }
 
 /*Number on bar*/
 
 .bar-label{
-	color:#363636;
 	height: 30px;
 	margin-bottom: 6px;
+	color:#363636;
+	text-align: right; /*change to left to make it in constant position*/
 	font-size: 28px;
 	font-family: "SourceSansProBold";
-	text-align: right; /*change to left to make it in constant position*/
-	line-height: 30px;
 }
