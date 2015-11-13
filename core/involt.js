@@ -346,22 +346,23 @@ var Involt =  function (){
 			Example block of encoded data (Pin A3 value 872):
 			A3V872E
 		*/
-
-		var Vtest = encodedString.indexOf("V");
-		var endTest = encodedString.indexOf("E");
 		
-		//pin counter
-		var i = parseInt(encodedString.substring(1,Vtest));
+		if(encodedString.indexOf("A") == 0 && encodedString.length >= 4 ){
+			var Vtest = encodedString.indexOf("V");
+			var endTest = encodedString.indexOf("E");
+			//pin counter
+			var i = parseInt(encodedString.substring(1,Vtest));
 
-		var stringValue = encodedString.substring(Vtest+1,endTest);
-		var stringValueCheck = isNaN(stringValue);
+			var stringValue = encodedString.substring(Vtest+1,endTest);
+			var stringValueCheck = isNaN(stringValue);
 
-		//count each analog pin number and create array of their values
-		if (stringValueCheck == false){
-			analogPins[i] = parseInt(stringValue);  
-		}
-		else {
-			analogPins[i] = stringValue; 
+			//count each analog pin number and create array of their values
+			if (stringValueCheck == false){
+				analogPins[i] = parseInt(stringValue);  
+			}
+			else {
+				analogPins[i] = stringValue; 
+			};
 		};
 
 	};
