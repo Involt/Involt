@@ -377,9 +377,9 @@ var Involt =  function (){
 		return buf;
 
 	};
-	this.receiveConvertString = function(receiveInfo){
+	this.receiveConvertString = function(coded){
 
-		var Int8View  = new Int8Array(receiveInfo.data);
+		var Int8View  = new Int8Array(coded);
 
 		encodedString = String.fromCharCode.apply(null, Int8View);
 
