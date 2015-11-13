@@ -341,38 +341,29 @@ var Involt =  function (){
 
   	};
 	this.onReceiveParse = function(encodedString){
-		var Atest = encodedString.indexOf("A");
-		var Btest = encodedString.indexOf("E");
-		var Ctest = encodedString.indexOf("V");
-		var Dtest = encodedString.length;
 
 		/*
 			Example block of encoded data (Pin A3 value 872):
 			A3V872E
 		*/
 
-		//corrupted serial data parameters (Based on my observations)
-		//remove corrupted serial data from array list
-		if (  	Atest == 0 && 
-				Btest >= 2 && 
-				Ctest >= 1 && 
-				Dtest >= 4    ) {
-			
-			//pin counter
-			var i = parseInt(encodedString.substring(1,Ctest));
+		var Vtest = encodedString.indexOf("V");
+		var endTest = encodedString.indexOf("E");
+		
+		//pin counter
+		var i = parseInt(encodedString.substring(1,Vtest));
 
-			var stringValue = encodedString.substring(Ctest+1,Btest);
-			var stringValueCheck = isNaN(stringValue);
+		var stringValue = encodedString.substring(Vtest+1,endTest);
+		var stringValueCheck = isNaN(stringValue);
 
-			//count each analog pin number and create array of their values
-			if (stringValueCheck == false){
-				analogPins[i] = parseInt(stringValue);  
-			}
-			else {
-				analogPins[i] = stringValue; 
-			};
-
+		//count each analog pin number and create array of their values
+		if (stringValueCheck == false){
+			analogPins[i] = parseInt(stringValue);  
+		}
+		else {
+			analogPins[i] = stringValue; 
 		};
+
 	};
 	this.sendConvertString = function(ardSend){
 
@@ -389,6 +380,7 @@ var Involt =  function (){
 	this.receiveConvertString = function(receiveInfo){
 
 		var Int8View  = new Int8Array(receiveInfo.data);
+
 		encodedString = String.fromCharCode.apply(null, Int8View);
 
 		return encodedString;
@@ -499,14 +491,30 @@ if (isSerial){
 	};
 
 	Involt.prototype.receive = function(){
+
+		var fullString = '';
+
 		var onReceive = function(receiveInfo) {
 
 			if (receiveInfo.connectionId !== involt.id) return;
 
-			var encodedString = involt.receiveConvertString(receiveInfo);
+			var encodedString = involt.receiveConvertString(receiveInfo.data);
 
-			involt.onReceiveParse(encodedString);
-
+			//if string received has errors it's splitted but correct string always starts with A and ends with E
+			if (encodedString.indexOf("A") >=0 && encodedString.indexOf("E") >=0){
+				involt.onReceiveParse(encodedString.trim());
+			}
+			//append strings to combine splitted elements to correct format
+			//this is not arduino issue because data in serial monitor is OK
+			else {
+				fullString += encodedString;
+				if (fullString.indexOf("A") >=0 && fullString.indexOf("E") >=0){
+					involt.onReceiveParse(fullString.trim());
+					
+					fullString = '';
+					
+				};
+			};
 		};
 
 		var onError = function (errorInfo) {
@@ -643,8 +651,8 @@ else if (isBluetooth){
 	Involt.prototype.btDiscovery = function(duration){
 		chrome.bluetooth.startDiscovery(function() {
 
-			console.info("Start discovery");
-		  setTimeout(function() {
+		console.info("Start discovery");
+		setTimeout(function() {
 
 		    chrome.bluetooth.stopDiscovery(function() {
 		    	console.info("Discovery stopped");  	
@@ -656,7 +664,7 @@ else if (isBluetooth){
 		  		
 		    });
 
-		  }, duration);
+		}, duration);
 
 		});
 	};
@@ -709,13 +717,28 @@ else if (isBluetooth){
 
 	Involt.prototype.receive = function(){
 
+		var fullString = '';
+
 		var onReceive = function(receiveInfo) {
-	  	if (receiveInfo.socketId !== involt.id) return;
+			
+	  		if (receiveInfo.socketId !== involt.id) return;
 
-	  	var encodedString = involt.receiveConvertString(receiveInfo);
+			var encodedString = involt.receiveConvertString(receiveInfo.data);
 
-			involt.onReceiveParse(encodedString);
+			//if string received has errors it's splitted but correct string always starts with A and ends with E
+			if (encodedString.indexOf("A") == 0 && encodedString.indexOf("E") >=0){
+				involt.onReceiveParse(encodedString.substring(0, encodedString.indexOf("E")+1).trim());
+			}
+			//append strings to combine splitted elements to correct format
+			//this is not arduino issue because data in serial monitor is OK
+			else {
+				fullString += encodedString;
+				if (fullString.indexOf("A") == 0 && fullString.indexOf("E") >=0){
 
+					involt.onReceiveParse(fullString.substring(0, fullString.indexOf("E")+1).trim());
+					fullString = '';
+				};
+			};
 		};
 
 		var onError = function (errorInfo) {
