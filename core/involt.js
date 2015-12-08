@@ -14,13 +14,13 @@
 
 		IMPORTANT:
 		Serial and Bluetooth Classic are used for Chrome App.
-		isPhonegap is for mobile devices and uses BT low Energy only. Best used with Phonegap Build.
+
+		For Mobile and Bluetooth LE version check the Phonegap version of Involt.
+
+		Online support coming soon.
 	*/
 	var isSerial    = true;
 	var isBluetooth = false;
-	//New modes in future:
-	//var isPhonegap  = false;
-	//var isOnline = false;
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on every launch. 
@@ -30,13 +30,13 @@
 	/*
 		BLUETOOTH AND SERIAL DEFAULT CONNECTION
 	*/
-	//Serial
+	//Serial port when not using loader.
 	var defaultSerialPort = "COM3";
 	//Keep the connection for longer time after app shutdown. 
 	//Default is false because it's problematic when working both on app code and Arduino code.
 	var isPersistent = false;
 
-	//Bluetooth
+	//Bluetooth address. The UUID must be changed in manifest.json and the app must be reloaded.
 	var defaultBtAddress = "98:D3:31:90:4C:66";
 	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
 	//Bluetooth device discovery duration.
@@ -85,7 +85,7 @@ var Involt =  function (){
 		involt.send(ardSend);
 	};
 	this.arduinoFn = function(afn){
-		var ardFN = "FN" + afn + "\n";
+		var ardFN = "F" + afn + "\n";
 		involt.debug("Triggered function:" + ardFN);
 		involt.send(ardFN);
 	};
