@@ -19,8 +19,8 @@
 
 		Online support coming soon.
 	*/
-	var isSerial    = true;
-	var isBluetooth = false;
+	var isSerial    = false;
+	var isBluetooth = true;
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on every launch. 
@@ -59,7 +59,7 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = false;
+	var debugMode = true;
 
 //----------------------------------------------------------------------------------------------
 
@@ -735,7 +735,6 @@ else if (isBluetooth){
 			else {
 				fullString += encodedString;
 				if (fullString.indexOf("A") == 0 && fullString.indexOf("E") >=0){
-
 					involt.onReceiveParse(fullString.substring(0, fullString.indexOf("E")+1).trim());
 					fullString = '';
 				};
@@ -780,6 +779,11 @@ else if (isBluetooth){
 			$("#loader-button").click(function() {
 				$(this).html("Connecting...");
 				console.log("Connection attempt to: " + defaultBtAddress);
+
+				chrome.bluetooth.stopDiscovery(function() {
+		    		console.info("Discovery stopped");  	
+		  		});
+		  		
 				involt.connect(defaultBtAddress, uuid);
 			});
 
