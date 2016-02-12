@@ -2,10 +2,9 @@
   INVOLT BASIC ARDUINO SKETCH
   by Ernest Warzocha 2015
   ------------------------------------------------------
-  This file can be used for serial communication
-  between Arduino Uno and Involt Chrome App. It can be 
-  used with HC-05 Bluetooth device connected via 
-  hardware serial.
+  This file is for serial communication between Arduino 
+  Uno and Involt Chrome App. It can be used with HC-05 
+  Bluetooth device connected via hardware serial.
 */
 
 /*
@@ -14,7 +13,7 @@
   this array. involtString is array for values received
   with "S" pin. You can increase the length of array to
   store more values then arduino total pins. Use them 
-  in sketch.
+  in sketch for not only pin-to-pin communication.
 */
 int    involtDigital[14] = {};
 String involtString[2] ={};
@@ -106,6 +105,9 @@ void involtReceive(){
       sscanf(involt, "S%dV%s", &pin, &value);
       involtString[pin] = value;
     }
+    else if (involt[0] == 'F'){
+      sscanf(involt, "F%s", &fname);
+    };
     memset(involt,0,sizeof(involt));
   };
 };
