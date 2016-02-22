@@ -1,15 +1,15 @@
 /*
-    INVOLT FRAMEWORK UI ELEMENTS AND UPDATING VALUES OF THEM
+    INVOLT FRAMEWORK UI ELEMENTS AND UPDATING THEIR VALUE
     Ernest Warzocha 2015
     involt.github.io
 
     This file is not required for Involt to work. 
-    If you don't need Involt UI kit just remove this file.
+    If you work with JQuery only you don't need Involt UI kit, just remove this file.
 */
 
 //UPDATE OF READ-ONLY ELEMENTS
 
-//Updated in 50ms interval to reduce CPU usage
+//Updated in 50ms interval from settings to reduce CPU usage
 var analogUpdate = function(){
 
   //show

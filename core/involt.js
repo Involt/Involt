@@ -6,63 +6,6 @@
 
 //----------------------------------------------------------------------------------------------
 
-//INVOLT SETTINGS
-
-	/*
-		CONNECTION
-		Select connection type, only ONE can be defined at once.
-
-		IMPORTANT:
-		Serial and Bluetooth Classic are used for Chrome App.
-
-		For Mobile and Bluetooth LE version check the Phonegap version of Involt.
-
-		Online support coming soon.
-	*/
-	var isSerial    = false;
-	var isBluetooth = true;
-	/*
-		LOADING SCREEN
-		Set loaderOnLaunch to false and skip loading screen on every launch. 
-		Remember to set default connection because it's not possible when app is running.
-	*/
-	var loaderOnLaunch = true;
-	/*
-		BLUETOOTH AND SERIAL DEFAULT CONNECTION
-	*/
-	//Serial port when not using loader.
-	var defaultSerialPort = "COM3";
-	//Keep the connection for longer time after app shutdown. 
-	//Default is false because it's problematic when working both on app code and Arduino code.
-	var isPersistent = false;
-
-	//Bluetooth address. The UUID must be changed in manifest.json and the app must be reloaded.
-	var defaultBtAddress = "98:D3:31:90:4C:66";
-	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
-	//Bluetooth device discovery duration.
-	var discoveryDuration = 5000;
-
-	/*
-		BITRATE
-		The bitrate should remain unchanged. 
-		If you have to lower the speed don't overload the port from arduino.
-		Bitrate in software and hardware must be the same.
-	*/
-	var bitrate = 57600;
-	/*
-		RECEIVED VALUES UI UPDATE RATE
-		Set update rate of read-only elements in miliseconds. 
-		Lower value improves response of UI elements but increases CPU usage.
-	*/
-	var updateRate = 50;
-	/*
-		DEBUG MODE
-		Debug mode logs more information to console.
-	*/
-	var debugMode = true;
-
-//----------------------------------------------------------------------------------------------
-
 //Array of values stored for sending to device with Involt functions and HTML elements.
 var digitalPins = [];
 //Array of values received from device.
@@ -660,8 +603,8 @@ else if (isBluetooth){
 		    	$(".loader-txt>span").hide();
 		    	$("#discover-button").html("Search for more?").fadeIn('fast');
 		    	if(!loaderOnLaunch){
-						involt.connect(defaultBtAddress, uuid);
-					}
+					involt.connect(defaultBtAddress, uuid);
+				};
 		  		
 		    });
 
@@ -683,7 +626,7 @@ else if (isBluetooth){
 				$("#loader-bg, #loader-error").remove();
 				$(".knob, .knob-send, .rangeslider").show();
 				$("html").css('overflow', 'auto');
-			}
+			};
 		};
 
 		var onCreate = function(createInfo){

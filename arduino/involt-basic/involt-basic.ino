@@ -3,8 +3,8 @@
   by Ernest Warzocha 2015
   ------------------------------------------------------
   This file is for serial communication between Arduino 
-  Uno and Involt Chrome App. It can be used with HC-05 
-  Bluetooth device connected via hardware serial.
+  Uno and Involt App. It can be used with HC-05 Bluetooth 
+  device connected via hardware serial.
 */
 
 /*
@@ -46,38 +46,31 @@ String isButton = "click";
 
 void loop() {
   involtReceive();
-  int buttonValue = digitalRead(4);
-
-  if(buttonValue == LOW && previousValue == HIGH) {
-        delay(30);
-        involtSendString(4, isButton);
-    };
-  previousValue = buttonValue;
   //ADD YOUR CODE HERE
-  delay(4);
-  involtSend(0,analogRead(A0));
-  delay(4);
-  involtSend(1,analogRead(A0)/2);
-  delay(4);
-  involtSend(2,analogRead(A0)/4);
  
- 
+  if(fname == "involt"){
+    digitalWrite(9,HIGH);
+  }
+  //Serial.println(involtString[0]);
+    
 
-  analogWrite(9,involtDigital[9]);
+  //analogWrite(9,involtDigital[9]);
   analogWrite(10,involtDigital[10]);
   analogWrite(11,involtDigital[11]);
   
-  digitalWrite(13,involtDigital[13]); //Serial.println(involtDigital[13]);
+ //Serial.println(involtDigital[13]);
   //Clear the function to trigger once.
+  
   fname = "";
 }
-
 
 /*
   INVOLT FUNCTIONS
   ------------------------------------------------------
   You don't have to look below. Especially if you don't
-  want to complicate everything. 
+  want to complicate everything. However, you can add 
+  your own functions (additional letters for example) 
+  when data is received.
 
   involtReceive
   ------------------------------------------------------ 
@@ -101,12 +94,14 @@ void involtReceive(){
       involtDigital[pin] = value;
     }
     else if (involt[0] == 'S'){
-      String value;
+      char value[sizeof(involt)];
       sscanf(involt, "S%dV%s", &pin, &value);
       involtString[pin] = value;
     }
     else if (involt[0] == 'F'){
-      sscanf(involt, "F%s", &fname);
+      char value[sizeof(involt)];
+      sscanf(involt, "F%s", &value);
+      fname = value;
     };
     memset(involt,0,sizeof(involt));
   };
