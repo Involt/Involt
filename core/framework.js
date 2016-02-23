@@ -180,10 +180,26 @@ $(document).ready(function() {
     };
   });
 
+  $(document).on("change",".ard.involt-input",function(){
+    var $t = $(this);
+    var valueCheck = $t.val();
+    if (!isNaN($t.val())){
+      valueCheck = parseInt($t.val());
+    }
+    else{
+      valueCheck = $t.val();
+    };
+    $t.updateValue(valueCheck);
+    if ($t.parent("form").length == 0) $t.sendValue();
+  });
+
   //form submit button
   $(document).on("click",".ard.submit-button", function(){
     var $t = $(this);
     if($t.parent("form").length>0){
+      $t.siblings('.ard.involt-input').each(function() {
+        $(this).sendValue();
+      });
       $t.siblings('input.ard').not(".custom-write").not(".radio").sendValue();
       $t.siblings('.ard.custom-write').each(function() {
         $(this).sendString($(this).val()+'\n');

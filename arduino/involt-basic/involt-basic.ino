@@ -51,10 +51,20 @@ void loop() {
   if(fname == "involt"){
     digitalWrite(9,HIGH);
   }
+  /*
   //Serial.println(involtString[0]);
-    
-
-  //analogWrite(9,involtDigital[9]);
+    involtSend(2,analogRead(A0)/2);
+  delay(5);
+  involtSend(0,analogRead(A0));
+  delay(5);
+  involtSendString(1,"Test my best string");
+  delay(20);
+  involtSendString(13,"another best string");
+  delay(20);
+*/
+involtSendFunction("test");
+delay(20);
+  analogWrite(9,involtDigital[9]);
   analogWrite(10,involtDigital[10]);
   analogWrite(11,involtDigital[11]);
   
@@ -122,3 +132,10 @@ void involtSendString(int pinNumber, String sendString){
   Serial.print(sendString); 
   Serial.println('E'); 
 };
+
+void involtSendFunction(String functionName){
+  Serial.print('F'); 
+  Serial.print(functionName); 
+  Serial.println('E'); 
+};
+

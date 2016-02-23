@@ -10,6 +10,8 @@
 var digitalPins = [];
 //Array of values received from device.
 var analogPins = [];
+//Custom function to trigger when its name is called from arduino. Create own file to add them and include in this object.
+var involtFunctions = {};
 
 //MAIN INVOLT OBJECT (COMMUNICATION BRIDGE)
 
@@ -17,9 +19,7 @@ var Involt =  function (){
 	this.id = 0;
 	this.devices = [];
 	this.onSend =  function(){
-		if(debugMode){
-			involt.debug(digitalPins);
-		};
+		involt.debug(digitalPins);
 	};
 	//involt.arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
 	this.arduinoSend = function(pin, value){
@@ -27,106 +27,114 @@ var Involt =  function (){
 		var ardSend = pin+"V"+value+"\n";
 		involt.send(ardSend);
 	};
-	this.arduinoFn = function(afn){
-		var ardFN = "F" + afn + "\n";
-		involt.debug("Triggered function:" + ardFN);
-		involt.send(ardFN);
+	this.arduinoFn = function(functionName){
+		var sendFunction = "F" + functionName + "\n";
+		involt.debug("Triggered function:" + functionName);
+		involt.send(sendFunction);
 	};
 	this.defineElement = function($t){
 
-		//read the classes of element and add them to object data
-		var splitCss = $t.attr('class').split(' ');
-		//index of the .ard class which defines Involt object
-		var ardIndex = splitCss.indexOf("ard");
+		var involtElement = {};
+		//split the classes to array
+		var classes = $t.attr('class').split(' ');
+		var ardIndex = classes.indexOf("ard");
 
-		//define arduino pin
-		var pin       = splitCss[ardIndex+2];
-		var pinNumber = parseInt(pin.substring(1,pin.length));
-		$t.data("pin", pin).data("pinNumber", pinNumber);
+		//define target pin
+		involtElement.pin = classes[ardIndex+2];
+		involtElement.pinNumber = parseInt(classes[ardIndex+2].substring(1,classes[ardIndex+2].length));
 
-		//define value parameter
-		var value = splitCss[ardIndex+3];
-		
-		if (typeof value !== 'undefined') {
-			//split if there are two values
-			var valueSplit = value.split("-");
-			//check if they are numbers and convert
-			for (var i = 0; i < valueSplit.length; i++){
-				var valueCheck = isNaN(valueSplit[i]);
-				if (valueCheck == false) {
-					valueSplit[i] = parseInt(valueSplit[i]);
+		var value, value2;
+
+		//search for involt parameters in classes
+		for(var i = 0; i < classes.length; i++){
+			//value
+			if (classes[i].indexOf("value-") == 0) {
+				var valueSplit = classes[i].split('-');
+				if(valueSplit.length == 2){
+					value = valueSplit[1];
+					if (!isNaN(valueSplit[1])){
+						value = parseInt(value);
+					};
+				}
+				else if(valueSplit.length == 3){
+					value = valueSplit[1];
+					involtElement.value2 = valueSplit[2];
+					if (!isNaN(valueSplit[1])){
+						value = parseInt(value);
+					};
+					if (!isNaN(valueSplit[2])){
+						involtElement.value2 = parseInt(involtElement.value2);
+					};
 				};
-			};
-
-			$t.data("value", valueSplit[0]);
-
-			if (valueSplit.length > 1){
-				$t.data("value2", valueSplit[1]);
+			}
+			//range
+			else if (classes[i].indexOf("range-") == 0) {
+				var range = classes[i].split('-');
+					involtElement.min = parseInt(range[1]);
+					involtElement.max = parseInt(range[2]);
+			}
+			//step
+			else if (classes[i].indexOf("step-") == 0) {
+				var step = classes[i].split('-');
+					involtElement.step = parseInt(step[1]);
+			}
+			//function
+			else if (classes[i].indexOf("fn-") == 0) {
+				var fn = classes[i].split('-');
+					involtElement.fn = fn[1];
 			};
 		};
 		
-		//html string attribute instead of sending string as value
-		if($t.attr('string') !== 'undefined'){
-			$t.data('value', $t.attr('string'));
-		};
-
-		//check if there is a function to send
-		if($t.attr('fn') !== 'undefined'){
-			$t.data('fn', $t.attr('fn'));
-		};
-
-		//add values to array
-		if (pin.indexOf("A")<0){
-			//define default value for digital pins
-			digitalPins[pinNumber] = $t.data("value");
-		}
-		else if (pin.indexOf("A") == 0){
-			//define analog pins variables
-			analogPins[pinNumber] = pinNumber;
-		};
-
-		//find the range and step parameters and add them to data
-		for (var i = 0; i < splitCss.length; i++) {
-
-			if (splitCss[i].indexOf("range-") == 0) {
-				var range = splitCss[i].split('-');
-					$t.data('min', parseInt(range[1])).data('max', parseInt(range[2]));
-			}
-
-			else if (splitCss[i].indexOf("step-") == 0) {
-				var step = splitCss[i].split('-');
-					$t.data('step', parseInt(step[1]));
-			};
-
-		};
 
 		//define default parameters
-		if($t.hasClass("rangeslider") || $t.hasClass("knob-send") || $t.hasClass("increase") || $t.hasClass("decrease")){
-			if(typeof $t.data("min") === 'undefined'){
-				$t.data("min", 0);
+		var uiName = classes[ardIndex+1];
+
+		if(uiName == 'rangeslider' || uiName == 'knob-send' || uiName == 'increase' || uiName == 'decrease'){
+			if(typeof min === 'undefined'){
+				involtElement.min = 0;
 			};
-			if(typeof $t.data("max") === 'undefined'){
-				$t.data("max", 255);
+			if(typeof max === 'undefined'){
+				involtElement.max = 255;
 			};
-			if(typeof $t.data("step") === 'undefined'){
-				$t.data("step", 1);
+			if(typeof step === 'undefined'){
+				involtElement.step = 1;
 			};
-			if(typeof $t.data("value") === 'undefined'){
-				$t.data("value", 0);
-					digitalPins[pinNumber] = $t.data("value");
+			if(typeof value === 'undefined'){
+				value = 0;
+				digitalPins[involtElement.pinNumber] = 0;
 			};
 		};
 
-		//default parameters for read elements
-		if($t.hasClass('bar') || $t.hasClass('knob')){
-			$t.data('value', 0);
-			if(typeof $t.data("min") === 'undefined'){
-				$t.data("min", 0);
+		if(uiName == 'bar' || uiName == 'knob' ){
+			value = 0;
+			if(typeof min === 'undefined'){
+				involtElement.min = 0;
 			};
-			if(typeof $t.data("max") === 'undefined'){
-				$t.data("max", 1024);
+			if(typeof max === 'undefined'){
+				involtElement.max = 1024;
 			};
 		};
+		
+		if(typeof $t.attr('string') !== 'undefined'){
+			value = $t.attr('string');
+		};
+
+		if(typeof $t.attr('value') !== 'undefined'){
+			value = $t.val();
+			if (!isNaN(value)){
+				value = parseInt(value);
+			};
+		};
+
+		if(involtElement.pin.indexOf('A')<0){
+			digitalPins[involtElement.pinNumber] = value;
+		}
+		else{
+			analogPins[involtElement.pinNumber] = value;
+		};
+
+		involtElement.value = value;
+		$t.data(involtElement);
 
 		//HTML GENERATED ELEMENTS OF FRAMEWORK
 		  
@@ -192,6 +200,7 @@ var Involt =  function (){
 		};	
 
 		//log the data on debug
+		involt.debug(uiName);
 		involt.debug($t.data());
 
 	};
@@ -288,26 +297,28 @@ var Involt =  function (){
 		/*
 			Example block of encoded data (Pin A3 value 872):
 			A3V872E
+			A14VteststringE
 		*/
+
+		var Vtest = encodedString.indexOf("V");
+		var endTest = encodedString.indexOf("E");
+		var testCount = (encodedString.match(/A/g) || []).length;
 		
-		if(encodedString.indexOf("A") == 0 && encodedString.length >= 4 ){
-			var Vtest = encodedString.indexOf("V");
-			var endTest = encodedString.indexOf("E");
-			//pin counter
-			var i = parseInt(encodedString.substring(1,Vtest));
+		if(encodedString.indexOf("A") == 0 && endTest>Vtest && testCount<2){
 
-			var stringValue = encodedString.substring(Vtest+1,endTest);
-			var stringValueCheck = isNaN(stringValue);
-
-			//count each analog pin number and create array of their values
-			if (stringValueCheck == false){
-				analogPins[i] = parseInt(stringValue);  
+			var matches = encodedString.match("A(.*)V(.*)E");
+			if(!isNaN(matches[2])){
+				analogPins[parseInt(matches[1])] = parseInt(matches[2]);
 			}
-			else {
-				analogPins[i] = stringValue; 
+			else{
+				analogPins[parseInt(matches[1])] = matches[2];
 			};
+			
+		}
+		else if(encodedString.indexOf("F")==0){
+			var matches = encodedString.match("F(.*)E");
+			window["involtFunctions"][matches[1]]();
 		};
-
 	};
 	this.sendConvertString = function(ardSend){
 
@@ -354,18 +365,15 @@ if (isSerial){
 
 	Involt.prototype.getDevices = function(){
 		var onGetDevices = function(ports){
-			console.log("Available port list:");
 			for (var j=0; j<ports.length; j++) {
 				involt.devices[j] = ports[j].path;
-				console.log(involt.devices[j]);
+				$(".loader-ports").append('<p>'+involt.devices[j]+'</p>');
 			};
-			if(loaderOnLaunch){
-				involt.createLoaderList(involt.devices);
-			}
+			console.log("Available port list:", involt.devices);
 		};
 
 		chrome.serial.getDevices(onGetDevices);
-
+		
 	};
 
 	Involt.prototype.connect = function(port, speed, continuePrevious){
@@ -382,9 +390,7 @@ if (isSerial){
 				$("html").css('overflow', 'auto');
 			};
 
-			console.log("Device connected:", defaultSerialPort);
-
-			console.log("Involt connection ID:", connectionInfo.connectionId);
+			console.log("Device connected:", defaultSerialPort, "ID:", connectionInfo.connectionId);
 
 			involt.id = connectionInfo.connectionId;
 
@@ -445,14 +451,14 @@ if (isSerial){
 			var encodedString = involt.receiveConvertString(receiveInfo.data);
 
 			//if string received has errors it's splitted but correct string always starts with A and ends with E
-			if (encodedString.indexOf("A") >=0 && encodedString.indexOf("E") >=0){
+			if (encodedString.indexOf("E") >=0){
 				involt.onReceiveParse(encodedString.trim());
 			}
 			//append strings to combine splitted elements to correct format
 			//this is not arduino issue because data in serial monitor is OK
 			else {
 				fullString += encodedString;
-				if (fullString.indexOf("A") >=0 && fullString.indexOf("E") >=0){
+				if (fullString.indexOf("E") >=0){
 					involt.onReceiveParse(fullString.trim());
 					
 					fullString = '';
@@ -469,12 +475,6 @@ if (isSerial){
 
 		chrome.serial.onReceiveError.addListener(onError);
 
-	};
-
-	Involt.prototype.createLoaderList = function(devices){
-		for(var u=0; u<devices.length; u++){
-			$(".loader-ports").append('<p>'+involt.devices[u]+'</p>');
-		};	
 	};
 
 	Involt.prototype.createLoader = function(){

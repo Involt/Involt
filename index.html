@@ -19,18 +19,30 @@
 </head>
 
 <body>
-	<div class="ard button-toggle P14 1-0" fn="involt"></div>
+	<div class="ard button P9 value-100"></div>
+	<div class="ard button P13 fn-involt"></div>
+	<div class="ard button-toggle P9 value-0-20"></div>
 	<div class="ard show A0"></div>
-	<div class="ard knob A1"></div>
+	<div class="ard show A1"></div>
+	<div class="ard show A13"></div>
 	<div class="ard bar A2"></div>
 	<div class="ard increase P9"></div>
 	<div class="ard decrease P9"></div>
-	<div class="ard rangeslider P9"></div>
-	<div class="ard rangeslider P10"></div>
-	<div class="ard rangeslider P11"></div>
+	<div class="ard rangeslider P9 value-50 range-0-100 step-5"></div>
 	<!--  Your content goes here. You can remove this line.  -->
 	<div id="involthankyou">Thank you for choosing Involt.</div>
+	<select name="" class="ard involt-input P9">
+		<option value="255">max</option>
+		<option value="25">low</option>
+		<option value="0">zero</option>
+	</select>
 
+	<form >
+		<p>label</p>
+		<input type="checkbox" required>
+		<input class="ard involt-input P9" type="textarea" value="0">
+		<button type="button" class="ard submit-button">Submit</button> 
+	</form>
 
 
 </body>
