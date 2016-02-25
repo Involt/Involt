@@ -165,6 +165,7 @@ Involt.prototype.knobSendCreate = function($t){
 };
 
 //JQUERY SLIDER PLUGIN
+
 Involt.prototype.rangesliderCreate = function($t){
 
   var $slider = $t.children('.slider');

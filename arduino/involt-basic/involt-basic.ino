@@ -55,17 +55,17 @@ void loop() {
   
   //Serial.println(involtString[0]);
     involtSend(2,analogRead(A0)/2);
-  delay(5);
+  delay(10);
   involtSend(0,analogRead(A0));
-  delay(5);
+  delay(10);
   i++;
   String sender = "Test my best string" + String(i);
   involtSendString(1,sender);
-  delay(20);
+  delay(10);
   j++;
   String sender2 = "string for me" + String(j);
   involtSendString(13,sender2);
-  delay(20);
+  delay(10);
 
 //involtSendFunction("test");
 //delay(20);
@@ -128,6 +128,7 @@ void involtSend(int pinNumber, int sendValue){
   Serial.print('V'); 
   Serial.print(sendValue); 
   Serial.println('E');
+  Serial.flush();
 };
 
 void involtSendString(int pinNumber, String sendString){
@@ -136,6 +137,8 @@ void involtSendString(int pinNumber, String sendString){
   Serial.print('V'); 
   Serial.print(sendString); 
   Serial.println('E'); 
+  Serial.flush();
+
 };
 
 void involtSendFunction(String functionName){

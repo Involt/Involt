@@ -94,15 +94,9 @@ var Involt =  function (){
 		var uiName = classes[ardIndex+1];
 
 		if(uiName == 'rangeslider' || uiName == 'knob-send' || uiName == 'increase' || uiName == 'decrease'){
-			if(typeof min === 'undefined'){
-				involtElement.min = 0;
-			};
-			if(typeof max === 'undefined'){
-				involtElement.max = 255;
-			};
-			if(typeof step === 'undefined'){
-				involtElement.step = 1;
-			};
+			if(typeof min === 'undefined') involtElement.min = 0;
+			if(typeof max === 'undefined') involtElement.max = 255;
+			if(typeof step === 'undefined') involtElement.step = 1;
 			if(typeof value === 'undefined'){
 				value = 0;
 				digitalPins[involtElement.pinNumber] = 0;
@@ -111,17 +105,11 @@ var Involt =  function (){
 
 		if(uiName == 'bar' || uiName == 'knob' ){
 			value = 0;
-			if(typeof min === 'undefined'){
-				involtElement.min = 0;
-			};
-			if(typeof max === 'undefined'){
-				involtElement.max = 1024;
-			};
+			if(typeof min === 'undefined') involtElement.min = 0;
+			if(typeof max === 'undefined') involtElement.max = 1024;
 		};
 		
-		if(typeof $t.attr('string') !== 'undefined'){
-			value = $t.attr('string');
-		};
+		if(typeof $t.attr('string') !== 'undefined') value = $t.attr('string');
 
 		if(typeof $t.attr('value') !== 'undefined'){
 			value = $t.val();
@@ -141,7 +129,7 @@ var Involt =  function (){
 		$t.data(involtElement);
 
 		//HTML GENERATED ELEMENTS OF FRAMEWORK
-		involt.createUiAssets($t);
+		if(typeof involt.createUiAssets !== 'undefined') involt.createUiAssets($t);
 
 		//log the data on debug
 		involt.debug($t.data());
@@ -169,7 +157,7 @@ var Involt =  function (){
 			if(typeof window["involtFunctions"]["test"] !== 'undefined'){
 				var matches = encodedString.match("F(.*)E");
 				window["involtFunctions"][matches[1]]();
-			}
+			};
 
 		};
 	};
@@ -256,7 +244,6 @@ if (isSerial){
 			};
 
 			$("#loader-bg, #loader-error").remove();
-			$(".knob, .knob-send, .rangeslider").show();
 			$("html").css('overflow', 'auto');
 
 			console.log("Device connected:", defaultSerialPort, " ID:", connectionInfo.connectionId, connectionInfo);
@@ -336,14 +323,12 @@ if (isSerial){
 		$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
 		$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device:</span></div><div class="loader-ports"></div>');
 		$("#loader").append('<div id="loader-button">Connect</div>');
-		$(".knob, .knob-send, .rangeslider").hide();
 		$("html").css('overflow:', 'hidden');
 
 		$(document).on("click","#resume-button",function() {
 			involt.id = involt.previousConnections[0];
 			console.log("Resumed previous connection: ID ", involt.previousConnections);
 			$("#loader-bg, #loader-error").remove();
-			$(".knob, .knob-send, .rangeslider").show();
 			$("html").css('overflow', 'auto');	
 		});
 
@@ -472,10 +457,8 @@ else if (isBluetooth){
 			else {
 				console.log("Connection established:", address);
 				$("#loader-bg, #loader-error").remove();
-				$(".knob, .knob-send, .rangeslider").show();
 				$("html").css('overflow', 'auto');
 			};
-
 			
 		};
 
@@ -518,14 +501,15 @@ else if (isBluetooth){
 	  		if (receiveInfo.socketId !== involt.id) return;
 
 			var encodedString = involt.receiveConvertString(receiveInfo.data);
-
+			
 			if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
 
 				fullString += encodedString;
 
 				if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
 					if(encodedString.indexOf('E') > 0){
-						involt.onReceiveParse(fullString)
+						involt.onReceiveParse(fullString.trim());
+						console.log(fullString.trim());
 						fullString = '';
 					};
 				};
@@ -535,6 +519,7 @@ else if (isBluetooth){
 				
 				if (fullString.indexOf('E') > 0){
 					involt.onReceiveParse(fullString.trim());
+					console.log(fullString.trim());
 					fullString = '';
 				};
 			};
@@ -551,7 +536,6 @@ else if (isBluetooth){
 		$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
 		$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
 		$("#loader").append('<div id="loader-button">Connect</div>');
-		$(".knob, .knob-send, .rangeslider").hide();
 		$("#discover-button").hide();
 		$("html").css('overflow:', 'hidden');
 
@@ -564,7 +548,7 @@ else if (isBluetooth){
 	  		});
 	  		
 	  		for (var i=0; i<involt.previousConnections.length; i++) {
-				involt.disconnect(involt.previousConnections[i].id);
+				involt.disconnect(involt.previousConnections[i].socketId);
 			};
 
 			involt.connect(defaultBtAddress, uuid);
