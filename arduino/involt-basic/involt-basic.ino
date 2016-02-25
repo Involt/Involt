@@ -43,7 +43,8 @@ void setup() {
 }
 
 String isButton = "click";
-
+int i=0;
+int j=1000;
 void loop() {
   involtReceive();
   //ADD YOUR CODE HERE
@@ -57,11 +58,14 @@ void loop() {
   delay(5);
   involtSend(0,analogRead(A0));
   delay(5);
-  
-  involtSendString(1,"Test my best string");
-  delay(5);
-  involtSendString(13,"another best string");
-  delay(5);
+  i++;
+  String sender = "Test my best string" + String(i);
+  involtSendString(1,sender);
+  delay(20);
+  j++;
+  String sender2 = "string for me" + String(j);
+  involtSendString(13,sender2);
+  delay(20);
 
 //involtSendFunction("test");
 //delay(20);

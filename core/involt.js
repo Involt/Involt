@@ -141,170 +141,16 @@ var Involt =  function (){
 		$t.data(involtElement);
 
 		//HTML GENERATED ELEMENTS OF FRAMEWORK
-		  
-		//html/css operations that create framework objects in html file 
-		//bar
-		if($t.hasClass('bar')){
-			$t.append('<div class="bar-label">0</div><div class="bar-background"><div class="bar-value"></div></div>');
-			$t.children('.bar-background').children('.bar-value').css('max-width', parseInt($t.children('.bar-background').css('width')));
-		};
-
-		//knob
-		if($t.hasClass('knob')){
-			$t.append(function() {
-				var knobMax  = $t.data('max');
-				var knobMin  = $t.data('min');
-				if($t.hasClass('proto')){
-					$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#626262" data-inputColor="#363636" data-bgColor="#d9d9d9" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
-				}
-				else{
-					$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#00C5FF" data-inputColor="#282828;" data-max="'+knobMax+'" data-min="'+knobMin+'" data-readOnly="true" value="0" class="knob-read">'); 
-				};
-				$t.children('.knob-read').data($t.data());
-			});
-
-			$(function() {
-		  		$t.children(".knob-read").knob();
-		    });
-		};
-
-		//knob-send
-		if($t.hasClass('knob-send')){
-			if($t.hasClass('proto')){
-				$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#626262" data-inputColor="#363636" data-bgColor="#d9d9d9" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
-			}
-			else{
-				$t.append('<input type="text" data-width="180" data-height="180" data-fgColor="#00C5FF" data-inputColor="#282828;" data-displayPrevious="true" data-angleOffset="-140" data-angleArc="280" class="knob-write">'); 
-			};
-			involt.knobSendCreate($t);
-		};
-		
-		//rangeslider
-		if($t.hasClass('rangeslider')){
-			$t.append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
-			involt.rangesliderCreate($t);
-		};
-		
-		//increase/decrease + and - when empty text
-		if($t.hasClass('increase')){
-			if($t.html() == '') $t.html("+").css('font-size', '30px');
-		};
-		if($t.hasClass('decrease')){
-			if($t.html() == '') $t.html("-").css('font-size', '30px');
-		};
-
-		//toggle ON/OFF when empty
-		if($t.hasClass('toggle')){
-			if ($t.data("value") == 0){
-		  		if($t.html() == '') $t.html("OFF").addClass('inactive');
-		  	}
-		  	else if ($t.data("value") == 1){
-		  		if($t.html() == '') $t.html("ON");
-		  	};
-		};	
+		involt.createUiAssets($t);
 
 		//log the data on debug
 		involt.debug($t.data());
 
 	};
-	//JQuery Knob plugin function
-	//this is required to be here to support appending
-	this.knobSendCreate = function($t){
-    //definePin will not work
-
-      var index = $t.data("pinNumber");
-      var currentValue = $t.data("value");
-      var max = $t.data("max");
-        $t.children('.knob-write').val(currentValue).data($t.data());
-
-        $t.children('.knob-write').knob({
-        	'min':  $t.data("min"),
-        	'max':  max,
-        	'step': $t.data("step"),
-        	'change' : function (value) {
-		        //prevent from sending duplicated values when step is higher than 1
-		        if (digitalPins[index] !== this.cv){
-
-		        	if (this.cv <= max){
-		        		digitalPins[index] = this.cv;
-		        		if ($t.parent("form").length == 0) $t.sendValue();
-		        	}
-		        	else {
-		        		digitalPins[index] = max;
-		        	};
-
-		        };
-
-	    	},
-		    'release' : function (value){
-
-		    	if (digitalPins[index] !== value){
-
-		    		if (value <= max){
-		    			digitalPins[index] = value;
-		    		}
-		    		else {
-		    			digitalPins[index] = max;
-		    		};
-
-		    		if ($t.parent("form").length == 0) $t.sendValue(); 
-
-		    	};
-		    	if ($t.parent("form").length == 0) $t.sendFn()
-		    }
-		});
-
-  	};
-  	//JQuery slider plugin
-  	this.rangesliderCreate = function($t){
-
-	  	var $slider = $t.children('.slider');
-	  	var $tooltip = $slider.siblings('.tooltip');
-
-	    $tooltip.html($t.data('value')).hide();
-	    $slider.siblings('.label').html($t.data('value'));
-
-	    $slider.noUiSlider({
-	      start: [$t.data("value")],
-	      range: {
-	        'min': [$t.data("min")],
-	        'max': [$t.data("max")]
-	      },
-	      step: $t.data("step")
-	    });
-	    
-	    $slider.on({
-	      slide: function(){
-	        var cssPos = $slider.children('.noUi-base').children('.noUi-origin').css('left');
-	        var val = parseInt($slider.val());
-	          $tooltip.css('left',cssPos).html(val);
-	          $slider.siblings('.label').html(val);
-	            digitalPins[$t.data("pinNumber")] = val;
-	            if ($t.parent("form").length == 0) involt.arduinoSend($t.data("pin"), val);
-	      },
-	      set: function(){
-	        if ($t.parent("form").length == 0) $t.sendFn();
-	      }
-	    });
-
-	    $t.hover(function() {
-	      $tooltip.css('left', $slider.children('.noUi-base').children('.noUi-origin').css('left'));
-	      $tooltip.fadeIn(250);
-	    }, function() {
-	      $tooltip.fadeOut(250);
-	    });
-
-  	};
 	this.onReceiveParse = function(encodedString){
 
-		/*
-			Example block of encoded data (Pin A3 value 872):
-			A3V872E
-			A14VteststringE
-		*/
+		//Example block of encoded data (Pin A3 value 872): A3V872E
 
-		var Vtest = encodedString.indexOf("V");
-		var endTest = encodedString.indexOf("E");
 		var testCount = (encodedString.match(/A/g) || []).length;
 		
 		if(encodedString.startsWith("A") && testCount<2){
@@ -458,15 +304,12 @@ if (isSerial){
 
 			var encodedString = involt.receiveConvertString(receiveInfo.data);
 
-
-			//if string received has errors it's splitted but correct string always starts with A and ends with E
-			if (encodedString.lastIndexOf('A') == 0){
+			if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
 
 				fullString += encodedString;
 
 				if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
 					if(encodedString.indexOf('E') > 0){
-						
 						involt.onReceiveParse(fullString)
 						fullString = '';
 					};
@@ -474,97 +317,13 @@ if (isSerial){
 			}
 			else{
 				fullString += encodedString;
-
-				if (encodedString.indexOf('E') >= 0){
-					involt.onReceiveParse(fullString)
-					fullString = '';
-				};
-			};
-
-
-			/*
-
-						else {
-				fullString += encodedString;
-
-				if(fullString.indexOf('E') == encodedString.lastIndexOf('E')){
-			}
-			*/
-
-			
-				//involt.onReceiveParse(fullString);
-			
-			//append strings to combine splitted elements to correct format
-			//this is not arduino issue because data in serial monitor is OK
-			/*
-						if (encodedString.endsWith("E") && encodedString.indexOf("E") == encodedString.lastIndexOf("E")){
-					console.log(encodedString);
-					isComplete = true;
-				};	
-
-			else {
-				fullString += encodedString;
-
-				if (fullString.indexOf("E") >=0){
-					//
-					
-					fullString = '';
-					
-				};
-			};*/
-
-			/*
-
-			var stringConcatCheck = function(encodedString){
-				if(encodedString.startsWith('A') || encodedString.startsWith('F')){
-					if (encodedString.lastIndexOf('E') == encodedString.indexOf('E') && encodedString.indexOf('E') > 1){
-						return true;
-					}
-					else{
-						return false
-					};
-				};
-			};
-
-			var isComplete = stringConcatCheck(encodedString);
-
-			if(isComplete){
-				involt.onReceiveParse(fullString);
-			}
-			else{
-				fullString += encodedString;
-			};
-			var encodedString = involt.receiveConvertString(receiveInfo.data);
-
-			//if string received has errors it's splitted but correct string always starts with A and ends with E
-			if (encodedString.indexOf("E") >=0){
-				involt.onReceiveParse(encodedString.trim());
-			}
-			//append strings to combine splitted elements to correct format
-			//this is not arduino issue because data in serial monitor is OK
-			else {
-				fullString += encodedString;
-				if (fullString.indexOf("E") >=0){
+				
+				if (fullString.indexOf('E') > 0){
 					involt.onReceiveParse(fullString.trim());
-					
 					fullString = '';
-					
 				};
 			};
 
-					if(fullString.startsWith('A') || fullString.startsWith('F')){
-					if(fullString.endsWith('E')) {
-						involt.onReceiveParse(fullString);
-						fullString = '';
-					};
-				}
-				fullstring += encodedString;
-			};
-
-			if(isComplete){
-				involt.onReceiveParse(fullString);
-				fullString = '';
-			*/
 		};
 
 		chrome.serial.onReceive.addListener(onReceive);
@@ -760,16 +519,22 @@ else if (isBluetooth){
 
 			var encodedString = involt.receiveConvertString(receiveInfo.data);
 
-			//if string received has errors it's splitted but correct string always starts with A and ends with E
-			if (encodedString.indexOf("A") == 0 && encodedString.indexOf("E") >=0){
-				involt.onReceiveParse(encodedString.substring(0, encodedString.indexOf("E")+1).trim());
-			}
-			//append strings to combine splitted elements to correct format
-			//this is not arduino issue because data in serial monitor is OK
-			else {
+			if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
+
 				fullString += encodedString;
-				if (fullString.indexOf("A") == 0 && fullString.indexOf("E") >=0){
-					involt.onReceiveParse(fullString.substring(0, fullString.indexOf("E")+1).trim());
+
+				if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
+					if(encodedString.indexOf('E') > 0){
+						involt.onReceiveParse(fullString)
+						fullString = '';
+					};
+				};
+			}
+			else{
+				fullString += encodedString;
+				
+				if (fullString.indexOf('E') > 0){
+					involt.onReceiveParse(fullString.trim());
 					fullString = '';
 				};
 			};
@@ -929,7 +694,7 @@ $(document).ready(function() {
 		involt.createLoader();
 	}
 	else {
-		//For bluetooth: connection without launcher is right after bluetoothDiscovery
+		//For bluetooth: connection without launcher is right after bluetoothDiscovery in involt.begin
 		if(isSerial){
 			involt.connect(defaultSerialPort, bitrate);
 		};
