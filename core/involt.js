@@ -307,7 +307,7 @@ var Involt =  function (){
 		var endTest = encodedString.indexOf("E");
 		var testCount = (encodedString.match(/A/g) || []).length;
 		
-		if(encodedString.indexOf("A") == 0 && endTest>Vtest && testCount<2){
+		if(encodedString.startsWith("A") && testCount<2){
 
 			var matches = encodedString.match("A(.*)V(.*)E");
 			if(!isNaN(matches[2])){
@@ -318,9 +318,13 @@ var Involt =  function (){
 			};
 			
 		}
-		else if(encodedString.indexOf("F")==0){
-			var matches = encodedString.match("F(.*)E");
-			window["involtFunctions"][matches[1]]();
+		else if(encodedString.startsWith("F")){
+
+			if(typeof window["involtFunctions"]["test"] !== 'undefined'){
+				var matches = encodedString.match("F(.*)E");
+				window["involtFunctions"][matches[1]]();
+			}
+
 		};
 	};
 	this.sendConvertString = function(ardSend){
@@ -446,11 +450,90 @@ if (isSerial){
 	Involt.prototype.receive = function(){
 
 		var fullString = '';
+		
 
 		var onReceive = function(receiveInfo) {
 
 			if (receiveInfo.connectionId !== involt.id) return;
 
+			var encodedString = involt.receiveConvertString(receiveInfo.data);
+
+
+			//if string received has errors it's splitted but correct string always starts with A and ends with E
+			if (encodedString.lastIndexOf('A') == 0){
+
+				fullString += encodedString;
+
+				if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
+					if(encodedString.indexOf('E') > 0){
+						
+						involt.onReceiveParse(fullString)
+						fullString = '';
+					};
+				};
+			}
+			else{
+				fullString += encodedString;
+
+				if (encodedString.indexOf('E') >= 0){
+					involt.onReceiveParse(fullString)
+					fullString = '';
+				};
+			};
+
+
+			/*
+
+						else {
+				fullString += encodedString;
+
+				if(fullString.indexOf('E') == encodedString.lastIndexOf('E')){
+			}
+			*/
+
+			
+				//involt.onReceiveParse(fullString);
+			
+			//append strings to combine splitted elements to correct format
+			//this is not arduino issue because data in serial monitor is OK
+			/*
+						if (encodedString.endsWith("E") && encodedString.indexOf("E") == encodedString.lastIndexOf("E")){
+					console.log(encodedString);
+					isComplete = true;
+				};	
+
+			else {
+				fullString += encodedString;
+
+				if (fullString.indexOf("E") >=0){
+					//
+					
+					fullString = '';
+					
+				};
+			};*/
+
+			/*
+
+			var stringConcatCheck = function(encodedString){
+				if(encodedString.startsWith('A') || encodedString.startsWith('F')){
+					if (encodedString.lastIndexOf('E') == encodedString.indexOf('E') && encodedString.indexOf('E') > 1){
+						return true;
+					}
+					else{
+						return false
+					};
+				};
+			};
+
+			var isComplete = stringConcatCheck(encodedString);
+
+			if(isComplete){
+				involt.onReceiveParse(fullString);
+			}
+			else{
+				fullString += encodedString;
+			};
 			var encodedString = involt.receiveConvertString(receiveInfo.data);
 
 			//if string received has errors it's splitted but correct string always starts with A and ends with E
@@ -468,6 +551,20 @@ if (isSerial){
 					
 				};
 			};
+
+					if(fullString.startsWith('A') || fullString.startsWith('F')){
+					if(fullString.endsWith('E')) {
+						involt.onReceiveParse(fullString);
+						fullString = '';
+					};
+				}
+				fullstring += encodedString;
+			};
+
+			if(isComplete){
+				involt.onReceiveParse(fullString);
+				fullString = '';
+			*/
 		};
 
 		chrome.serial.onReceive.addListener(onReceive);
@@ -544,29 +641,39 @@ else if (isBluetooth){
 		chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
 
 		var newDevice = function(device){
+
 			console.log("New device found: " + device.name, device);
-			involt.devices[device.name] = device;	 
+			involt.devices[device.name] = device;
+			if(involt.devices[device.name] === 'undefined'){
+				$(".loader-ports").append('<p>'+involt.devices[device.name].name+'</p>');				
+			};
+
 		};
 		var removeDevice = function(device){
+
 			console.log("Device lost: " + device.name, device.address);
 			delete involt.devices[device.name];
+
 		};
 
 		chrome.bluetooth.onDeviceAdded.addListener(newDevice);
 		chrome.bluetooth.onDeviceChanged.addListener(newDevice);
 		chrome.bluetooth.onDeviceRemoved.addListener(removeDevice);
 
-		var onGetDevices = function(devices){
-			for (var i = 0; i < devices.length; i++) {
-				involt.devices[devices[i].name] = devices[i];
-				$(".loader-ports").append('<p>'+involt.devices[i]+'</p>');
-			};
-			console.log("Available devices:", involt.devices);
+		var onGetDevices = function(device){
+
+			console.log("Available devices:");
+			for (var i = 0; i < device.length; i++) {
+				involt.devices[device[i].name] = device[i];
+				$(".loader-ports").append('<p>'+involt.devices[device[i].name].name+'</p>');
+				console.log(device[i].name, involt.devices[device[i].name]);
+			};	
+
 		};
 
 		var checkConnections = function(socket){
 			for (var i=0; i<socket.length; i++) {
-				involt.previousConnections[i] = socket[i].socketId;
+				involt.previousConnections[i] = socket[i];
 			};
 		};
 
@@ -574,27 +681,25 @@ else if (isBluetooth){
 		chrome.bluetoothSocket.getSockets(checkConnections);
 
 		involt.bluetoothDiscovery(discoveryDuration);
+
 	};
 
 	Involt.prototype.bluetoothDiscovery = function(duration){
+
 		chrome.bluetooth.startDiscovery(function() {
-
-		console.info("Start discovery");
-		setTimeout(function() {
-
-		    chrome.bluetooth.stopDiscovery(function() {
-		    	console.info("Discovery stopped");  	
-		    	$(".loader-txt>span").hide();
-		    	$("#discover-button").html("Search for more?").fadeIn('fast');
-		    	if(!loaderOnLaunch){
-					involt.connect(defaultBtAddress, uuid);
-				};
-		  		
-		    });
-
-		}, duration);
-
+			console.info("Start discovery");
+			setTimeout(function() {
+				chrome.bluetooth.stopDiscovery(function() {
+					console.info("Discovery stopped");  	
+					$(".loader-txt>span").hide();
+					$("#discover-button").html("Search for more?").fadeIn('fast');
+					if(!loaderOnLaunch){
+						involt.connect(defaultBtAddress, uuid);
+					};	
+				});
+			}, duration);
 		});
+
 	};
 
 	Involt.prototype.connect = function(address, uuid){
@@ -606,18 +711,20 @@ else if (isBluetooth){
 				$("#loader-button").html("Connect");
 			} 
 			else {
-				console.log("Connection established");
+				console.log("Connection established:", address);
 				$("#loader-bg, #loader-error").remove();
 				$(".knob, .knob-send, .rangeslider").show();
 				$("html").css('overflow', 'auto');
 			};
+
+			
 		};
 
 		var onCreate = function(createInfo){
 
 			chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
 			involt.id = createInfo.socketId;
-		
+
 		};
 
 		//Create bluetooth socket and then connect to device.
@@ -627,7 +734,11 @@ else if (isBluetooth){
 
 	Involt.prototype.disconnect = function(id){
 
-		chrome.bluetoothSocket.close(id, involt.onDisconnect(id));
+		var onDisconnect = function(){
+			console.log("disconnected from previous session (id:"+id+")");
+		};
+
+		chrome.bluetoothSocket.close(id, onDisconnect);
 
 	};
 
@@ -675,6 +786,7 @@ else if (isBluetooth){
 		$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
 		$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
 		$("#loader").append('<div id="loader-button">Connect</div>');
+		$(".knob, .knob-send, .rangeslider").hide();
 		$("#discover-button").hide();
 		$("html").css('overflow:', 'hidden');
 
@@ -686,6 +798,10 @@ else if (isBluetooth){
 	    		console.info("Discovery stopped");  	
 	  		});
 	  		
+	  		for (var i=0; i<involt.previousConnections.length; i++) {
+				involt.disconnect(involt.previousConnections[i].id);
+			};
+
 			involt.connect(defaultBtAddress, uuid);
 		});
 
@@ -703,12 +819,6 @@ else if (isBluetooth){
 	};	
 
 };
-
-//----------------------------------------------------------------------------------------------
-
-//ONLINE CONNECTION COMING SOON
-
-//----------------------------------------------------------------------------------------------
 
 //INVOLT JQUERY METHODS
 
@@ -807,16 +917,23 @@ else if (isBluetooth){
 //----------------------------------------------------------------------------------------------
 
 //CREATE INVOLT APP
-
 var involt = new Involt();
 
-//FIND CONNECTED DEVICES
-
+//FIND CONNECTED DEVICES AND THEIR STATE
 involt.begin();
 
-//IDENTIFY INVOLT OBJECTS AND DEFINE THEIR PARAMETERS
-
 $(document).ready(function() {
+
+	//CREATE LOADER OR CONNECT DIRECTLY
+	if (loaderOnLaunch){
+		involt.createLoader();
+	}
+	else {
+		//For bluetooth: connection without launcher is right after bluetoothDiscovery
+		if(isSerial){
+			involt.connect(defaultSerialPort, bitrate);
+		};
+	};
 
 	//DEFINE FRAMEWORK ELEMENTS FROM CSS CLASSES
 	involt.debug("Involt UI generated elements:");
@@ -833,17 +950,6 @@ $(document).ready(function() {
 		element = $(element);
 		involt.defineElement(element);
 	});
-	
-	//create loader or connect directly
-	if (loaderOnLaunch){
-		involt.createLoader();
-	}
-	else {
-		//For bluetooth: connection without launcher is right after bluetoothDiscovery
-		if(isSerial){
-			involt.connect(defaultSerialPort, bitrate);
-		};
-	};
 
 });
 
