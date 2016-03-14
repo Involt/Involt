@@ -145,5 +145,6 @@ void involtSendFunction(String functionName){
   Serial.print('F'); 
   Serial.print(functionName); 
   Serial.println('E'); 
+  Serial.flush();
 };
 

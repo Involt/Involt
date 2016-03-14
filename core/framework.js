@@ -4,7 +4,7 @@
     involt.github.io
 
     This file is not required for Involt to work. 
-    If you work with JQuery only you don't need Involt UI kit, just remove this file.
+    While working with JQuery without using UI kit just remove this file to save some space.
 */
 
 //UPDATE OF READ-ONLY ELEMENTS
@@ -334,14 +334,11 @@ $(document).ready(function() {
 
   $(document).on("change",".ard.involt-input",function(){
     var $t = $(this);
-    var valueCheck = $t.val();
-    if (!isNaN($t.val())){
-      valueCheck = parseInt($t.val());
-    }
-    else{
-      valueCheck = $t.val();
+    var value = $t.val();
+    if (!isNaN(value)){
+      value = parseInt($t.val());
     };
-    $t.updateValue(valueCheck);
+    $t.updateValue(value);
     if ($t.parent("form").length == 0) $t.sendValue();
   });
 
@@ -352,7 +349,6 @@ $(document).ready(function() {
       $t.siblings('.ard.involt-input').each(function() {
         $(this).sendValue();
       });
-      $t.siblings('input.ard').not(".custom-write").not(".radio").sendValue();
       $t.siblings('.ard.custom-write').each(function() {
         $(this).sendString($(this).val()+'\n');
       });

@@ -28,8 +28,14 @@ var Involt =  function (){
 	//involt.arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
 	this.arduinoSend = function(pin, value){
 		//convert pin and value to framework-friendly format
-		var ardSend = pin+"V"+value+"\n";
-		involt.send(ardSend);
+		if(typeof pin !== 'undefined' && typeof value !== 'undefined'){
+			var ardSend = pin+"V"+value+"\n";
+			involt.send(ardSend);		
+		}
+		else{
+			console.error("Problem while sending the value - pin or value parameter is not defined.");
+			involt.debug(pin + "," +value);
+		};
 	};
 	this.arduinoFn = function(functionName){
 		var sendFunction = "F" + functionName + "\n";
@@ -501,7 +507,7 @@ else if (isBluetooth){
 	  		if (receiveInfo.socketId !== involt.id) return;
 
 			var encodedString = involt.receiveConvertString(receiveInfo.data);
-			
+
 			if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
 
 				fullString += encodedString;
@@ -543,9 +549,7 @@ else if (isBluetooth){
 			$(this).html("Connecting...");
 			console.log("Connection attempt to: " + defaultBtAddress);
 
-			chrome.bluetooth.stopDiscovery(function() {
-	    		console.info("Discovery stopped");  	
-	  		});
+			chrome.bluetooth.stopDiscovery(function() {});
 	  		
 	  		for (var i=0; i<involt.previousConnections.length; i++) {
 				involt.disconnect(involt.previousConnections[i].socketId);
@@ -573,6 +577,7 @@ else if (isBluetooth){
 
 (function($) {
 
+	//Send name of function to trigger it in arduino
 	$.fn.sendFn = function(name) {
 
 		return this.each(function() {
@@ -582,28 +587,37 @@ else if (isBluetooth){
 					involt.arduinoFn($t.data('fn'));
 				};
 			}
-			else{
+			else {
 				involt.arduinoFn(name);
 			};
 		});
 
 	};
 	
-	$.fn.sendValue = function(value){
+	//Send the value for pin related to UI element pin, if no value defined - send the value defined in array
+	$.fn.sendValue = function(pin, value){
 
 		return this.each(function() {
 			var $t = $(this);
-			if (typeof value === 'undefined') {
-				involt.arduinoSend($t.data("pin"), digitalPins[$t.data("pinNumber")]);
+
+			if(typeof value === 'undefined') {
+				if (typeof pin === 'undefined') {
+					involt.arduinoSend($t.data("pin"), digitalPins[$t.data("pinNumber")]);
+				}
+				else {
+					involt.arduinoSend($t.data("pin"), pin);
+				};
 			}
-			else{
-				involt.arduinoSend($t.data("pin"), value);
+			else {
+				involt.arduinoSend(pin, value);
 			};
+
 			$t.not('.knob-send').not('.rangeslider').sendFn();
 		});
 
 	};
 
+	//Update the value related to target pin, if nothing is defined the value in array will be data of UI element
 	$.fn.updateValue = function(newValue){
 
 		return this.each(function() {
@@ -612,17 +626,17 @@ else if (isBluetooth){
 				digitalPins[$t.data("pinNumber")] = $t.data("value");
 			}
 			else{
-				var valueCheck = isNaN(newValue);
-				if(valueCheck == false) parseInt(newValue);
-					digitalPins[$t.data("pinNumber")] = newValue;
-					if (typeof $t.data("value2") === 'undefined') {
-						$t.data("value", newValue);
-					};       
+				if (!isNaN(newValue)) parseInt(newValue);
+				digitalPins[$t.data("pinNumber")] = newValue;
+				if (typeof $t.data("value2") === 'undefined') {
+					$t.data("value", newValue);
+				};       
 			};
 		});
 
 	};
 
+	//Send raw string directly to device
 	$.fn.sendString = function(string){
 
 		return this.each(function() {
@@ -632,6 +646,7 @@ else if (isBluetooth){
 
 	};
 
+	//Define the pin of UI element
 	$.fn.pinDefine = function(pin){
 
 		return this.each(function() {
@@ -642,6 +657,7 @@ else if (isBluetooth){
 
 	};
 
+	//Change target pin and if there is undefined value - move the previous value
 	$.fn.pinSwap = function(newPin){
 
 		return this.each(function() {
@@ -652,11 +668,27 @@ else if (isBluetooth){
 			$t.data("pin", newPin);
 			$t.data("pinNumber", parseInt(newPin.substring(1,newPin.length)));
 
-			//check if the new pin value is defined - if not - put the previous value
-			if (typeof digitalPins[$t.data("pinNumber")] == 'undefined') {
+			//check if the new pin value is defined - if not, put the previous value
+			if (typeof digitalPins[$t.data("pinNumber")] === 'undefined') {
 				digitalPins[$t.data("pinNumber")] = digitalPins[previousPin];
 			};
 
+		});
+
+	};
+
+	// Mix of update and sendValue - it defines the value and send it for previously defined pin or also define pin
+	$.fn.sendAndUpdate = function(pin, value){
+
+		return this.each(function(){
+
+			if (typeof value === 'undefined') {
+				$(this).updateValue(pin).sendValue();
+			}
+			else {
+				$(this).pinDefine(pin).updateValue(value).sendValue();
+			};
+			
 		});
 
 	};
