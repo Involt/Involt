@@ -19,6 +19,7 @@ var Involt =  function (){
 	this.id = 0;
 	this.devices = [];
 	this.previousConnections = [];
+	this.fullString = '';
 	this.onSend =  function(){
 		involt.debug(digitalPins);
 	};
@@ -33,8 +34,7 @@ var Involt =  function (){
 			involt.send(ardSend);		
 		}
 		else{
-			console.error("Problem while sending the value - pin or value parameter is not defined.");
-			involt.debug(pin + "," +value);
+			involt.debug("Problem while sending the value - pin or value parameter is missing.: "+ pin + ", " + value);
 		};
 	};
 	this.arduinoFn = function(functionName){
@@ -95,6 +95,10 @@ var Involt =  function (){
 			};
 		};
 		
+		//use the older syntax for value
+		if(typeof value === 'undefined' && !isNaN(classes[ardIndex+3])){
+			value = parseInt(classes[ardIndex+3]);
+		};
 
 		//define default parameters
 		var uiName = classes[ardIndex+1];
@@ -141,6 +145,35 @@ var Involt =  function (){
 		involt.debug($t.data());
 
 	};
+	this.onReceive = function(receiveInfo){
+
+		if (isSerial && receiveInfo.connectionId !== involt.id) return;
+		if (isBluetooth && receiveInfo.socketId !== involt.id) return;
+
+		var encodedString = involt.receiveConvertString(receiveInfo.data);
+
+		if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
+
+			involt.fullString += encodedString;
+
+			if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
+				if(encodedString.indexOf('E') > 0){
+					involt.onReceiveParse(involt.fullString)
+					involt.fullString = '';
+				};
+			};
+		}
+		else{
+
+			involt.fullString += encodedString;
+			
+			if (involt.fullString.indexOf('E') > 0){
+				involt.onReceiveParse(involt.fullString.trim());
+				involt.fullString = '';
+			};
+		};
+
+	};
 	this.onReceiveParse = function(encodedString){
 
 		//Example block of encoded data (Pin A3 value 872): A3V872E
@@ -182,9 +215,7 @@ var Involt =  function (){
 	this.receiveConvertString = function(coded){
 
 		var Int8View  = new Int8Array(coded);
-
 		encodedString = String.fromCharCode.apply(null, Int8View);
-
 		return encodedString;
 
 	};
@@ -281,45 +312,13 @@ if (isSerial){
 	Involt.prototype.send = function(sendString){
 
 		involt.debug(sendString);
-
 		chrome.serial.send(involt.id, involt.sendConvertString(sendString), involt.onSend);
 
 	};
 
 	Involt.prototype.receive = function(){
 
-		var fullString = '';
-		
-
-		var onReceive = function(receiveInfo) {
-
-			if (receiveInfo.connectionId !== involt.id) return;
-
-			var encodedString = involt.receiveConvertString(receiveInfo.data);
-
-			if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
-
-				fullString += encodedString;
-
-				if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
-					if(encodedString.indexOf('E') > 0){
-						involt.onReceiveParse(fullString)
-						fullString = '';
-					};
-				};
-			}
-			else{
-				fullString += encodedString;
-				
-				if (fullString.indexOf('E') > 0){
-					involt.onReceiveParse(fullString.trim());
-					fullString = '';
-				};
-			};
-
-		};
-
-		chrome.serial.onReceive.addListener(onReceive);
+		chrome.serial.onReceive.addListener(involt.onReceive);
 		chrome.serial.onReceiveError.addListener(involt.onError);
 
 	};
@@ -500,39 +499,7 @@ else if (isBluetooth){
 
 	Involt.prototype.receive = function(){
 
-		var fullString = '';
-
-		var onReceive = function(receiveInfo) {
-			
-	  		if (receiveInfo.socketId !== involt.id) return;
-
-			var encodedString = involt.receiveConvertString(receiveInfo.data);
-
-			if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
-
-				fullString += encodedString;
-
-				if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
-					if(encodedString.indexOf('E') > 0){
-						involt.onReceiveParse(fullString.trim());
-						console.log(fullString.trim());
-						fullString = '';
-					};
-				};
-			}
-			else{
-				fullString += encodedString;
-				
-				if (fullString.indexOf('E') > 0){
-					involt.onReceiveParse(fullString.trim());
-					console.log(fullString.trim());
-					fullString = '';
-				};
-			};
-		};
-
-
-		chrome.bluetoothSocket.onReceive.addListener(onReceive);
+		chrome.bluetoothSocket.onReceive.addListener(involt.onReceive);
 		chrome.bluetoothSocket.onReceiveError.addListener(involt.onError);
 
 	};

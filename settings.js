@@ -34,6 +34,7 @@
 
 		CONNECTION UUID
 		The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
+		You can get the UUID of your device form hardware documentation or app's chrome console.
 
 		BLUETOOTH DISCOVERY DURATION
 		In some cases it will take more time for some devices to find them.
