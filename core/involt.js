@@ -6,10 +6,11 @@
 
 //----------------------------------------------------------------------------------------------
 
-//Array of values stored for sending to device with Involt functions and HTML elements.
-var digitalPins = [];
+//Array of values (numeric for pins/strings) stored for sending to device with Involt functions and HTML elements.
+var involtPin = [];
+var involtString = [];
 //Array of values received from device.
-var analogPins = [];
+var involtReceivedPin = [];
 //Custom function to trigger when its name is called from arduino. Create own file to add them and include in this object.
 var involtFunctions = {};
 
@@ -21,9 +22,10 @@ var Involt =  function (){
 	this.previousConnections = [];
 	this.fullString = '';
 	this.onSend =  function(){
-		involt.debug(digitalPins);
+		involt.debug(involtPin);
+		involt.debug(involtString);
 	};
-	this.onError = function (errorInfo) {
+	this.onError = function (errorInfo){
 		console.error("Received error on connection: " + errorInfo.error);
 	};
 	//involt.arduinoSend is responsible for sending the data, involt.send is used to send as specified connection type.
@@ -39,7 +41,7 @@ var Involt =  function (){
 	};
 	this.arduinoFn = function(functionName){
 		var sendFunction = "F" + functionName + "\n";
-		involt.debug("Triggered function:" + functionName);
+		involt.debug("Triggered function: " + functionName);
 		involt.send(sendFunction);
 	};
 	this.defineElement = function($t){
@@ -51,6 +53,7 @@ var Involt =  function (){
 
 		//define target pin
 		involtElement.pin = classes[ardIndex+2];
+		involtElement.pinType = involtElement.pin[0];
 		involtElement.pinNumber = parseInt(classes[ardIndex+2].substring(1,classes[ardIndex+2].length));
 
 		var value, value2;
@@ -62,19 +65,10 @@ var Involt =  function (){
 				var valueSplit = classes[i].split('-');
 				if(valueSplit.length == 2){
 					value = valueSplit[1];
-					if (!isNaN(valueSplit[1])){
-						value = parseInt(value);
-					};
 				}
 				else if(valueSplit.length == 3){
 					value = valueSplit[1];
-					involtElement.value2 = valueSplit[2];
-					if (!isNaN(valueSplit[1])){
-						value = parseInt(value);
-					};
-					if (!isNaN(valueSplit[2])){
-						involtElement.value2 = parseInt(involtElement.value2);
-					};
+					value2 = valueSplit[2];
 				};
 			}
 			//range
@@ -95,7 +89,7 @@ var Involt =  function (){
 			};
 		};
 		
-		//use the older syntax for value
+		//use the older syntax for numeric single value
 		if(typeof value === 'undefined' && !isNaN(classes[ardIndex+3])){
 			value = parseInt(classes[ardIndex+3]);
 		};
@@ -109,31 +103,44 @@ var Involt =  function (){
 			if(typeof step === 'undefined') involtElement.step = 1;
 			if(typeof value === 'undefined'){
 				value = 0;
-				digitalPins[involtElement.pinNumber] = 0;
+				involtPin[involtElement.pinNumber] = 0;
 			};
-		};
-
-		if(uiName == 'bar' || uiName == 'knob' ){
+		}
+		else if(uiName == 'bar' || uiName == 'knob'){
 			value = 0;
+			involtReceivedPin[involtElement.pinNumber = 0];
 			if(typeof min === 'undefined') involtElement.min = 0;
 			if(typeof max === 'undefined') involtElement.max = 1024;
 		};
 		
+		//define values from html attribute
 		if(typeof $t.attr('string') !== 'undefined') value = $t.attr('string');
+		if(typeof $t.attr('value') !== 'undefined') value = $t.val();
 
-		if(typeof $t.attr('value') !== 'undefined'){
-			value = $t.val();
-			if (!isNaN(value)){
-				value = parseInt(value);
-			};
+		//convert strings to numeric value if they are numeric
+		if (!isNaN(value)){
+			value = parseInt(value);
 		};
 
-		if(involtElement.pin.indexOf('A')<0){
-			digitalPins[involtElement.pinNumber] = value;
+		if (typeof value2 !== 'undefined' ){
+			if(!isNaN(value2)){
+				involtElement.value2 = parseInt(value2);
+			}
+			else{
+				involtElement.value2 = value2;
+			}
+		};
+
+		//add the value to proper array
+		if(involtElement.pinType == 'P'){
+			involtPin[involtElement.pinNumber] = value;
 		}
-		else{
-			analogPins[involtElement.pinNumber] = value;
-		};
+		else if(involtElement.pinType == 'S'){
+			involtString[involtElement.pinNumber] = value;
+		}
+		else if(involtElement.pinType == 'A'){
+			involtReceivedPin[involtElement.pinNumber] = value;
+		}
 
 		involtElement.value = value;
 		$t.data(involtElement);
@@ -158,8 +165,10 @@ var Involt =  function (){
 
 			if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
 				if(encodedString.indexOf('E') > 0){
-					involt.onReceiveParse(involt.fullString)
+					involt.onReceiveParse(involt.fullString.trim())
+					//console.log(involt.fullString);
 					involt.fullString = '';
+					
 				};
 			};
 		}
@@ -169,7 +178,9 @@ var Involt =  function (){
 			
 			if (involt.fullString.indexOf('E') > 0){
 				involt.onReceiveParse(involt.fullString.trim());
+				//console.log(involt.fullString);
 				involt.fullString = '';
+				
 			};
 		};
 
@@ -177,28 +188,31 @@ var Involt =  function (){
 	this.onReceiveParse = function(encodedString){
 
 		//Example block of encoded data (Pin A3 value 872): A3V872E
-
-		var testCount = (encodedString.match(/A/g) || []).length;
 		
-		if(encodedString.startsWith("A") && testCount<2){
+		if(encodedString.startsWith("A")){
+			var testCount = (encodedString.match(/A/g) || []).length;
 
-			var matches = encodedString.match("A(.*)V(.*)E");
-			if(!isNaN(matches[2])){
-				analogPins[parseInt(matches[1])] = parseInt(matches[2]);
-			}
-			else{
-				analogPins[parseInt(matches[1])] = matches[2];
+			if(testCount<2){
+				var matches = encodedString.match("A(.*)V(.*)E");
+				if(!isNaN(matches[2])){
+					involtReceivedPin[parseInt(matches[1])] = parseInt(matches[2]);
+				} 
+				else {
+					involtReceivedPin[parseInt(matches[1])] = matches[2];	
+				};
 			};
-			
 		}
 		else if(encodedString.startsWith("F")){
+			var matches = encodedString.match("F(.*)E");
 
-			if(typeof window["involtFunctions"]["test"] !== 'undefined'){
-				var matches = encodedString.match("F(.*)E");
+			if(typeof window["involtFunctions"][matches[1]] !== 'undefined'){
 				window["involtFunctions"][matches[1]]();
+			}
+			else{
+				involt.debug("Function not defined");
 			};
-
 		};
+
 	};
 	this.sendConvertString = function(ardSend){
 
@@ -569,7 +583,12 @@ else if (isBluetooth){
 
 			if(typeof value === 'undefined') {
 				if (typeof pin === 'undefined') {
-					involt.arduinoSend($t.data("pin"), digitalPins[$t.data("pinNumber")]);
+					if ($t.data("pinType") == 'P') {
+						involt.arduinoSend($t.data("pin"), involtPin[$t.data("pinNumber")]);
+					}
+					else if ($t.data("pinType") == 'S') {
+						involt.arduinoSend($t.data("pin"), involtString[$t.data("pinNumber")]);
+					};
 				}
 				else {
 					involt.arduinoSend($t.data("pin"), pin);
@@ -580,7 +599,7 @@ else if (isBluetooth){
 			};
 
 			$t.not('.knob-send').not('.rangeslider').sendFn();
-		});
+		});	
 
 	};
 
@@ -590,11 +609,21 @@ else if (isBluetooth){
 		return this.each(function() {
 			var $t = $(this);
 			if (typeof newValue === 'undefined') {
-				digitalPins[$t.data("pinNumber")] = $t.data("value");
+				if ($t.data("pinType") == 'P') {
+					involtPin[$t.data("pinNumber")] = $t.data("value");
+				}
+				else if ($t.data("pinType") == 'S') {
+					involtString[$t.data("pinNumber")] = $t.data("value");
+				};
 			}
 			else{
 				if (!isNaN(newValue)) parseInt(newValue);
-				digitalPins[$t.data("pinNumber")] = newValue;
+				if ($t.data("pinType") == 'P') {
+					involtPin[$t.data("pinNumber")] = newValue;
+				}
+				else if ($t.data("pinType") == 'S') {
+					involtString[$t.data("pinNumber")] = newValue;
+				};
 				if (typeof $t.data("value2") === 'undefined') {
 					$t.data("value", newValue);
 				};       
@@ -617,9 +646,10 @@ else if (isBluetooth){
 	$.fn.pinDefine = function(pin){
 
 		return this.each(function() {
-
-			$(this).data("pin", pin).data("pinNumber", parseInt(pin.substring(1,pin.length)));
-
+			var $t = $(this);
+			$t.data("pin", pin);
+			$t.data("pinType", pin[0]);
+			$t.data("pinNumber", parseInt(pin.substring(1,pin.length)));
 		});
 
 	};
@@ -633,11 +663,19 @@ else if (isBluetooth){
 			var previousPin = $t.data("pinNumber");
 
 			$t.data("pin", newPin);
+			$t.data("pinType", newPin[0]);
 			$t.data("pinNumber", parseInt(newPin.substring(1,newPin.length)));
 
 			//check if the new pin value is defined - if not, put the previous value
-			if (typeof digitalPins[$t.data("pinNumber")] === 'undefined') {
-				digitalPins[$t.data("pinNumber")] = digitalPins[previousPin];
+			if ($t.data("pinType") == 'P') {
+				if (typeof involtPin[$t.data("pinNumber")] === 'undefined') {
+					involtPin[$t.data("pinNumber")] = involtPin[previousPin];
+				};
+			}
+			else if ($t.data("pinType") == 'S') {
+				if (typeof involtString[$t.data("pinNumber")] === 'undefined') {
+					involtString[$t.data("pinNumber")] = involtString[previousPin];
+				};
 			};
 
 		});

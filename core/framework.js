@@ -14,7 +14,8 @@ var analogUpdate = function(){
 
   //show
   $(".show").each(function() {
-    $(this).html(analogPins[$(this).data("pinNumber")]);
+    var $t = $(this);
+    $t.html(involtReceivedPin[$t.data("pinNumber")]);
   });
 
   //bar
@@ -22,28 +23,27 @@ var analogUpdate = function(){
       var $t = $(this);
       //map the value to bar pixel width
       var bar = {
-
         minValue : $t.data('min'),
         maxValue : $t.data('max'),
         maxWidth : parseInt($t.css('width'))
-
       };
       //scaling the css width of active element to total width
-      var widthMap = (analogPins[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
+      var widthMap = (involtReceivedPin[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
       //change bar width
       $t.children('.bar-background').children(".bar-value").css('width', widthMap);
       //display the value
-      $t.children(".bar-label").css('width', widthMap).html(analogPins[$(this).data("pinNumber")]);
+      $t.children(".bar-label").css('width', widthMap).html(involtReceivedPin[$(this).data("pinNumber")]);
   });
 
   //knob
   $(".knob").each(function() {
-    $(this).children().children('.knob-read').val(analogPins[$(this).data("pinNumber")]).trigger('change');
+    $(this).children().children('.knob-read').val(involtReceivedPin[$(this).data("pinNumber")]).trigger('change');
   });
 
   //value
   $(".value").each(function() {
-    $(this).attr('value', analogPins[$(this).data("pinNumber")]);
+    var $t = $(this);
+    $t.attr('value', involtReceivedPin[$t.data("pinNumber")]);
   });
 
 };
@@ -131,14 +131,14 @@ Involt.prototype.knobSendCreate = function($t){
       'step': $t.data("step"),
       'change' : function (value) {
         //prevent from sending duplicated values when step is higher than 1
-        if (digitalPins[index] !== this.cv){
+        if (involtPin[index] !== this.cv){
 
           if (this.cv <= max){
-            digitalPins[index] = this.cv;
+            involtPin[index] = this.cv;
             if ($t.parent("form").length == 0) $t.sendValue();
           }
           else {
-            digitalPins[index] = max;
+            involtPin[index] = max;
           };
 
         };
@@ -146,13 +146,13 @@ Involt.prototype.knobSendCreate = function($t){
     },
     'release' : function (value){
 
-      if (digitalPins[index] !== value){
+      if (involtPin[index] !== value){
 
         if (value <= max){
-          digitalPins[index] = value;
+          involtPin[index] = value;
         }
         else {
-          digitalPins[index] = max;
+          involtPin[index] = max;
         };
 
         if ($t.parent("form").length == 0) $t.sendValue(); 
@@ -189,7 +189,7 @@ Involt.prototype.rangesliderCreate = function($t){
       var val = parseInt($slider.val());
         $tooltip.css('left',cssPos).html(val);
         $slider.siblings('.label').html(val);
-          digitalPins[$t.data("pinNumber")] = val;
+          involtPin[$t.data("pinNumber")] = val;
           if ($t.parent("form").length == 0) involt.arduinoSend($t.data("pin"), val);
     },
     set: function(){
@@ -222,11 +222,11 @@ $(document).ready(function() {
     $t.toggleClass('state2');
 
     if ($t.hasClass('state2')) {
-      digitalPins[$t.data("pinNumber")] = $t.data("value2");
+      involtPin[$t.data("pinNumber")] = $t.data("value2");
         $t.sendValue();
     }
     else {
-      digitalPins[$t.data("pinNumber")] = $t.data("value");
+      involtPin[$t.data("pinNumber")] = $t.data("value");
         $t.sendValue();       
     };
   });
@@ -235,18 +235,18 @@ $(document).ready(function() {
   $(document).on("click",".ard.toggle",function() {
     var $t = $(this);
     var index = $t.data('pinNumber');
-    if (digitalPins[index] == 0){
+    if (involtPin[index] == 0){
       if ($t.html() == "OFF") {
         $t.html("ON");
       };
-      digitalPins[index] = 1;
+      involtPin[index] = 1;
         $t.sendValue();
     }
-    else if (digitalPins[index] == 1){
+    else if (involtPin[index] == 1){
       if ($t.html() == "ON") {
         $t.html("OFF");
       };
-        digitalPins[index] = 0; 
+        involtPin[index] = 0; 
           $t.sendValue();    
     };
     $t.toggleClass('inactive');
@@ -258,8 +258,8 @@ $(document).ready(function() {
     var $t = $(this);
     var index = $t.data("pinNumber");
 
-      digitalPins[index] = digitalPins[index] + $t.data("step");
-      digitalPins[index] = Math.min(Math.max(digitalPins[index], $t.data("min")), $t.data("max"));
+      involtPin[index] = involtPin[index] + $t.data("step");
+      involtPin[index] = Math.min(Math.max(involtPin[index], $t.data("min")), $t.data("max"));
         $t.sendValue(); 
   });
 
@@ -268,8 +268,8 @@ $(document).ready(function() {
     var $t = $(this);
     var index = $t.data("pinNumber");
 
-      digitalPins[index] = digitalPins[index] - $t.data("step");
-      digitalPins[index] = Math.min(Math.max(digitalPins[index], $t.data("min")), $t.data("max"));
+      involtPin[index] = involtPin[index] - $t.data("step");
+      involtPin[index] = Math.min(Math.max(involtPin[index], $t.data("min")), $t.data("max"));
         $t.sendValue(); 
   });
 
@@ -277,12 +277,12 @@ $(document).ready(function() {
   $(document).on({
       mouseenter: function () {
         var $t = $(this);
-        digitalPins[$t.data("pinNumber")] = $t.data("value");
+        involtPin[$t.data("pinNumber")] = $t.data("value");
           $t.sendValue();
       },
       mouseleave: function () {
         var $t = $(this);
-        digitalPins[$t.data("pinNumber")] = $t.data("value2");
+        involtPin[$t.data("pinNumber")] = $t.data("value2");
           $t.sendValue();
       }
   }, ".ard.hover");
@@ -315,10 +315,10 @@ $(document).ready(function() {
   $(document).on("change",".ard.checkbox",function() {
     var $t = $(this);
     if (this.checked) {
-      digitalPins[$t.data("pinNumber")] = $t.data("value");
+      involtPin[$t.data("pinNumber")] = $t.data("value");
     }
     else {
-      digitalPins[$t.data("pinNumber")] = $t.data("value2");
+      involtPin[$t.data("pinNumber")] = $t.data("value2");
     };
     if ($t.parent("form").length == 0) $t.sendValue();
   });
