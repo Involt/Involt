@@ -56,7 +56,7 @@ var Involt =  function (){
 		involtElement.pinType = involtElement.pin[0];
 		involtElement.pinNumber = parseInt(classes[ardIndex+2].substring(1,classes[ardIndex+2].length));
 
-		var value, value2;
+		var value;
 
 		//search for involt parameters in classes
 		for(var i = 0; i < classes.length; i++){
@@ -67,8 +67,7 @@ var Involt =  function (){
 					value = valueSplit[1];
 				}
 				else if(valueSplit.length == 3){
-					value = valueSplit[1];
-					value2 = valueSplit[2];
+					value = [valueSplit[1], valueSplit[2]];
 				};
 			}
 			//range
@@ -118,17 +117,20 @@ var Involt =  function (){
 		if(typeof $t.attr('value') !== 'undefined') value = $t.val();
 
 		//convert strings to numeric value if they are numeric
-		if (!isNaN(value)){
-			value = parseInt(value);
-		};
-
-		if (typeof value2 !== 'undefined' ){
-			if(!isNaN(value2)){
-				involtElement.value2 = parseInt(value2);
-			}
-			else{
-				involtElement.value2 = value2;
-			}
+		if (typeof value === 'object'){
+			for(var k = 0; k<value.length; k++){
+				if(!isNaN(value[k])){
+					value[k] = parseInt(value[k]);
+				}
+				else{
+					value[k] = value[k];
+				};
+			};
+		}
+		else {
+			if (!isNaN(value)){
+				value = parseInt(value);
+			};
 		};
 
 		//add the value to proper array
@@ -624,9 +626,7 @@ else if (isBluetooth){
 				else if ($t.data("pinType") == 'S') {
 					involtString[$t.data("pinNumber")] = newValue;
 				};
-				if (typeof $t.data("value2") === 'undefined') {
-					$t.data("value", newValue);
-				};       
+				$t.data("value", newValue);      
 			};
 		});
 

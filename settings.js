@@ -10,8 +10,8 @@
 		CONNECTION TYPE
 		Select connection type, only ONE can be defined at once.
 	*/
-	var isSerial    = true;
-	var isBluetooth = false;
+	var isSerial    = false;
+	var isBluetooth = true;
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on app launch. 

@@ -3,8 +3,9 @@
     Ernest Warzocha 2015
     involt.github.io
 
-    This file is not required for Involt to work. 
-    While working with JQuery without using UI kit just remove this file to save some space.
+    This file is not required for Involt to work if you use only your own JQuery code without Involt UI kit.
+    It contains functions which generates Involt UI assets, their events and automatic update of read-only elements.
+    Involt pagination is also included here. Involt JQuery methods are in involt.js
 */
 
 //UPDATE OF READ-ONLY ELEMENTS
@@ -113,6 +114,10 @@ Involt.prototype.createUiAssets = function($t){
       };
   };  
 
+  if($t.hasClass('switch')){
+    $t.append('<div class="switch-track"><div class="switch-handle"></div></div>');
+  };
+
 };
 
 
@@ -132,7 +137,6 @@ Involt.prototype.knobSendCreate = function($t){
       'change' : function (value) {
         //prevent from sending duplicated values when step is higher than 1
         if (involtPin[index] !== this.cv){
-
           if (this.cv <= max){
             involtPin[index] = this.cv;
             if ($t.parent("form").length == 0) $t.sendValue();
@@ -140,23 +144,17 @@ Involt.prototype.knobSendCreate = function($t){
           else {
             involtPin[index] = max;
           };
-
         };
-
     },
     'release' : function (value){
-
       if (involtPin[index] !== value){
-
         if (value <= max){
           involtPin[index] = value;
         }
         else {
           involtPin[index] = max;
         };
-
         if ($t.parent("form").length == 0) $t.sendValue(); 
-
       };
       if ($t.parent("form").length == 0) $t.sendFn()
     }
@@ -218,15 +216,15 @@ $(document).ready(function() {
   //button-toggle
   $(document).on("click",".ard.button-toggle",function() {
     var $t = $(this);
-
+    var values = $t.data("value");
     $t.toggleClass('state2');
 
     if ($t.hasClass('state2')) {
-      involtPin[$t.data("pinNumber")] = $t.data("value2");
+      involtPin[$t.data("pinNumber")] = values[0];
         $t.sendValue();
     }
     else {
-      involtPin[$t.data("pinNumber")] = $t.data("value");
+      involtPin[$t.data("pinNumber")] = values[1];
         $t.sendValue();       
     };
   });
@@ -235,6 +233,7 @@ $(document).ready(function() {
   $(document).on("click",".ard.toggle",function() {
     var $t = $(this);
     var index = $t.data('pinNumber');
+
     if (involtPin[index] == 0){
       if ($t.html() == "OFF") {
         $t.html("ON");
@@ -249,7 +248,25 @@ $(document).ready(function() {
         involtPin[index] = 0; 
           $t.sendValue();    
     };
+
     $t.toggleClass('inactive');
+  });
+
+  //switch
+  $(document).on("click",".ard.switch",function() {
+    var $t = $(this);
+    var $handle = $t.children('.switch-track').children('.switch-handle');
+    var values = $t.data('value');
+    $handle.toggleClass('inactive');
+
+    if ($handle.hasClass('inactive')) {
+      involtPin[$t.data("pinNumber")] = values[0];
+        $t.sendValue();
+    }
+    else {
+      involtPin[$t.data("pinNumber")] = values[1];
+        $t.sendValue();       
+    };  
 
   });
 
@@ -277,12 +294,14 @@ $(document).ready(function() {
   $(document).on({
       mouseenter: function () {
         var $t = $(this);
-        involtPin[$t.data("pinNumber")] = $t.data("value");
+        var value = $t.data("value");
+        involtPin[$t.data("pinNumber")] = value[0];
           $t.sendValue();
       },
       mouseleave: function () {
         var $t = $(this);
-        involtPin[$t.data("pinNumber")] = $t.data("value2");
+        var value = $t.data("value");
+        involtPin[$t.data("pinNumber")] = value[1];
           $t.sendValue();
       }
   }, ".ard.hover");
@@ -314,11 +333,12 @@ $(document).ready(function() {
   //checkbox
   $(document).on("change",".ard.checkbox",function() {
     var $t = $(this);
+    var values = $t.data("value");
     if (this.checked) {
-      involtPin[$t.data("pinNumber")] = $t.data("value");
+      involtPin[$t.data("pinNumber")] = values[0];
     }
     else {
-      involtPin[$t.data("pinNumber")] = $t.data("value2");
+      involtPin[$t.data("pinNumber")] = values[1];
     };
     if ($t.parent("form").length == 0) $t.sendValue();
   });
@@ -358,6 +378,9 @@ $(document).ready(function() {
       $t.siblings('.ard.rangeslider').each(function() {
         $(this).sendValue();
       });
+      $t.siblings('.ard.checkbox').each(function() {
+        $(this).sendValue();
+      });
       $t.siblings('.ard.radio').each(function() {
         if(this.checked){
           $(this).sendValue();
@@ -365,6 +388,19 @@ $(document).ready(function() {
       });
     };
     $t.sendFn($t.attr('fn'));
+  });
+
+  //INVOLT PAGINATION SYSTEM
+  $(document).on("click","a.involt-pagelink", function(event){
+    event.preventDefault();
+    var $t = $(this);
+    var link = $t.attr('href');
+    var $openPage = $(link);
+    $(".involt-page").each(function(index, el) {
+      $(this).hide();
+    });
+    $openPage.show();
+
   });
 
 });

@@ -54,17 +54,17 @@ void loop() {
   }
   
   //Serial.println(involtString[0]);
-    involtSend(2,analogRead(A0)/2);
+   // involtSend(2,analogRead(A0)/2);
   delay(10);
-  involtSend(0,analogRead(A0));
+ // involtSend(0,analogRead(A0));
   delay(10);
   i++;
   String sender = "Test my best string" + String(i);
-  involtSendString(1,sender);
+  //involtSendString(1,sender);
   delay(10);
   j++;
   String sender2 = "string for me" + String(j);
-  involtSendString(13,sender2);
+  //involtSendString(13,sender2);
   delay(10);
 
 //involtSendFunction("test");
