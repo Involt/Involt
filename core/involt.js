@@ -95,11 +95,12 @@ var Involt =  function (){
 
 		//define default parameters
 		var uiName = classes[ardIndex+1];
+		involtElement.name = uiName;
 
 		if(uiName == 'rangeslider' || uiName == 'knob-send' || uiName == 'increase' || uiName == 'decrease'){
-			if(typeof min === 'undefined') involtElement.min = 0;
-			if(typeof max === 'undefined') involtElement.max = 255;
-			if(typeof step === 'undefined') involtElement.step = 1;
+			if(typeof involtElement.min === 'undefined') involtElement.min = 0;
+			if(typeof involtElement.max === 'undefined') involtElement.max = 255;
+			if(typeof involtElement.step === 'undefined') involtElement.step = 1;
 			if(typeof value === 'undefined'){
 				value = 0;
 				involtPin[involtElement.pinNumber] = 0;
@@ -107,9 +108,9 @@ var Involt =  function (){
 		}
 		else if(uiName == 'bar' || uiName == 'knob'){
 			value = 0;
-			involtReceivedPin[involtElement.pinNumber = 0];
-			if(typeof min === 'undefined') involtElement.min = 0;
-			if(typeof max === 'undefined') involtElement.max = 1024;
+			involtReceivedPin[involtElement.pinNumber] = 0;
+			if(typeof involtElement.min === 'undefined') involtElement.min = 0;
+			if(typeof involtElement.max === 'undefined') involtElement.max = 1024;
 		};
 		
 		//define values from html attribute

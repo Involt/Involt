@@ -363,21 +363,60 @@ button:hover{
 /* Pagination system */
 
 .involt-nav{
-
 	z-index:2;
-	height: 50px;
+	min-height: 48px;
+	box-shadow: 0 0 3px black;
+	position: fixed;
+	width: 100%;
+	background: white;
 }
 
 .involt-nav>.involt-pagelink{
+	color:black;
+	text-decoration: none;
 	text-align:center;
 	float:left;
-	width: 20%;
+	line-height: 46px;
+}
+
+.involt-nav>.involt-pagelink:hover{
+	color: blue;
+}
+
+.involt-nav>.involt-pagelink.active{
+	color:blue;
+	border-bottom: 2px solid;
 }
 
 .involt-page{
 	position: absolute;
-	top:50px;
+	padding: 20px;
+	top:48px;
 	bottom:0px;
 	width: 100%;
 	background:white;
+	overflow:auto;
+}
+
+.involt-dialogbackground{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: black;
+	opacity: 0.3;
+	z-index: 999;
+}
+
+.involt-dialog{
+	padding: 20px;
+	min-width: 280px;
+	min-height: 280px;
+	position: absolute;
+	top:50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: white;
+	z-index:1000;
+	border-radius:4px;
+	box-shadow: 0 0 38px rgba(0,0,0,0.25);
 }

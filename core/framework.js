@@ -35,7 +35,7 @@ var analogUpdate = function(){
       //change bar width
       $t.children('.bar-background').children(".bar-value").css('width', widthMap);
       //display the value
-      $t.children(".bar-label").css('width', widthMap).html(involtReceivedPin[$(this).data("pinNumber")]);
+      $t.children(".bar-label").css('width', widthMap).html(involtReceivedPin[$t.data("pinNumber")]);
   });
 
   //knob
@@ -62,6 +62,7 @@ Involt.prototype.createUiAssets = function($t){
   if($t.hasClass('bar')){
     $t.append('<div class="bar-label">0</div><div class="bar-background"><div class="bar-value"></div></div>');
     $t.children('.bar-background').children('.bar-value').css('max-width', parseInt($t.children('.bar-background').css('width')));
+    $t.children('.bar-label').css('max-width', parseInt($t.children('.bar-background').css('width')));
   };
 
   //knob
@@ -241,8 +242,19 @@ $(document).ready(function() {
   //toggle
   $(document).on("click",".ard.toggle",function() {
     var $t = $(this);
-    var index = $t.data('pinNumber');
 
+    $t.toggleClass('inactive');
+    if ($t.hasClass('inactive')){
+      involtPin[$t.data('pinNumber')] = 0;
+      $t.html("OFF");
+    }
+    else {
+      involtPin[$t.data('pinNumber')] = 1;
+      $t.html("ON");
+    };
+
+    $t.sendValue();
+    /*
     if (involtPin[index] == 0){
       if ($t.html() == "OFF") {
         $t.html("ON");
@@ -257,8 +269,8 @@ $(document).ready(function() {
         involtPin[index] = 0; 
           $t.sendValue();    
     };
-
-    $t.toggleClass('inactive');
+    */
+    
   });
 
   //switch
@@ -406,16 +418,59 @@ $(document).ready(function() {
   //make sure to show only the home screen
   $(".involt-page").not(".home").hide();
 
+  //Start with active state of home link in navigation bar
+  var homelink = $(".home").attr('id');
+  //count how many links are in navigation
+  var countLinks = $(".involt-nav").children('.involt-pagelink').length;
+
+  $(".involt-nav").children('.involt-pagelink').each(function() {
+    if($(this).attr('href') == '#'+ homelink){
+      $(this).addClass('active');
+    };
+
+    $(this).css('width', 100/countLinks+'%');
+  });
+
+  //toggle between pages
   $(document).on("click","a.involt-pagelink", function(event){
     event.preventDefault();
     var $t = $(this);
     var link = $t.attr('href');
     var $openPage = $(link);
-    $(".involt-page").each(function(index, el) {
+
+    $(".involt-nav").children('.involt-pagelink').removeClass('active');
+    $t.addClass('active');
+    $(".involt-page").each(function() {
       $(this).hide();
     });
     $openPage.show();
 
+  });
+
+  //make sure to hide all dialogs
+  $(".involt-dialog").hide();
+
+  //open dialog
+  $(document).on("click","a.involt-showdialog", function(event){
+    event.preventDefault();
+    var $t = $(this);
+    var link = $t.attr('href');
+    var $openDialog = $(link);
+    $("body").prepend('<div class="involt-dialogbackground"></div>')
+    $openDialog.show();
+  });
+
+  //hide dialog when clicked on background
+  $(document).on("click",".involt-dialogbackground", function(event){
+    $(".involt-dialog").hide();
+    $(this).remove();
+  });
+
+  //hide dialog when clicked on hidedialog button
+  $(document).on("click","a.involt-hidedialog", function(event){
+    event.preventDefault();
+    $(".involt-dialog").hide();
+    $(".involt-dialogbackground").remove();
   });
 
 });

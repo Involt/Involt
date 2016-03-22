@@ -54,9 +54,9 @@ void loop() {
   }
   
   //Serial.println(involtString[0]);
-   // involtSend(2,analogRead(A0)/2);
+    involtSend(2,analogRead(A0)/2);
   delay(10);
- // involtSend(0,analogRead(A0));
+ involtSend(1,analogRead(A0));
   delay(10);
   i++;
   String sender = "Test my best string" + String(i);
