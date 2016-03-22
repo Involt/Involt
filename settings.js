@@ -13,6 +13,18 @@
 	var isSerial    = false;
 	var isBluetooth = true;
 	/*
+		MOBILE/DESKTOP
+		Create project as desktop Chrome packaged app or Cordova/Phonegap mobile app.
+		For Involt it's default set to false. Involt mobile template have all required assets.
+		When switching from desktop to mobile, changes in App UI are not required but make sure to 
+		paste HTML code to mobile template.
+
+		IMPORTANT
+		Mobile support works only with bluetooth and is developed (and tested) for Android.
+		For details on mobile setup check involt website.
+	*/
+	var isMobile = false;
+	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on app launch. 
 		Remember to set default connection settings because it's not possible when app is running.
@@ -34,14 +46,14 @@
 
 		CONNECTION UUID
 		The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
-		You can get the UUID of your device form hardware documentation or app's chrome console.
+		You can get the UUID of your device from hardware documentation or app's chrome console.
 
 		BLUETOOTH DISCOVERY DURATION
 		In some cases it will take more time for some devices to find them.
 	*/
 	var defaultBtAddress = "98:D3:31:90:4C:66";
 	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
-	var discoveryDuration = 5000;
+	var discoveryDuration = 3000;
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 

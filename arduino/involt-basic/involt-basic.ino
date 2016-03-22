@@ -60,7 +60,7 @@ void loop() {
   delay(10);
   i++;
   String sender = "Test my best string" + String(i);
-  //involtSendString(1,sender);
+  involtSendString(0,sender);
   delay(10);
   j++;
   String sender2 = "string for me" + String(j);

@@ -359,3 +359,25 @@ button:hover{
 	text-align: right; /*change to left to make it in constant position*/
 	line-height: 30px;
 }
+
+/* Pagination system */
+
+.involt-nav{
+
+	z-index:2;
+	height: 50px;
+}
+
+.involt-nav>.involt-pagelink{
+	text-align:center;
+	float:left;
+	width: 20%;
+}
+
+.involt-page{
+	position: absolute;
+	top:50px;
+	bottom:0px;
+	width: 100%;
+	background:white;
+}

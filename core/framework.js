@@ -8,6 +8,8 @@
     Involt pagination is also included here. Involt JQuery methods are in involt.js
 */
 
+//----------------------------------------------------------------------------------------------
+
 //UPDATE OF READ-ONLY ELEMENTS
 
 //Updated in 50ms interval from settings to reduce CPU usage
@@ -50,6 +52,8 @@ var analogUpdate = function(){
 };
 
 setInterval(analogUpdate, updateRate);
+
+//----------------------------------------------------------------------------------------------
 
 //CREATE HTML ELEMENTS REQUIRED FOR UI KIT
 
@@ -120,6 +124,7 @@ Involt.prototype.createUiAssets = function($t){
 
 };
 
+//----------------------------------------------------------------------------------------------
 
 //JQUERY KNOB PLUGIN
 
@@ -162,6 +167,8 @@ Involt.prototype.knobSendCreate = function($t){
 
 };
 
+//----------------------------------------------------------------------------------------------
+
 //JQUERY SLIDER PLUGIN
 
 Involt.prototype.rangesliderCreate = function($t){
@@ -203,6 +210,8 @@ Involt.prototype.rangesliderCreate = function($t){
   });
 
 };
+
+//----------------------------------------------------------------------------------------------
 
 //INVOLT UI EVENTS
 
@@ -390,7 +399,13 @@ $(document).ready(function() {
     $t.sendFn($t.attr('fn'));
   });
 
+//----------------------------------------------------------------------------------------------
+
   //INVOLT PAGINATION SYSTEM
+
+  //make sure to show only the home screen
+  $(".involt-page").not(".home").hide();
+
   $(document).on("click","a.involt-pagelink", function(event){
     event.preventDefault();
     var $t = $(this);

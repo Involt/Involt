@@ -381,7 +381,7 @@ else if (isBluetooth){
 			adapterOn = adapter.available;
 			if(adapterOn){
 				console.info("Involt for Classic Bluetooth is running")
-				involt.debug("Adapter " + adapter.address + ": " + adapter.name);
+				involt.debug("Adapter: " + adapter.address + " : " + adapter.name);
 			}
 			else{
 				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.");
@@ -394,7 +394,7 @@ else if (isBluetooth){
 				adapterOn = adapter.available;
 				if(adapterOn){
 					console.info("Bluetooth adapter is ON");
-					involt.debug("Adapter " + adapter.address + ": " + adapter.name);
+					involt.debug("Adapter: " + adapter.address + " : " + adapter.name);
 				}
 				else{
 					console.log("Bluetooth adapter is OFF");
@@ -407,10 +407,14 @@ else if (isBluetooth){
 
 		var newDevice = function(device){
 
-			console.log("New device found: " + device.name, device);
 			involt.devices[device.name] = device;
-			if(involt.devices[device.name] === 'undefined'){
-				$(".loader-ports").append('<p>'+involt.devices[device.name].name+'</p>');				
+
+			if($('.loader-ports:contains('+ involt.devices[device.name].name +')').length > 0){
+				involt.debug("Device already on the list: " + device.name);
+			}
+			else {
+				console.log("New device found: " + device.name, device);
+				$(".loader-ports").append('<p>'+involt.devices[device.name].name+'</p>');
 			};
 
 		};
@@ -451,16 +455,30 @@ else if (isBluetooth){
 
 	Involt.prototype.bluetoothDiscovery = function(duration){
 
+		var onGetDevices = function(device){
+			console.log("Available devices:");
+			for (var i = 0; i < device.length; i++) {
+				involt.devices[device[i].name] = device[i];
+				if($('.loader-ports:contains('+ involt.devices[device[i].name].name +')').length == 0){
+					$(".loader-ports").append('<p>'+involt.devices[device[i].name].name+'</p>');
+					console.log(device[i].name, involt.devices[device[i].name]);
+				}
+			};	
+		};
+
 		chrome.bluetooth.startDiscovery(function() {
 			console.info("Start discovery");
 			setTimeout(function() {
 				chrome.bluetooth.stopDiscovery(function() {
-					console.info("Discovery stopped");  	
-					$(".loader-txt>span").hide();
-					$("#discover-button").html("Search for more?").fadeIn('fast');
-					if(!loaderOnLaunch){
-						involt.connect(defaultBtAddress, uuid);
-					};	
+					console.info("Discovery stopped");
+					if (loaderOnLaunch){
+						$(".loader-txt>span").hide();
+						$("#discover-button").html("Search for more?").fadeIn('fast');
+						//Somehow Android requires this step after the discovery, otherwise it will not detect the devices as in desktop.
+						if (isMobile){
+							chrome.bluetooth.getDevices(onGetDevices);
+						};
+					};
 				});
 			}, duration);
 		});
@@ -470,16 +488,20 @@ else if (isBluetooth){
 	Involt.prototype.connect = function(address, uuid){
 
 		var onConnect = function() {
-			if (chrome.runtime.lastError) {
-				console.error("Connection failed: " + chrome.runtime.lastError.message);
-				involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
-				$("#loader-button").html("Connect");
-			} 
-			else {
-				console.log("Connection established:", address);
-				$("#loader-bg, #loader-error").remove();
-				$("html").css('overflow', 'auto');
+
+			if (!isMobile){
+				if (chrome.runtime.lastError) {
+					console.error("Connection failed: " + chrome.runtime.lastError.message);
+					involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
+					$("#loader-button").html("Connect");
+					return;
+				};
 			};
+
+			console.log("Connection established:", address);
+			$("#loader-bg, #loader-error").remove();
+			$("html").css('overflow', 'auto');
+			
 			
 		};
 
@@ -488,6 +510,10 @@ else if (isBluetooth){
 			chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
 			involt.id = createInfo.socketId;
 
+		};
+
+		for (var i=0; i<involt.previousConnections.length; i++) {
+			involt.disconnect(involt.previousConnections[i].socketId);
 		};
 
 		//Create bluetooth socket and then connect to device.
@@ -522,21 +548,19 @@ else if (isBluetooth){
 
 	Involt.prototype.createLoader = function(){
 
-		$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-		$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
-		$("#loader").append('<div id="loader-button">Connect</div>');
-		$("#discover-button").hide();
-		$("html").css('overflow:', 'hidden');
+		if(!isMobile){
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+			$("#discover-button").hide();
+			$("html").css('overflow:', 'hidden');
+		};
 
 		$(document).on("click","#loader-button",function() {
 			$(this).html("Connecting...");
 			console.log("Connection attempt to: " + defaultBtAddress);
 
 			chrome.bluetooth.stopDiscovery(function() {});
-	  		
-	  		for (var i=0; i<involt.previousConnections.length; i++) {
-				involt.disconnect(involt.previousConnections[i].socketId);
-			};
 
 			involt.connect(defaultBtAddress, uuid);
 		});
@@ -555,6 +579,8 @@ else if (isBluetooth){
 	};	
 
 };
+
+//----------------------------------------------------------------------------------------------
 
 //INVOLT JQUERY METHODS
 
@@ -702,42 +728,68 @@ else if (isBluetooth){
 
 //----------------------------------------------------------------------------------------------
 
+//LAUNCH THE FRAMEWORK
+
+Involt.prototype.launch = function(){
+	//FIND CONNECTED DEVICES AND RECEIVE THEIR STATE
+	involt.begin();
+
+	$(document).ready(function() {
+
+		//CREATE LOADER OR CONNECT DIRECTLY
+		if (loaderOnLaunch){
+			involt.createLoader();
+		}
+		else {
+			if (isSerial){
+				involt.connect(defaultSerialPort, bitrate);
+			}
+			else if (isBluetooth){
+				involt.connect(defaultBtAddress, uuid);
+			};
+		};
+
+		//DEFINE FRAMEWORK ELEMENTS FROM CSS CLASSES
+		involt.debug("Involt UI generated elements:");
+		$(".ard").not(".custom-write").not(".submit-button").each(function(index, el) {
+			involt.defineElement($(this));
+		});
+
+		/*
+			INSERTION QUERY
+			Additional plugin for listening to new dom elements.
+			With this plugin Involt fully appends new framework elements.
+		*/
+		insertionQ('.ard').every(function(element){
+			element = $(element);
+			involt.defineElement(element);
+		});
+
+	});
+
+	//RECEIVE THE DATA AND UPDATE THE VALUES
+	//For updating the read-only UI elements check analogUpdate function in framework.js
+	involt.receive();	
+};
+
 //CREATE INVOLT APP
 var involt = new Involt();
 
-//FIND CONNECTED DEVICES AND THEIR STATE
-involt.begin();
+//On mobile, wait for Cordova to load all plugins and assets, desktop version runs immediately.
+if (isMobile){
 
-$(document).ready(function() {
-
-	//CREATE LOADER OR CONNECT DIRECTLY
-	if (loaderOnLaunch){
-		involt.createLoader();
-	}
-	else {
-		//For bluetooth: connection without launcher is right after bluetoothDiscovery in involt.begin
-		if(isSerial){
-			involt.connect(defaultSerialPort, bitrate);
-		};
-	};
-
-	//DEFINE FRAMEWORK ELEMENTS FROM CSS CLASSES
-	involt.debug("Involt UI generated elements:");
-	$(".ard").not(".custom-write").not(".submit-button").each(function(index, el) {
-		involt.defineElement($(this));
+	//Create loader before the plugins load (user don't have to look at not fully loaded UI assets and then suddenly see the loader).
+	$(document).ready(function() {
+		$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+		$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
+		$("#loader").append('<div id="loader-button">Connect</div>');
+		$("#discover-button").hide();
+		$("html").css('overflow:', 'hidden');
 	});
 
-	/*
-		INSERTION QUERY
-		Additional plugin for listening to new dom elements.
-		With this plugin Involt fully appends new framework elements.
-	*/
-	insertionQ('.ard').every(function(element){
-		element = $(element);
-		involt.defineElement(element);
-	});
+	document.addEventListener('deviceready', involt.launch, false);
+}
+else {
+	involt.launch();
+};
 
-});
-
-//DATA RECEIVE AND VALUE UPDATE
-involt.receive();
