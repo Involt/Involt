@@ -112,6 +112,11 @@ var Involt =  function (){
 			if(typeof involtElement.min === 'undefined') involtElement.min = 0;
 			if(typeof involtElement.max === 'undefined') involtElement.max = 1024;
 		};
+
+		if(uiName == 'involt-input'){
+			if($t.val() == '') $t.val(0);
+			value = $t.val();
+		}
 		
 		//define values from html attribute
 		if(typeof $t.attr('string') !== 'undefined') value = $t.attr('string');
@@ -169,9 +174,7 @@ var Involt =  function (){
 			if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
 				if(encodedString.indexOf('E') > 0){
 					involt.onReceiveParse(involt.fullString.trim())
-					//console.log(involt.fullString);
-					involt.fullString = '';
-					
+					involt.fullString = '';	
 				};
 			};
 		}
@@ -181,9 +184,7 @@ var Involt =  function (){
 			
 			if (involt.fullString.indexOf('E') > 0){
 				involt.onReceiveParse(involt.fullString.trim());
-				//console.log(involt.fullString);
 				involt.fullString = '';
-				
 			};
 		};
 
@@ -634,8 +635,7 @@ else if (isBluetooth){
 
 	//Update the value related to target pin, if nothing is defined the value in array will be data of UI element
 	$.fn.updateValue = function(newValue){
-
-		return this.each(function() {
+				return this.each(function() {
 			var $t = $(this);
 			if (typeof newValue === 'undefined') {
 				if ($t.data("pinType") == 'P') {
@@ -653,10 +653,33 @@ else if (isBluetooth){
 				else if ($t.data("pinType") == 'S') {
 					involtString[$t.data("pinNumber")] = newValue;
 				};
-				$t.data("value", newValue);      
+				//$t.data("value", newValue);     kiedy tego nie ma to działajo switche 
 			};
 		});
-
+		/*
+		return this.each(function() {
+			var $t = $(this);
+			if (typeof newValue === 'undefined') {
+				if ($t.data("pinType") == 'P') {
+					involtPin[$t.data("pinNumber")] = $t.data("value");
+				}
+				else if ($t.data("pinType") == 'S') {
+					involtString[$t.data("pinNumber")] = $t.data("value");
+				};
+			}
+			else{
+				if (!isNaN(newValue)) parseInt(newValue);
+				if ($t.data("pinType") == 'P') {
+					involtPin[$t.data("pinNumber")] = newValue;
+					$t.data("value", newValue);      
+				}
+				else if ($t.data("pinType") == 'S') {
+					involtString[$t.data("pinNumber")] = newValue;
+				};
+				
+			};
+		});
+		*/
 	};
 
 	//Send raw string directly to device

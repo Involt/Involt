@@ -201,8 +201,7 @@ button:hover{
 /*Hover*/
 
 .hover{
-	min-width: 80px;
-	max-width: 380px;
+	width:80px;
 	min-height: 40px;
 	border: 1px solid #d9d9d9;
 }
@@ -228,7 +227,7 @@ button:hover{
 /*Rangelider*/
 
 .rangeslider{
-	width: 380px;
+	min-width: 200px;
 	height: 40px;
 	padding:0 10px;
 }
@@ -246,20 +245,19 @@ button:hover{
 	position: relative;
 	background: #00C5FF;
 	width: 100%;
-	height: 2px;
+	height: 4px;
 }
 
 .noUi-handle{
 	background: #00C5FF;
-	width: 16px;
-	height: 16px;
+	width: 20px;
+	height: 20px;
 	position: relative;
 	left: -10px;
-	top: -7px;
+	top: -8px;
 	z-index: 1;
 	border-radius: 20px;
 	cursor:pointer;
-	transition: background 0.2s linear;
 }
 
 .noUi-handle:hover, .noUi-handle:active{

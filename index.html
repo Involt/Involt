@@ -28,29 +28,25 @@
 	</div>
 
 	<div id="page-1" class="involt-page home">
+		<h3>Send values to pins 9,10 or 11</h3>
 		<div class="ard button P9 255">Old syntax</div>
 		<div class="ard button P9 value-255">New syntax</div>
 		<div class="ard toggle P10 0"></div>
-		<div class="ard button-toggle P10 value-20-4">TogglePWM</div>
+		<div class="ard button-toggle P10 value-0-255">TogglePWM</div>
 		<div class="ard switch P10 value-123-0"></div>
 		<div class="ard increase P11 0 range-0-100 step-10"></div>
 		<div class="ard decrease P11 0 range-0-100 step-10"></div>
-		<div class="ard hover P11 value-50-100">Hover me</div>
+		<div class="ard hover P11 value-100-0">Hover me</div>
 		<div class="ard custom-button P11V30">Custom button</div>
-
+		<div class="ard rangeslider P10"></div>
+		<div class="ard knob-send P11 value-100"></div>
 		<div class="ard button P9 0">clear</div>
 		<div class="ard button P10 0">clear</div>
 		<div class="ard button P11 0">clear</div>
-		<!--
-		
-		<div class="ard button P9 2"></div>
-		 <div class="testbutton ak">test</div>
-		 <div class="ard rangeslider P9"></div>
-		<div class="ard button S6 value-test"></div>
-		<div class="ard button-toggle P10 value-25-69"></div>-->
 	</div>
 	
 	<div id="page-2" class="involt-page">
+		<h3>Read only elements</h3>
 		<div class="ard show A0"></div>	
 		<div class="ard knob A2 "></div>	
 		<div class="ard bar A1 range-50-100"></div>
@@ -58,72 +54,54 @@
 	</div>
 
 	<div id="page-3" class="involt-page">
+		<h3>HTML native inputs</h3>
 		<input type="text" class="ard input-write P9">
 		<input type="text" class="ard custom-write P9">
 		<input type="checkbox" class="ard checkbox P10 value-123-12">
 		<input type="radio" name='test' class="ard radio P11 0">
 		<input type="radio" name='test' class="ard radio P11 20">
 		<input type="radio" name='test' class="ard radio P11 100">
-	<!--
-		<div class="ard switch P9 value-255-0"></div>	
-		<div class="ard switch P10 value-255-0"></div>
-		<div class="ard switch P11 value-255-0"></div>
-		<div class="ard show A0"></div>		
-	-->
 	</div>
 
 	<div id="page-4" class="involt-page">
-		<a href="#dialog-1" class="involt-showdialog">dialogshow</a>
+		<a href="#dialog-1" class="involt-showdialog">Click to show dialog box</a>
 	</div>
 
 	<div id="page-5" class="involt-page">
+		<h3>Other features</h3>
+		<p>Send values from inputs only when submit button is pressed similarly to HTML form with submit button</p>
 		<form>
-			<input type="text" class="ard involt-input P9">
+			<input type="text" class="ard involt-input S9">
 			<input type="range" class="ard involt-input P10 value-50 range-0-100">
 			<select class="ard involt-input P11">
 				<option value="0">0</option>
 				<option value="100">100</option>
 				<option value="255">255</option>
 			</select>
-			<div class="ard submit-button">SEND</div>
+			<button type="button" class="ard submit-button">Submit</button> 
 		</form>
+		<p>Sending function to Arduino</p>
+		<div class="ard button P13 fn-involt">Button without value</div>
+		<div class="ard button P13 123 fn-involt">Button with value</div>
+		<p>Dynamic elements sends function on release.</p>
+		<div class="ard rangeslider P9 fn-involt"></div>
+		<p>Send string with "S" pin</p>
+		<div class="ard button-toggle S3 value-test-notest">toggle</div>
+		<div class="ard button S0 value-test">Button test</div>
+		<div class="ard switch S1 value-test-notest"></div>
+
 	</div>
 
 	<div id="dialog-1" class="involt-dialog">
-		DIALOG
+		<p>Involt dialog test. Turn ON and OFF each pin.</p>
 		<input type="checkbox" class="ard checkbox P9 value-255-0">
 		<input type="checkbox" class="ard checkbox P10 value-255-0">
 		<input type="checkbox" class="ard checkbox P11 value-255-0">
-		<a href="#dialog-1" class="involt-hidedialog">HIDE</a>
+		<a href="#dialog-1" class="involt-hidedialog">Hide the box</a>
 	</div>
-	<!--
-	<div id="dialog-1" class="involt-dialog">dialog-1</div>
-	<div class="ard button P9 value-100"></div>
-	<div class="ard button P13 fn-involt"></div>
-	<div class="ard button-toggle P9 value-0-20"></div>
-	<div class="ard knob A0"></div>
-	<div class="ard show A1"></div>
-	<div class="ard show A13"></div>
-	<div class="ard bar A2"></div>
-	<div class="ard increase P9"></div>
-	<div class="ard decrease P9"></div>
-	<div class="ard rangeslider P9 value-50 range-0-100 step-5"></div>
--->
+
 	<!--  Your content goes here. You can remove this line.  -->
 	<div id="involthankyou">Thank you for choosing Involt.</div>
-<!--
-	<div class="test">test</div>
-	<form >
-		<p>label</p>
-			<select name="" class="ard involt-input P8">
-		<option value="255">max</option>
-		<option value="25">low</option>
-		<option value="0">zero</option>
-	</select>
-		<input class="ard involt-input P9" type="number" value="0">
-		<button type="button" class="ard submit-button">Submit</button> 
-	</form>
--->
 
 </body>
 
