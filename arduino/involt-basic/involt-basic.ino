@@ -29,65 +29,21 @@ char involt[16];
 */
 String fname;
 
-int previousValue = LOW;
-
 void setup() {
  //Connection speed must be same as app.
  Serial.begin(57600);
-  pinMode(13, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
-  pinMode(4,INPUT_PULLUP);
-  //delay(2000);
 }
 
-String isButton = "click";
-int i=0;
-int j=0;
 void loop() {
   involtReceive();
+
+
+  
   //ADD YOUR CODE HERE
+
+
  
-  if(fname == "involt"){
-    digitalWrite(9,HIGH);
-  }
-  j = analogRead(A0);
-  //Serial.println(involtString[0]);
-  involtSend(2,j);
-  delay(2);
-   involtSend(3,j/3);
-  delay(2);
-  /* 
-  delay(2);
- involtSend(1,j);
-  delay(2);
-      involtSend(3,j);
-  delay(2);
- involtSend(4,j);
-  delay(2); 
-      involtSend(5,j);
-  delay(2);
- involtSend(6,j);
-  delay(10); */
-  i++;
-  String sender = "Test my best string" + String(i);
-  involtSendString(0,sender);
-  delay(10);
-  //j++;
-  String sender2 = "string for me" + String(j);
-  //involtSendString(1,sender2);
-  involtSendFunction("test");
- delay(10);
- // if (j==1000) j = 0;
-//delay(20);
-  analogWrite(9,involtPin[9]);
-  analogWrite(10,involtPin[10]);
-  analogWrite(11,involtPin[11]);
-  
- //Serial.println(involtPin[13]);
   //Clear the function to trigger once.
-  
   fname = "";
 }
 
@@ -140,7 +96,7 @@ void involtSend(int pinNumber, int sendValue){
   Serial.print('V'); 
   Serial.print(sendValue); 
   Serial.println('E');
- Serial.flush();
+  Serial.flush();
 };
 
 void involtSendString(int pinNumber, String sendString){
