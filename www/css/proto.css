@@ -1,0 +1,107 @@
+/*
+	WIREFRAMING/PROTO UI KIT
+
+	This file reduces the layout colors and effects.
+	Just uncomment the link in HTML header section.
+*/
+
+.button,
+.increase, .decrease, 
+.toggle, .button-toggle, .custom-button, .submit-button{
+	background: #f6f6f6;
+	color: black;
+	border: 1px solid black;
+	border-bottom: 2px solid black;
+	box-shadow: none;
+	line-height: 37px;
+}
+
+.button:hover,
+.increase:hover, .decrease:hover, 
+.toggle:hover, .button-toggle:hover, .custom-button:hover {
+	background: lightgray;
+}
+
+.submit-button:hover{
+	background: lightgray;
+	border: 1px solid black;
+	border-bottom: 2px solid black;
+}
+
+.button-toggle.state2, .toggle.inactive{
+	background: white;
+	color: black;
+	border-color: lightgray;
+}
+
+.button-toggle.state2:hover, .toggle.inactive:hover{
+	background: gray;
+	border-color: black;
+}
+
+button.button, button.increase, button.decrease, button.toggle, button.button-toggle{
+	outline: 0;
+	border: 1px solid black;
+	border-bottom: 2px solid black;
+}
+
+button.button:active, button.increase:active, button.decrease:active, button.toggle:active, button.button-toggle:active{
+	background: lightgray!important;
+}
+
+button.button:hover, button.increase:hover, button.decrease:hover, button.toggle:hover, button.button-toggle:hover{
+	background: white;
+}
+
+.switch-handle, .switch-handle.active, .noUi-handle{
+	background: black;
+	box-shadow: none;
+}
+
+.switch-handle{
+	background: gray;
+}
+
+.bar-value, .noUi-base{
+	background: black;
+}
+
+.hover{
+	background: lightgray;
+	border: none;
+}
+
+.hover:hover{
+	background: gray;
+	border: none;
+}
+
+.show{
+	border-color: black;
+}
+
+.input-write, .custom-write{
+	border-color:black;
+	color:black;
+	box-shadow: none!important;
+}
+
+.input-write:hover, .custom-write:hover,
+.input-write:focus, .custom-write:focus{
+	border-width: 2px;
+	line-height: 36px;
+	padding-left: 9px;
+}
+
+::-webkit-input-placeholder {
+	font-family: "SourceSansProLight";
+	color: gray;
+}
+
+.involt-pagelink, .involt-showdialog, .involt-hidedialog, .involt-sidemenulink, .involt-cta, .involt-fullback{
+	color:black!important;
+}
+
+.involt-pagelink:hover, .involt-showdialog:hover, .involt-hidedialog:hover, .involt-sidemenulink:hover, .involt-cta:hover, .involt-fullback:hover{
+	color:gray!important;
+}
