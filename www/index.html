@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="msapplication-tap-highlight" content="no" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+	<title>Involt</title>
+	<!--Involt UI kit-->
+	<link rel="stylesheet" type="text/css" href="css/framework.css">
+	<link rel="stylesheet" type="text/css" href="css/layout-components.css">
+	<!-- Uncomment to use wireframing UI kit -->
+	<link rel="stylesheet" type="text/css" href="css/proto.css"> 
+	<script src="cordova.js"></script>
+	<script src="core/jquery/jquery-2.1.0.min.js"></script>
+	<script src="core/jquery/jquery.nouislider.min.js"></script>
+	<script src="core/jquery/jquery.knob.js"></script>
+	<script src="core/jquery/insQ.min.js"></script>
+	<script src="settings.js"></script>
+	<script src="core/involt.js"></script>
+	<script src="core/framework.js"></script> 
+</head>
+
+<body>
+
+	
+	<header class="involt-header">
+		
+
+		<div page='page-1' class="involt-appbar">
+			<a href="" class="involt-sidemenulink">Menu</a>
+			
+
+			<div class="title-left">Home</div>
+		
+			<a href="" class="involt-cta">Send</a>
+			
+			
+		</div>
+		
+		<div page='page-2' class="involt-appbar">
+			<a href="" class="involt-sidemenulink">Menu</a>
+
+			<a href="" class="involt-cta">Trigger</a>
+			<a href="" class="involt-cta">Trigger</a>
+			<div class="title-center">Read</div>			
+		</div>
+		<div page='page-3' class="involt-appbar">
+			<a href="" class="involt-sidemenulink">Menu</a>
+			<div class="title-center">inputs</div>
+			
+		</div>
+		<div page='page-4' class="involt-appbar">
+			<a href="" class="involt-sidemenulink">Menu</a>
+			<div class="title-center">dialog</div>
+			
+		</div>
+		<div page='page-5' class="involt-appbar">
+			<a href="" class="involt-sidemenulink">Menu</a>
+			<div class="title-center">other</div>
+			
+		</div>
+		<nav class="involt-nav">
+			<a href="#page-1"  class="involt-pagelink involt-cta" fn="involt">Home</a>
+			<a href="#page-2"  class="involt-pagelink">Second</a>
+			<a href="#page-3"  class="involt-pagelink">Third</a>
+			<a href="#page-4"  class="involt-pagelink">Fourth</a>
+			<a href="#page-5"  class="involt-pagelink">Fifth</a>
+		</nav>
+	</header>
+
+	<div class="involt-sidemenu">
+		<div><p><a href="#page-6" class="involt-pagelink">fullpage</a></p></div>
+		<a href="">a</a>
+		<a href="">b</a>
+		<a href="">c</a>
+		<a href="">d</a>
+		<a href="">e</a>
+	</div>
+
+	<div page="page-1" class="involt-page">
+		<div class="ard show A2"></div>	
+		<div class="ard bar A3"></div>
+			<!--
+		<div class="ard button P4 value-123 fn-test"></div>
+		<div class="ard switch P10 value-0-120 active"></div>
+		<div class="ard switch P10 value-0-120"></div>-->
+		<!--
+		<button class="ard button P9 23">23</button>
+		<button class="ard button-toggle P9 value-1-23">Toggle</button>
+		<button class="ard toggle P4 0"></button>
+		<button class="ard increase P20">+</button>
+		<div class="test1">a</div>
+		<div class="test2">b</div>
+		<div class="ard button P5 255 test3">c</div>
+		<div class="test4">d</div>
+		<h3>Send values to pins 9,10 or 11</h3>
+		<div class="ard button P9 255">Old syntax</div>
+		<div class="ard button P9 value-255">TEST</div>
+		<div class="ard toggle P10 0"></div>
+		
+		
+		<div class="ard increase P11 0 range-0-100 step-10"></div>
+		<div class="ard decrease P11 0 range-0-100 step-10"></div>
+		<div class="ard hover P11 value-0-100">Hover me</div>
+		<div class="ard custom-button P11V30">Custom button</div>
+		<div class="ard rangeslider P10 step-10 fluid"></div>
+		<div class="ard rangeslider P10 step-10 fluid label-constant"></div>
+		<div class="ard knob-send P11 range-0-100 value-100"></div>
+		<div class="ard button P9 0">clear</div>
+		<div class="ard button P10 0">clear</div>
+		<div class="ard button P11 0">clear</div> -->
+	</div>
+	
+	<div page="page-2" class="involt-page home">
+		<h3>Read only elements</h3>
+		<div class="ard show A0"></div>	
+		<div class="ard knob A2 "></div>	
+		<div class="ard bar A1 range-50-100"></div>
+		<div class="ard bar A1 range-0-1024 label-constant"></div>
+		<div class="ard bar A2 range-0-512 label-constant"></div>
+		<div class="ard bar A3 range-0-512 label-constant"></div>
+		<div class="ard bar A4 range-0-512 label-constant"></div>
+		<div class="ard bar A5 range-0-512 label-constant"></div>
+		<div class="ard bar A6 range-0-512 label-constant"></div>
+
+		<input type="text" class="ard value A2">
+	</div>
+
+	<div page="page-3" class="involt-page">
+		<h3>HTML native inputs</h3>
+		<input type="number" class="ard input-write P9">
+		<input type="text" class="ard custom-write P9" placeholder="Type something">
+		<input type="checkbox" class="ard checkbox P10 value-12-123">
+		<input type="radio" name='test' class="ard radio P11 0">
+		<input type="radio" name='test' class="ard radio P11 20">
+		<input type="radio" name='test' class="ard radio P11 100">
+	</div>
+
+	<div page="page-4" class="involt-page">
+		<a href="#dialog-1" class="involt-showdialog">Click to show dialog box</a>
+		<a href="#page-6" class="involt-pagelink">fullpage</a>
+		<p>Tests for JQuery methods</p>
+		<div class="test1">Send value to target pin</div>
+		<div class="test2">Change value and target pin of button below</div>
+		<div class="ard button P10 20 test3">Change test</div>
+		<div class="test4">Send and update test</div>
+		<div class="test5">Swap the pin of button below</div>
+		<div class="ard button P10 212 test6">Swap test</div>
+		<div class="test7">Chain test</div>
+		<div class="test8">Change input value</div>
+		<input type="range" class="ard involt-input P10 value-50 range-0-100 test9">
+		<div class="test10">Change value for each button below (test .each)</div>
+		<div class="ard button P9 122 test11">1</div>
+		<div class="ard button P9 123 test11">2</div>
+		<div class="ard button P9 124 test11">3</div>
+		<div class="ard button P10 value-92 test12">Add two on</div>
+	</div>
+
+	<div page="page-5" class="involt-page">
+		<h3>Other features</h3>
+		<p>Send values from inputs only when submit button is pressed similarly to HTML form with submit button</p>
+		<form>
+			<input type="text" class="ard involt-input S9">
+			<input type="range" class="ard involt-input P10" min="0" max="100" value="50">
+			<select class="ard involt-input P11">
+				<option value="0">0</option>
+				<option value="100">100</option>
+				<option value="255">255</option>
+			</select>
+			<button type="button" class="ard submit-button">Submit</button> 
+		</form>
+		<p>Sending function to Arduino</p>
+		<div class="ard button P13 fn-involt">Button without value</div>
+		<div class="ard button P13 123 fn-involt">Button with value</div>
+		<p>Dynamic elements sends function on release.</p>
+		<div class="ard rangeslider P9 fn-involt"></div>
+		<p>Send string with "S" pin</p>
+		<div class="ard button-toggle S3 value-test-notest">toggle</div>
+		<div class="ard button S0 value-test">Button test</div>
+		<div class="ard switch S1 value-test-notest"></div>
+
+	</div>
+
+	<div page="dialog-1" class="involt-dialog">
+		<p>Involt dialog test. Turn ON and OFF each pin.</p>
+		<input type="checkbox" class="ard checkbox P9 value-0-255">
+		<input type="checkbox" class="ard checkbox P10 value-0-255">
+		<input type="checkbox" class="ard checkbox P11 value-0-255">
+		<a href="#dialog-1" class="involt-hidedialog">Hide the box</a>
+	</div>
+
+	<div page="page-6" class="involt-fullpage">
+
+		<div class="involt-appbar">
+			<a href="#page-6" class="involt-fullback">Back</a>
+			<div class="title">another page</div>
+		</div>
+	<a href="#page-7" class="involt-pagelink">fullpage2</a>
+
+		<a href="#page-1" class="involt-pagelink">a</a>
+
+	</div>
+
+	<div page="page-7" class="involt-fullpage">
+
+		<div class="involt-appbar">
+			<a href="#page-7" class="involt-fullback">Back</a>
+			<div class="title">and another page</div>
+		</div>
+					<div class="involt-cta" fn="involt">test</div>
+		<div class="test1">a</div>
+		<div class="test2">b</div>
+		<div class="ard button P5 255 test3">c</div>
+		<div class="test4">d</div>
+		<h3>Send values to pins 9,10 or 11</h3>
+		
+		<div class="ard button P9 255">Old syntax</div>
+		<div class="ard button P9 value-255">New syntax</div>
+		<div class="ard toggle P10 value-1"></div>
+		<div class="ard button-toggle P10 value-0-255">TogglePWM</div>
+		<div class="ard switch P10 value-123-0"></div>
+		<div class="ard increase P11 0 range-0-100 step-10"></div>
+		<div class="ard decrease P11 0 range-0-100 step-10"></div>
+		<div class="ard hover P11 value-100-0">Hover me</div>
+		<div class="ard custom-button P11V30">Custom button</div>
+		<div class="ard rangeslider P10"></div>
+		<div class="ard knob-send P11 value-100"></div>
+		<div class="ard button P9 0">clear</div>
+		<div class="ard button P10 0">clear</div>
+		<div class="ard button P11 0">clear</div>
+
+	</div>
+
+	
+
+</body>
+
+</html>

@@ -1,0 +1,362 @@
+/*
+	FRAMEWORK.CSS - INVOLT CSS UI:
+	1. Global CSS
+	2. Clickable elements (buttons, switches)
+	3. HTML inputs, submit
+	4. Knobs (for editing check the reference page)
+	5. Hover, show
+	6. Rangeslider, bar
+*/
+
+/*----Global CSS----*/
+* { 
+	-webkit-box-sizing: border-box; box-sizing: border-box; 
+	-webkit-tap-highlight-color: rgba(150, 150, 150, 0.1);
+}
+
+/*Import font from core/font */
+@font-face { font-family: 'SourceSansProLight';   src: url('font/SourceSansPro-Light.ttf'); }
+@font-face { font-family: 'SourceSansProRegular'; src: url('font/SourceSansPro-Regular.ttf'); }
+@font-face { font-family: 'SourceSansProBold';    src: url('font/SourceSansPro-Bold.ttf'); }
+
+body{
+	margin: 0px;
+	padding: 0px;
+	font-family: 'SourceSansProRegular';
+	font-size: 100%;
+}
+
+.ard{
+	margin: 10px;
+}
+
+/*Clickable elements (buttons)*/
+
+.button,
+.increase, .decrease, 
+.toggle, .button-toggle, .custom-button, .submit-button{
+	background: #0064fa;
+	color:white;
+	width: 140px;
+	height: 40px;
+	border-bottom:2px solid #0040a0;
+	border-radius: 3px;
+	font-family: 'SourceSansProBold';
+	font-size:16px;
+	line-height: 38px;
+	text-align: center;
+	cursor: pointer;
+	transition: background 0.1s linear;
+}
+
+.button:hover,
+.increase:hover, .decrease:hover, 
+.toggle:hover, .button-toggle:hover, .custom-button:hover {
+	background: #003287;
+	border-color:#001432;
+}
+
+/*Small buttons*/
+
+.increase, .decrease, .toggle{
+	width: 60px;
+}
+
+.toggle.inactive{
+	background: #edf4ff;
+	color: #b3d1ff;
+	border-color: #bdd7ff;
+}
+
+.toggle.inactive:hover{
+	background: #b3d1ff;
+	color: #edf4ff;
+	border-color: #91a6c5;
+}
+
+/*Button-toggle two states*/
+
+.button-toggle.state2{
+	background: #edf4ff;
+	color:#363636;
+	border-color: #bdd7ff;
+}
+
+.button-toggle.state2:hover{
+	background: #b3d1ff;
+	border-color: #91a6c5;
+}
+
+/* Use html button on mobile to prevent from hover so the color will change for short time - only when active (when pressed) */
+
+button.button, button.increase, button.decrease, button.toggle, button.button-toggle{
+	outline: 0;
+	border:0;
+	border-bottom:2px solid #0040a0;
+}
+
+button.button:active, button.increase:active, button.decrease:active, button.toggle:active, button.button-toggle:active{
+	background: #003287!important;
+}
+
+button.button:hover, button.increase:hover, button.decrease:hover, button.toggle:hover, button.button-toggle:hover{
+	background: #0064fa;
+}
+
+/*Switch (similar to android)*/
+
+.switch{
+	width:60px;
+	height:40px;
+	padding: 13px 12px;
+}
+
+.switch-track{
+	background:#e5e5e5;
+	width: 36px;
+	height: 14px;
+	border: 1px solid #d0d0d0;
+	border-radius: 6px;
+}
+
+.switch-handle.active{
+	background:#0064fa;
+	margin-left: 16px;
+}
+
+.switch-handle{
+	background: #f4f4f4;
+	width: 20px;
+	height: 20px;
+	margin-left:-1px;
+	box-shadow: 0px 1px 3px rgba(0,0,0,0.75);
+	border-radius: 20px;
+	position:relative;
+	top: -4px;
+	transition: margin 0.1s linear;
+}
+
+/*Inputs - input-write, custom-write*/
+
+.input-write, .custom-write  {
+	color:#363636;
+	width: 140px;
+	height: 40px;
+	padding-left: 10px;
+	border: 1px solid #0064fa;
+	box-shadow: 0 0 1px rgba(0,0,0,0.75);
+	border-radius: 3px;
+	font-size: 16px;
+	line-height: 38px;
+}
+
+.input-write:hover, .custom-write:hover{
+	box-shadow: 0 0 3px rgba(0,0,0,0.75);
+}
+
+.input-write:focus, .custom-write:focus{
+	box-shadow: 0 0 1px rgba(0,0,0,0.75), inset 0 0 3px #0064fa;
+	outline: 0;
+	/*transition: background 0.3s linear; */
+}
+
+::-webkit-input-placeholder {
+	color: #b3d1ff;
+	font-family: "SourceSansProLight";
+}
+
+.submit-button{
+	background: #ffde00;
+	color:#363636;
+	border:0;
+	border-bottom:2px solid #bcb325;
+	font-size: 16px;
+	outline: 0;
+}
+.submit-button:hover{
+	background: #ffba00;
+	border-color: #ca9300;
+}
+
+
+
+/*Knob-send*/
+/*For editing Knobs visually check references*/
+.knob-send>div>input, .knob>div>input{
+	font-family: "SourceSansProBold"!important;
+	font-size:28px!important;
+	outline: 0!important;
+}
+
+.knob-send{
+	width: 140px;
+	cursor:pointer;
+}
+
+/*Knob*/
+.knob{
+	width: 140px;
+}
+
+/*Hover*/
+
+.hover{
+	background: #edf4ff;
+	width:140px;
+	height: 40px;
+	border: 1px solid #edf4ff;
+}
+
+.hover:hover{
+	border: 1px solid #0064fa;
+}
+
+/*show*/
+
+.show{
+	min-width: 60px;
+	height: 40px;
+	border-bottom: 2px solid #0064fa;
+	font-family: "SourceSansProBold";
+	font-size: 24px;
+	line-height: 40px;
+	text-align: right;
+	display: inline;
+}
+
+/*Rangelider*/
+
+.rangeslider{
+	max-width: 300px;
+	height: 40px;
+	padding:0 10px;
+}
+
+.rangeslider>.label{
+	display: none;
+}
+
+.rangeslider>.slider{
+	height: 40px;
+	padding-top:21px;
+}
+
+.noUi-base{
+	background:#0064fa;
+	width: 100%;
+	height: 4px;
+	position: relative;
+}
+
+.noUi-handle{
+	background:#0064fa;
+	width: 20px;
+	height: 20px;
+	box-shadow: 0px 1px 3px rgba(0,0,0,0.75);
+	border-radius: 20px;
+	position: relative;
+	left: -10px;
+	top: -8px;
+	z-index: 1;
+	cursor:pointer;
+}
+
+.noUi-origin{
+	background: #e5e5e5;
+	position: absolute;
+	right: 0;
+	top: 0;
+	left: 0;
+	bottom: 0;
+}
+
+.tooltip{
+	background: #e5e5e5;
+	color:#363636;
+	min-width: 50px;
+	height: 25px;
+	margin-top: -20px;
+	margin-left:-25px;
+	border-radius: 4px;
+	font-size:14px;
+	line-height: 25px;
+	text-align: center;
+	position: relative;
+	float:left;
+}
+
+.tooltip:after {
+	content: " "; 
+	position: absolute; 
+	top: 100%;
+	left: 50%;
+	border: solid transparent; 
+	border-top-color: #e5e5e5; 
+	border-width: 8px; 
+	margin-left: -8px;
+}
+
+/*Rangeslider with constant label instead of tooltip */
+
+.rangeslider.label-constant>.tooltip{
+	display: none!important;
+}
+
+.rangeslider.label-constant>.slider{
+	width: 90%;
+	padding-left: 15px;
+	float: right;
+}
+
+.rangeslider.label-constant.rangeslider>.label{
+	width: 10%;
+	font-family: "SourceSansProBold";
+	font-size: 20px;
+	line-height: 46px;
+	text-align: center;
+	display: block;
+	float: left;
+}
+
+/*Bar*/
+
+.bar {
+	width: 300px;	
+	height: 40px;
+}
+
+.bar-background{
+	width: 300px;
+	background-color: #e5e5e5;
+	height: 4px;
+}
+
+.bar-value{
+	background: #0064fa;
+	height: 4px;
+}
+
+/*Number on bar*/
+
+.bar-label{
+	color:#363636;
+	height: 30px;
+	margin-bottom: 6px;
+	font-family: "SourceSansProBold";
+	font-size: 24px;
+	line-height: 30px;
+	text-align: right; /*change to left to make it in constant position*/
+}
+
+.bar.label-constant>.bar-background{
+	width: 240px;
+	margin-top:13px;
+	float: right;
+}
+
+.bar.label-constant>.bar-label{
+	width: 60px!important;
+	font-size: 20px;
+	text-align: center;
+	float:left;
+}

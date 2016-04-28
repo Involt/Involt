@@ -1,7 +1,15 @@
 /*
-		INVOLT FRAMEWORK CORE FILE
-		Ernest Warzocha 2015
-		involt.github.io
+	INVOLT FRAMEWORK CORE FILE
+	Ernest Warzocha 2015
+	involt.github.io
+
+	This file is required. It contains communication bridge, core functions and JQuery methods.
+
+	1. Common functions and converting CSS to parameters
+	2. Serial communication functions
+	3. Bluetooth communication functions
+	4. JQuery methods
+	5. Initializing the app
 */
 
 //----------------------------------------------------------------------------------------------
@@ -12,7 +20,7 @@ var involtString = [];
 //Array of values received from device.
 var involtReceivedPin = [];
 //Custom function to trigger when its name is called from arduino. Create own file to add them and include in this object.
-var involtFunctions = {};
+var involtFunction = {};
 
 //MAIN INVOLT OBJECT (COMMUNICATION BRIDGE)
 
@@ -20,6 +28,7 @@ var Involt =  function (){
 	this.id = 0;
 	this.devices = [];
 	this.previousConnections = [];
+	this.isMobile = false;
 	this.fullString = '';
 	this.onSend =  function(){
 		involt.debug(involtPin);
@@ -141,7 +150,7 @@ var Involt =  function (){
 
 		//add the value to proper array
 		if(involtElement.pinType == 'P'){
-			involtPin[involtElement.pinNumber] = value;
+			if (typeof value !== 'object') involtPin[involtElement.pinNumber] = value;
 		}
 		else if(involtElement.pinType == 'S'){
 			involtString[involtElement.pinNumber] = value;
@@ -157,6 +166,7 @@ var Involt =  function (){
 		if(typeof involt.createUiAssets !== 'undefined') involt.createUiAssets($t);
 
 		//log the data on debug
+		involt.debug(uiName);
 		involt.debug($t.data());
 
 	};
@@ -167,53 +177,50 @@ var Involt =  function (){
 
 		var encodedString = involt.receiveConvertString(receiveInfo.data);
 
-		if (encodedString.lastIndexOf('A') == 0 || encodedString.lastIndexOf('F') == 0){
+		var matchingPattern = /[AF][^EAF]+\E/g;
+		var dataBlock = encodedString.match(matchingPattern);
 
-			involt.fullString += encodedString;
-
-			if(encodedString.indexOf('E') == encodedString.lastIndexOf('E')){
-				if(encodedString.indexOf('E') > 0){
-					involt.onReceiveParse(involt.fullString.trim())
-					involt.fullString = '';	
-				};
-			};
+		if(dataBlock !== null){
+			involt.onReceiveParse(dataBlock);
+			involt.fullString = '';
 		}
-		else{
-
+		else {
 			involt.fullString += encodedString;
 			
-			if (involt.fullString.indexOf('E') > 0){
-				involt.onReceiveParse(involt.fullString.trim());
+			var isCompleted = involt.fullString.match(matchingPattern);
+
+			if(isCompleted !== null){
+				involt.onReceiveParse(isCompleted);
 				involt.fullString = '';
 			};
+			
 		};
 
 	};
-	this.onReceiveParse = function(encodedString){
+	this.onReceiveParse = function(dataBlock){
 
 		//Example block of encoded data (Pin A3 value 872): A3V872E
-		
-		if(encodedString.startsWith("A")){
-			var testCount = (encodedString.match(/A/g) || []).length;
 
-			if(testCount<2){
-				var matches = encodedString.match("A(.*)V(.*)E");
-				if(!isNaN(matches[2])){
-					involtReceivedPin[parseInt(matches[1])] = parseInt(matches[2]);
-				} 
-				else {
-					involtReceivedPin[parseInt(matches[1])] = matches[2];	
+		for (var j=0; j<dataBlock.length; j++){
+			var indexA = dataBlock[j].indexOf('A');
+			var indexV = dataBlock[j].indexOf('V');
+			var indexE = dataBlock[j].indexOf('E');
+
+			if(indexA == 0 && indexA < indexV && indexV == dataBlock[j].lastIndexOf('V') && indexV >= 0){
+				var index = parseInt(dataBlock[j].substring(indexA+1,indexV));
+				var value = dataBlock[j].substring(indexV+1,indexE);
+				if(!isNaN(value)){
+					involtReceivedPin[index] = parseInt(value);
+				}
+				else{
+					involtReceivedPin[index] = value;
 				};
-			};
-		}
-		else if(encodedString.startsWith("F")){
-			var matches = encodedString.match("F(.*)E");
-
-			if(typeof window["involtFunctions"][matches[1]] !== 'undefined'){
-				window["involtFunctions"][matches[1]]();
 			}
-			else{
-				involt.debug("Function not defined");
+			else if (dataBlock[j].indexOf('F') == 0){
+				var name = dataBlock[j].substring(1,indexE);
+				if(typeof window["involtFunction"][name] !== 'undefined'){
+					window["involtFunction"][name]();
+				};
 			};
 		};
 
@@ -244,6 +251,9 @@ var Involt =  function (){
 	};
 	this.bottomError = function(text){
 		$("body").append('<div id="loader-error">'+ text +'</div>');
+		$(document).on("click","#loader-error", function(){
+			$(this).remove();
+		});
 	    $("#loader-error").delay(2500).fadeOut("slow", function() {
 	    	$(this).remove();
 	    });
@@ -476,9 +486,12 @@ else if (isBluetooth){
 					if (loaderOnLaunch){
 						$(".loader-txt>span").hide();
 						$("#discover-button").html("Search for more?").fadeIn('fast');
-						//Somehow Android requires this step after the discovery, otherwise it will not detect the devices as in desktop.
-						if (isMobile){
-							chrome.bluetooth.getDevices(onGetDevices);
+					};
+					//Somehow Android requires this step after the discovery, otherwise it will not detect the devices as in desktop.
+					if (involt.isMobile){
+						chrome.bluetooth.getDevices(onGetDevices);
+						if(!loaderOnLaunch){
+							involt.connect(defaultBtAddress, uuid);
 						};
 					};
 				});
@@ -491,7 +504,7 @@ else if (isBluetooth){
 
 		var onConnect = function() {
 
-			if (!isMobile){
+			if (!involt.isMobile){
 				if (chrome.runtime.lastError) {
 					console.error("Connection failed: " + chrome.runtime.lastError.message);
 					involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
@@ -514,6 +527,7 @@ else if (isBluetooth){
 
 		};
 
+		//console.log(involt.previousConnections);
 		for (var i=0; i<involt.previousConnections.length; i++) {
 			involt.disconnect(involt.previousConnections[i].socketId);
 		};
@@ -550,7 +564,7 @@ else if (isBluetooth){
 
 	Involt.prototype.createLoader = function(){
 
-		if(!isMobile){
+		if(!involt.isMobile){
 			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
 			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
 			$("#loader").append('<div id="loader-button">Connect</div>');
@@ -635,51 +649,36 @@ else if (isBluetooth){
 
 	//Update the value related to target pin, if nothing is defined the value in array will be data of UI element
 	$.fn.updateValue = function(newValue){
-				return this.each(function() {
-			var $t = $(this);
-			if (typeof newValue === 'undefined') {
-				if ($t.data("pinType") == 'P') {
-					involtPin[$t.data("pinNumber")] = $t.data("value");
-				}
-				else if ($t.data("pinType") == 'S') {
-					involtString[$t.data("pinNumber")] = $t.data("value");
-				};
-			}
-			else{
-				if (!isNaN(newValue)) parseInt(newValue);
-				if ($t.data("pinType") == 'P') {
-					involtPin[$t.data("pinNumber")] = newValue;
-				}
-				else if ($t.data("pinType") == 'S') {
-					involtString[$t.data("pinNumber")] = newValue;
-				};
-				//$t.data("value", newValue);     kiedy tego nie ma to działajo switche 
-			};
-		});
-		/*
+
 		return this.each(function() {
 			var $t = $(this);
 			if (typeof newValue === 'undefined') {
 				if ($t.data("pinType") == 'P') {
 					involtPin[$t.data("pinNumber")] = $t.data("value");
+
 				}
 				else if ($t.data("pinType") == 'S') {
 					involtString[$t.data("pinNumber")] = $t.data("value");
 				};
+
 			}
 			else{
 				if (!isNaN(newValue)) parseInt(newValue);
 				if ($t.data("pinType") == 'P') {
+					if (typeof $t.data("value") === typeof newValue){
+						$t.data("value", newValue); 
+					};
 					involtPin[$t.data("pinNumber")] = newValue;
-					$t.data("value", newValue);      
 				}
 				else if ($t.data("pinType") == 'S') {
 					involtString[$t.data("pinNumber")] = newValue;
+					if (typeof $t.data("value") === typeof newValue){
+						$t.data("value", newValue); 
+					};
 				};
-				
 			};
 		});
-		*/
+
 	};
 
 	//Send raw string directly to device
@@ -759,7 +758,6 @@ Involt.prototype.launch = function(){
 	involt.begin();
 
 	$(document).ready(function() {
-
 		//CREATE LOADER OR CONNECT DIRECTLY
 		if (loaderOnLaunch){
 			involt.createLoader();
@@ -769,25 +767,18 @@ Involt.prototype.launch = function(){
 				involt.connect(defaultSerialPort, bitrate);
 			}
 			else if (isBluetooth){
-				involt.connect(defaultBtAddress, uuid);
+				if(!involt.isMobile){
+					var checkConnections = function(sockets){
+						for (var i=0; i<sockets.length;i++){
+							involt.previousConnections[i] = sockets[i];
+							involt.disconnect(involt.previousConnections[i].socketId);
+						};
+					};
+					chrome.bluetoothSocket.getSockets(checkConnections);
+					involt.connect(defaultBtAddress, uuid);
+				};
 			};
 		};
-
-		//DEFINE FRAMEWORK ELEMENTS FROM CSS CLASSES
-		involt.debug("Involt UI generated elements:");
-		$(".ard").not(".custom-write").not(".submit-button").each(function(index, el) {
-			involt.defineElement($(this));
-		});
-
-		/*
-			INSERTION QUERY
-			Additional plugin for listening to new dom elements.
-			With this plugin Involt fully appends new framework elements.
-		*/
-		insertionQ('.ard').every(function(element){
-			element = $(element);
-			involt.defineElement(element);
-		});
 
 	});
 
@@ -799,21 +790,46 @@ Involt.prototype.launch = function(){
 //CREATE INVOLT APP
 var involt = new Involt();
 
-//On mobile, wait for Cordova to load all plugins and assets, desktop version runs immediately.
-if (isMobile){
+if(typeof cordova === 'object') involt.isMobile = true;
 
-	//Create loader before the plugins load (user don't have to look at not fully loaded UI assets and then suddenly see the loader).
-	$(document).ready(function() {
-		$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-		$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
-		$("#loader").append('<div id="loader-button">Connect</div>');
-		$("#discover-button").hide();
-		$("html").css('overflow:', 'hidden');
+$(document).ready(function() {
+
+	//DEFINE FRAMEWORK ELEMENTS FROM CSS CLASSES
+	involt.debug("Involt UI generated elements:");
+	$(".ard").not(".custom-write").not(".submit-button").each(function(index, el) {
+		involt.defineElement($(this));
 	});
 
+	/*
+		INSERTION QUERY
+		Additional plugin for listening to new dom elements.
+		With this plugin Involt fully appends new framework elements.
+	*/
+	insertionQ('.ard').every(function(element){
+		element = $(element);
+		involt.defineElement(element);
+	});	
+});
+
+//On mobile, wait for Cordova to load all plugins and assets, desktop version runs immediately.
+if (involt.isMobile){
+
+	//Create loader before the plugins load (user don't have to look at not fully loaded UI and then suddenly see the loader).
+	//The device connects after discovery
+	if(loaderOnLaunch){
+		
+		$(document).ready(function() {
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+			$("#discover-button").hide();
+			$("html").css('overflow:', 'hidden');
+		});
+		
+	};
+	
 	document.addEventListener('deviceready', involt.launch, false);
 }
 else {
 	involt.launch();
 };
-

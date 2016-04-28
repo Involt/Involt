@@ -8,14 +8,14 @@
 */
 
 /*
-  involtDigital array contains values received from app.
+  involtPin array contains values received from app.
   Each UI element refers to pin number which is index of
   this array. involtString is array for values received
   with "S" pin. You can increase the length of array to
   store more values then arduino total pins. Use them 
   in sketch for not only pin-to-pin communication.
 */
-int    involtDigital[14] = {};
+int    involtPin[14] = {};
 String involtString[2] ={};
 
 /*
@@ -44,7 +44,7 @@ void setup() {
 
 String isButton = "click";
 int i=0;
-int j=1000;
+int j=0;
 void loop() {
   involtReceive();
   //ADD YOUR CODE HERE
@@ -52,28 +52,40 @@ void loop() {
   if(fname == "involt"){
     digitalWrite(9,HIGH);
   }
-  
+  j = analogRead(A0);
   //Serial.println(involtString[0]);
-    involtSend(2,analogRead(A0)/2);
-  delay(10);
- involtSend(1,analogRead(A0));
-  delay(10);
+  involtSend(2,j);
+  delay(2);
+   involtSend(3,j/3);
+  delay(2);
+  /* 
+  delay(2);
+ involtSend(1,j);
+  delay(2);
+      involtSend(3,j);
+  delay(2);
+ involtSend(4,j);
+  delay(2); 
+      involtSend(5,j);
+  delay(2);
+ involtSend(6,j);
+  delay(10); */
   i++;
   String sender = "Test my best string" + String(i);
   involtSendString(0,sender);
   delay(10);
-  j++;
+  //j++;
   String sender2 = "string for me" + String(j);
-  //involtSendString(13,sender2);
-  delay(10);
-
-//involtSendFunction("test");
+  //involtSendString(1,sender2);
+  involtSendFunction("test");
+ delay(10);
+ // if (j==1000) j = 0;
 //delay(20);
-  analogWrite(9,involtDigital[9]);
-  analogWrite(10,involtDigital[10]);
-  analogWrite(11,involtDigital[11]);
+  analogWrite(9,involtPin[9]);
+  analogWrite(10,involtPin[10]);
+  analogWrite(11,involtPin[11]);
   
- //Serial.println(involtDigital[13]);
+ //Serial.println(involtPin[13]);
   //Clear the function to trigger once.
   
   fname = "";
@@ -106,7 +118,7 @@ void involtReceive(){
     if (involt[0] == 'P'){
       int value;
       sscanf(involt, "P%dV%d", &pin, &value);
-      involtDigital[pin] = value;
+      involtPin[pin] = value;
     }
     else if (involt[0] == 'S'){
       char value[sizeof(involt)];
@@ -128,7 +140,7 @@ void involtSend(int pinNumber, int sendValue){
   Serial.print('V'); 
   Serial.print(sendValue); 
   Serial.println('E');
-  Serial.flush();
+ Serial.flush();
 };
 
 void involtSendString(int pinNumber, String sendString){
