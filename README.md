@@ -52,7 +52,7 @@ Now you can open your project with launch button or Chrome App Launcher.
 
 Project works on Win, OSX and Chrome OS (Serial, Bluetooth 2.0). For mobile currently Android and Bluetooth 2.0 is supported.
 
-For mobile support and installation check http://involt.github.io/examples/mobile.html
+For mobile support and installation check http://involt.github.io/getting-started/mobile.html
 
 Basic blink example
 -------------------
