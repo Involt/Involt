@@ -617,6 +617,8 @@ else if (isBluetooth || isLowEnergy){
 			$("body").append(address);
 			var onConnect = function(){
 				console.log("Connection attempt to LE device");
+				$("#loader-bg, #loader-error").remove();
+				$("html").css('overflow', 'auto');
 				$("body").append("OK");
 				var onGetServices = function(services){
 					$("body").append(services[0]);
