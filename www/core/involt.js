@@ -614,12 +614,12 @@ else if (isBluetooth || isLowEnergy){
 		};
 
 		Involt.prototype.connect = function(address){
-
+			$("body").append(address);
 			var onConnect = function(){
 				console.log("Connection attempt to LE device");
-
+				$("body").append("OK");
 				var onGetServices = function(services){
-					$("body").append(services);
+					$("body").append(services[0]);
 				};
 
 				chrome.bluetoothLowEnergy.getServices(address, onGetServices(services));
