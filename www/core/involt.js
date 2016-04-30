@@ -629,6 +629,38 @@ else if (isBluetooth || isLowEnergy){
 
 		};
 
+		Involt.prototype.createLoader = function(){
+
+			if(!involt.isMobile){
+				$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+				$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
+				$("#loader").append('<div id="loader-button">Connect</div>');
+				$("#discover-button").hide();
+				$("html").css('overflow:', 'hidden');
+			};
+
+			$(document).on("click","#loader-button",function() {
+				$(this).html("Connecting...");
+				console.log("Connection attempt to: " + defaultBtAddress);
+
+				chrome.bluetooth.stopDiscovery(function() {});
+
+				involt.connect(defaultBtAddress);
+			});
+
+			$(document).on("click","#discover-button",function() {
+				involt.bluetoothDiscovery(discoveryDuration);
+				$(this).html("Searching for devices...");
+			});
+
+			$(document).on("click",".loader-ports > p",function() {
+				$(".loader-ports > p").removeClass("active-port");
+				$(this).addClass("active-port");
+				defaultBtAddress = involt.devices[$(this).html()].address;
+			});			
+
+		};	
+
 	};
 };
 
