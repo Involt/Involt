@@ -621,7 +621,14 @@ else if (isBluetooth || isLowEnergy){
 				$("html").css('overflow', 'auto');
 				$("body").append("OK");
 				var onGetServices = function(services){
-					$("body").append(services[0]);
+					for (var i = 0; i<services.length; i++){
+						$("body").append(services[i].uuid);
+						$("body").append(services[i].isPrimary);
+						$("body").append(services[i].instanceId);
+						$("body").append(services[i].deviceAddress);
+						$("body").append("NEXT");
+					}
+					
 				};
 
 				chrome.bluetoothLowEnergy.getServices(address, onGetServices(services));
