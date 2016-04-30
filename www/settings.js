@@ -10,8 +10,9 @@
 		CONNECTION TYPE
 		Select connection type, only ONE can be defined at once.
 	*/
-	var isSerial    = true;
-	var isBluetooth = false;
+	var isSerial    = false;  //Desktop
+	var isBluetooth = false; //Desktop AND Mobile (BT 2.0)
+	var isLowEnergy = true; //Mobile (BT LE)
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on app launch. 
@@ -32,16 +33,20 @@
 		BLUETOOTH DEFAULT ADDRESS
 		Bluetooth default address. Use when loader is not used.
 
-		CONNECTION UUID
-		The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
-		You can get the UUID of your device form hardware documentation or app's chrome console.
-
 		BLUETOOTH DISCOVERY DURATION
 		In some cases it will take more time for some devices to find them.
 	*/
 	var defaultBtAddress = "98:D3:31:90:4C:66";
-	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
 	var discoveryDuration = 3000;
+	/*
+		CONNECTION UUID
+		DESKTOP: The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
+		You can get the UUID of your device form hardware documentation or app's chrome console.
+
+		For Bluetooth Low Energy change the RX/TX, you should get them from device documentation.
+
+	*/
+	var uuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 
