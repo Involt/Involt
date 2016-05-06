@@ -31,7 +31,7 @@
     <preference name="android-installLocation"    value="auto" />
     <preference name="webviewbounce"              value="true" />
 
-    
+    <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="SplashShowOnlyFirstTime" value="false" />
@@ -53,11 +53,11 @@
     <icon src="img/icons/android/icon-192-xxxhdpi.png"  gap:platform="android"    gap:qualifier="xxxhdpi" />
 
 
-  <splash src="www/res/screen/android/drawable-land-ldpi-screen.png"      density="land-ldpi" />
-        <splash src="www/res/screen/android/drawable-land-mdpi-screen.png"      density="land-mdpi" />
-        <splash src="www/res/screen/android/drawable-land-hdpi-screen.png"      density="land-hdpi" />
-        <splash src="www/res/screen/android/drawable-land-xhdpi-screen.png"     density="land-xhdpi" />
-        <splash src="www/res/screen/android/drawable-land-xxhdpi-screen.png"    density="land-xxhdpi" />
+  <splash src="res/screen/android/drawable-land-ldpi-screen.png"      density="land-ldpi" />
+        <splash src="res/screen/android/drawable-land-mdpi-screen.png"      density="land-mdpi" />
+        <splash src="res/screen/android/drawable-land-hdpi-screen.png"      density="land-hdpi" />
+        <splash src="res/screen/android/drawable-land-xhdpi-screen.png"     density="land-xhdpi" />
+        <splash src="res/screen/android/drawable-land-xxhdpi-screen.png"    density="land-xxhdpi" />
     <!-- Splashscreen: (requires plugin) -->
     <!--
     <gap:splash src="img/splashscreen/android/screen-ldpi-portrait.png"       gap:platform="android" gap:qualifier="port-ldpi" />
