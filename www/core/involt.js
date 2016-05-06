@@ -30,7 +30,6 @@ var Involt =  function (){
 	this.previousConnections = [];
 	this.isMobile = false;
 	this.fullString = '';
-	this.lowEnergyServices = [];
 	this.onSend =  function(){
 		involt.debug(involtPin);
 		involt.debug(involtString);
@@ -266,7 +265,7 @@ var Involt =  function (){
 //CONNECTION FUNCTIONS
 //Depending on selected type the framework defines different functions.
 
-//SERIAL CONNECTION ON DESKTOP
+//SERIAL CONNECTION
 
 if (isSerial){
 
@@ -382,82 +381,90 @@ if (isSerial){
 
 //----------------------------------------------------------------------------------------------
 
-//BLUETOOTH CONNECTION ON DESKTOP AND MOBILE
-else if (isBluetooth || isLowEnergy){
+//BLUETOOTH CONNECTION
 
-	//Bluetooth adapter state for both desktop and mobile
-	Involt.prototype.adapter = function(){
+else if (isBluetooth){
 
-			var adapterOn;
+	Involt.prototype.begin = function(){
 
-			var adapterOnLaunch = function(adapter) {
+		var adapterOn;
+
+		var adapterOnLaunch = function(adapter) {
+			adapterOn = adapter.available;
+			if(adapterOn){
+				console.info("Involt for Classic Bluetooth is running")
+				involt.debug("Adapter: " + adapter.address + " : " + adapter.name);
+			}
+			else{
+				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.");
+				involt.bottomError('Bluetooth adapter is turned OFF. Turn on and search again.');
+			};
+		};
+
+		var adapterChange = function(adapter) {
+			if(adapterOn != adapter.available){
 				adapterOn = adapter.available;
 				if(adapterOn){
-					console.info("Involt for Classic Bluetooth is running")
+					console.info("Bluetooth adapter is ON");
 					involt.debug("Adapter: " + adapter.address + " : " + adapter.name);
 				}
 				else{
-					console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.");
-					involt.bottomError('Bluetooth adapter is turned OFF. Turn on and search again.');
+					console.log("Bluetooth adapter is OFF");
 				};
 			};
+		};
 
-			var adapterChange = function(adapter) {
-				if(adapterOn != adapter.available){
-					adapterOn = adapter.available;
-					if(adapterOn){
-						console.info("Bluetooth adapter is ON");
-						involt.debug("Adapter: " + adapter.address + " : " + adapter.name);
-					}
-					else{
-						console.log("Bluetooth adapter is OFF");
-					};
-				};
+		chrome.bluetooth.getAdapterState(adapterOnLaunch);
+		chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
+
+		var newDevice = function(device){
+
+			involt.devices[device.name] = device;
+
+			if($('.loader-ports:contains('+ involt.devices[device.name].name +')').length > 0){
+				involt.debug("Device already on the list: " + device.name);
+			}
+			else {
+				console.log("New device found: " + device.name, device);
+				$(".loader-ports").append('<p>'+involt.devices[device.name].name+'</p>');
 			};
 
-			chrome.bluetooth.getAdapterState(adapterOnLaunch);
-			chrome.bluetooth.onAdapterStateChanged.addListener(adapterChange);
+		};
+		var removeDevice = function(device){
 
-			var newDevice = function(device){
+			console.log("Device lost: " + device.name, device.address);
+			delete involt.devices[device.name];
 
-				involt.devices[device.name] = device;
+		};
 
-				if($('.loader-ports:contains('+ involt.devices[device.name].name +')').length > 0){
-					involt.debug("Device already on the list: " + device.name);
-				}
-				else {
-					console.log("New device found: " + device.name, device);
-					$(".loader-ports").append('<p>'+involt.devices[device.name].name+'</p>');
-				};
+		chrome.bluetooth.onDeviceAdded.addListener(newDevice);
+		chrome.bluetooth.onDeviceChanged.addListener(newDevice);
+		chrome.bluetooth.onDeviceRemoved.addListener(removeDevice);
 
+		var onGetDevices = function(device){
+
+			console.log("Available devices:");
+			for (var i = 0; i < device.length; i++) {
+				involt.devices[device[i].name] = device[i];
+				$(".loader-ports").append('<p>'+involt.devices[device[i].name].name+'</p>');
+				console.log(device[i].name, involt.devices[device[i].name]);
+			};	
+
+		};
+
+		var checkConnections = function(socket){
+			for (var i=0; i<socket.length; i++) {
+				involt.previousConnections[i] = socket[i];
 			};
-			var removeDevice = function(device){
+		};
 
-				console.log("Device lost: " + device.name, device.address);
-				delete involt.devices[device.name];
+		chrome.bluetooth.getDevices(onGetDevices);
+		chrome.bluetoothSocket.getSockets(checkConnections);
 
-			};
+		involt.bluetoothDiscovery(discoveryDuration);
 
-			chrome.bluetooth.onDeviceAdded.addListener(newDevice);
-			chrome.bluetooth.onDeviceChanged.addListener(newDevice);
-			chrome.bluetooth.onDeviceRemoved.addListener(removeDevice);
-
-			var onGetDevices = function(device){
-
-				console.log("Available devices:");
-				for (var i = 0; i < device.length; i++) {
-					involt.devices[device[i].name] = device[i];
-					$(".loader-ports").append('<p>'+involt.devices[device[i].name].name+'</p>');
-					console.log(device[i].name, involt.devices[device[i].name]);
-				};	
-
-			};
-
-			chrome.bluetooth.getDevices(onGetDevices);
-			involt.bluetoothDiscovery(discoveryDuration);
 	};
 
-	//Discovery of devices
 	Involt.prototype.bluetoothDiscovery = function(duration){
 
 		var onGetDevices = function(device){
@@ -493,184 +500,100 @@ else if (isBluetooth || isLowEnergy){
 
 	};
 
-	if (isBluetooth){
+	Involt.prototype.connect = function(address, uuid){
 
-		Involt.prototype.begin = function(){
+		var onConnect = function() {
 
-			involt.adapter();
-
-			var checkConnections = function(socket){
-				for (var i=0; i<socket.length; i++) {
-					involt.previousConnections[i] = socket[i];
+			if (!involt.isMobile){
+				if (chrome.runtime.lastError) {
+					console.error("Connection failed: " + chrome.runtime.lastError.message);
+					involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
+					$("#loader-button").html("Connect");
+					return;
 				};
 			};
 
-			chrome.bluetoothSocket.getSockets(checkConnections);
+			console.log("Connection established:", address);
+			$("#loader-bg, #loader-error").remove();
+			$("html").css('overflow', 'auto');
+			
+			
+		};
+
+		var onCreate = function(createInfo){
+
+			chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
+			involt.id = createInfo.socketId;
 
 		};
 
-		Involt.prototype.connect = function(address, uuid){
-
-			var onConnect = function() {
-
-				if (!involt.isMobile){
-					if (chrome.runtime.lastError) {
-						console.error("Connection failed: " + chrome.runtime.lastError.message);
-						involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
-						$("#loader-button").html("Connect");
-						return;
-					};
-				};
-
-				console.log("Connection established:", address);
-				$("#loader-bg, #loader-error").remove();
-				$("html").css('overflow', 'auto');
-				
-			};
-
-			var onCreate = function(createInfo){
-
-				chrome.bluetoothSocket.connect(createInfo.socketId, defaultBtAddress, uuid, onConnect);
-				involt.id = createInfo.socketId;
-
-			};
-
-			for (var i=0; i<involt.previousConnections.length; i++) {
-				involt.disconnect(involt.previousConnections[i].socketId);
-			};
-
-			//Create bluetooth socket and then connect to device.
-			chrome.bluetoothSocket.create(onCreate);
-
+		//console.log(involt.previousConnections);
+		for (var i=0; i<involt.previousConnections.length; i++) {
+			involt.disconnect(involt.previousConnections[i].socketId);
 		};
 
-		Involt.prototype.disconnect = function(id){
-
-			var onDisconnect = function(){
-				console.log("disconnected from previous session (id:"+id+")");
-			};
-
-			chrome.bluetoothSocket.close(id, onDisconnect);
-
-		};
-
-		Involt.prototype.send = function(sendString){
-
-			involt.debug(sendString);
-
-			chrome.bluetoothSocket.send(involt.id, involt.sendConvertString(sendString), involt.onSend);
-
-		};
-
-		Involt.prototype.receive = function(){
-
-			chrome.bluetoothSocket.onReceive.addListener(involt.onReceive);
-			chrome.bluetoothSocket.onReceiveError.addListener(involt.onError);
-
-		};
-
-		Involt.prototype.createLoader = function(){
-
-			if(!involt.isMobile){
-				$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-				$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
-				$("#loader").append('<div id="loader-button">Connect</div>');
-				$("#discover-button").hide();
-				$("html").css('overflow:', 'hidden');
-			};
-
-			$(document).on("click","#loader-button",function() {
-				$(this).html("Connecting...");
-				console.log("Connection attempt to: " + defaultBtAddress);
-
-				chrome.bluetooth.stopDiscovery(function() {});
-
-				involt.connect(defaultBtAddress, uuid);
-			});
-
-			$(document).on("click","#discover-button",function() {
-				involt.bluetoothDiscovery(discoveryDuration);
-				$(this).html("Searching for devices...");
-			});
-
-			$(document).on("click",".loader-ports > p",function() {
-				$(".loader-ports > p").removeClass("active-port");
-				$(this).addClass("active-port");
-				defaultBtAddress = involt.devices[$(this).html()].address;
-			});			
-
-		};	
-
-	}
-
-	//BLUETOOTH LOW ENERGY ON MOBILE
-
-	else if (isLowEnergy){
-
-		Involt.prototype.begin = function(){
-
-			involt.adapter();
-
-		};
-
-		Involt.prototype.connect = function(address){
-			$("body").append(address);
-			var onConnect = function(){
-				console.log("Connection attempt to LE device");
-				$("#loader-bg, #loader-error").remove();
-				$("html").css('overflow', 'auto');
-				$("body").append("OK");
-				var onGetServices = function(services){
-					for (var i = 0; i<services.length; i++){
-						$("body").append(services[i].uuid);
-						$("body").append(services[i].isPrimary);
-						$("body").append(services[i].instanceId);
-						$("body").append(services[i].deviceAddress);
-						$("body").append("NEXT");
-					}
-					
-				};
-
-				chrome.bluetoothLowEnergy.getServices(address, onGetServices(services));
-			};
-
-			chrome.bluetoothLowEnergy.connect(address, onConnect());
-
-		};
-
-		Involt.prototype.createLoader = function(){
-
-			if(!involt.isMobile){
-				$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
-				$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
-				$("#loader").append('<div id="loader-button">Connect</div>');
-				$("#discover-button").hide();
-				$("html").css('overflow:', 'hidden');
-			};
-
-			$(document).on("click","#loader-button",function() {
-				$(this).html("Connecting...");
-				console.log("Connection attempt to: " + defaultBtAddress);
-
-				chrome.bluetooth.stopDiscovery(function() {});
-
-				involt.connect(defaultBtAddress);
-			});
-
-			$(document).on("click","#discover-button",function() {
-				involt.bluetoothDiscovery(discoveryDuration);
-				$(this).html("Searching for devices...");
-			});
-
-			$(document).on("click",".loader-ports > p",function() {
-				$(".loader-ports > p").removeClass("active-port");
-				$(this).addClass("active-port");
-				defaultBtAddress = involt.devices[$(this).html()].address;
-			});			
-
-		};	
+		//Create bluetooth socket and then connect to device.
+		chrome.bluetoothSocket.create(onCreate);
 
 	};
+
+	Involt.prototype.disconnect = function(id){
+
+		var onDisconnect = function(){
+			console.log("disconnected from previous session (id:"+id+")");
+		};
+
+		chrome.bluetoothSocket.close(id, onDisconnect);
+
+	};
+
+	Involt.prototype.send = function(sendString){
+
+		involt.debug(sendString);
+
+		chrome.bluetoothSocket.send(involt.id, involt.sendConvertString(sendString), involt.onSend);
+
+	};
+
+	Involt.prototype.receive = function(){
+
+		chrome.bluetoothSocket.onReceive.addListener(involt.onReceive);
+		chrome.bluetoothSocket.onReceiveError.addListener(involt.onError);
+
+	};
+
+	Involt.prototype.createLoader = function(){
+
+		if(!involt.isMobile){
+			$("body").prepend('<div id="loader-bg"><div id="loader"></div></div>');
+			$("#loader").append('<div id="loader-logo"><img src="img/logo.png" alt="" /></div><div class="loader-txt"><span>Please select your device: </span><div id="discover-button"></div></div><div class="loader-ports"></div>');
+			$("#loader").append('<div id="loader-button">Connect</div>');
+			$("#discover-button").hide();
+			$("html").css('overflow:', 'hidden');
+		};
+
+		$(document).on("click","#loader-button",function() {
+			$(this).html("Connecting...");
+			console.log("Connection attempt to: " + defaultBtAddress);
+
+			chrome.bluetooth.stopDiscovery(function() {});
+
+			involt.connect(defaultBtAddress, uuid);
+		});
+
+		$(document).on("click","#discover-button",function() {
+			involt.bluetoothDiscovery(discoveryDuration);
+			$(this).html("Searching for devices...");
+		});
+
+		$(document).on("click",".loader-ports > p",function() {
+			$(".loader-ports > p").removeClass("active-port");
+			$(this).addClass("active-port");
+			defaultBtAddress = involt.devices[$(this).html()].address;
+		});			
+
+	};	
+
 };
 
 //----------------------------------------------------------------------------------------------
