@@ -605,7 +605,7 @@ else if (isBluetooth || isLowEnergy){
 	else if(isLowEnergy){
 
 		Involt.prototype.begin = function(){
-			//if(!isMobile) console.log("Bluetooth Low Energy support is for mobile only.");
+			if(!involt.isMobile) console.error("Bluetooth Low Energy support is for mobile only.");
 
 			involt.bluetoothDiscovery(discoveryDuration);
 		};
