@@ -37,7 +37,7 @@
     <!-- <preference name="android-build-tool" value="gradle" /> -->
     <!--<plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
     <plugin name="cordova-plugin-chrome-apps-bluetoothsocket" source="npm"/>-->
-    <plugin name="cordova-plugin-ble-central" source="npm"/>
+    <plugin name="cordova-plugin-ble-central" source="npm" spec="1.1.0"/>
 
     <!-- Icons:-->
     <icon src="img/icons/icon-pg.png" />
