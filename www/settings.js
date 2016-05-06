@@ -43,10 +43,16 @@
 		DESKTOP: The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
 		You can get the UUID of your device form hardware documentation or app's chrome console.
 
-		For Bluetooth Low Energy change the RX/TX, you should get them from device documentation.
-
+		
+		Variable uuid is device uuid.
 	*/
-	var uuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
+	/*
+		For Bluetooth Low Energy:
+		Change the RX/TX uuid for communication, you should get them from device documentation.
+	*/
+	var uuidRx = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+	var uuidTx = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 
