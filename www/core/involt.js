@@ -174,7 +174,9 @@ var Involt =  function (){
 		if (isSerial && receiveInfo.connectionId !== involt.id) return;
 		if (isBluetooth && receiveInfo.socketId !== involt.id) return;
 
-		var encodedString = involt.receiveConvertString(receiveInfo.data);
+		var encodedString;
+		if(!isLowEnergy) encodedString = involt.receiveConvertString(receiveInfo.data);
+		else encodedString = involt.receiveConvertString(receiveInfo);
 
 		var matchingPattern = /[AF][^EAF]+\E/g;
 		var dataBlock = encodedString.match(matchingPattern);
@@ -626,6 +628,10 @@ else if (isBluetooth || isLowEnergy){
 				var onStop = function(){
 					$(".loader-txt>span").hide();
 					$("#discover-button").html("Search for more?").fadeIn('fast');
+
+					if(!loaderOnLaunch){
+						involt.connect(defaultBtAddress);
+					}
 				};
 
 				ble.stopScan(onStop , onError);
@@ -640,6 +646,7 @@ else if (isBluetooth || isLowEnergy){
 				console.log("Connection established:", address);
 				$("#loader-bg, #loader-error").remove();
 				$("html").css('overflow', 'auto');
+				involt.receive(); 
 			};
 
 			var onError = function(){
@@ -651,19 +658,29 @@ else if (isBluetooth || isLowEnergy){
 
 		Involt.prototype.send = function(sendString){
 
-			involt.debug(sendString);
-			involt.onSend();
-			ble.writeWithoutResponse(defaultBtAddress, uuid, uuidRx, involt.sendConvertString(sendString));
+			//involt.debug(sendString);
+			//involt.onSend();
+
+
+		
+
+			//console.log("Send " + toSend);
+			ble.writeWithoutResponse(defaultBtAddress, uuid, uuidTx, involt.sendConvertString(sendString));
 
 		};
 
 		Involt.prototype.receive = function(){
 
+			var onData = function(data){
+				involt.onReceive(data);
+				console.log(data);
+			}
+
 			var onError = function(reason) {
 		       involt.debug(reason);
 		    };
 
-			ble.read(defaultBtAddress, uuid, uuidTx, involt.onReceive, onError);
+			ble.startNotification(defaultBtAddress, "6e400001-b5a3-f393-e0a9-e50e24dcca9e", "6e400003-b5a3-f393-e0a9-e50e24dcca9e", onData, onError);
 		};
 
 		Involt.prototype.createLoader = function(){
@@ -881,7 +898,7 @@ Involt.prototype.launch = function(){
 
 	//RECEIVE THE DATA AND UPDATE THE VALUES
 	//For updating the read-only UI elements check analogUpdate function in framework.js
-	involt.receive(); 
+	
 };
 
 //CREATE INVOLT APP

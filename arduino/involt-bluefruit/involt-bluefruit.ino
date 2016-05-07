@@ -118,7 +118,7 @@ void involtReceive(){
     sscanf(ble.buffer, "F%s", &value);
     fname = value;
   };
-  
+  //Serial.println(ble.buffer);
   ble.waitForOK();
 };
 

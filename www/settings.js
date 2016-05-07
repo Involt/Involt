@@ -46,13 +46,13 @@
 		
 		Variable uuid is device uuid.
 	*/
-	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
+	var uuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
 	/*
 		For Bluetooth Low Energy:
 		Change the RX/TX uuid for communication, you should get them from device documentation.
 	*/
-	var uuidRx = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
-	var uuidTx = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+	var uuidTx = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //send to device
+	var uuidRx = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; //read from device
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 
