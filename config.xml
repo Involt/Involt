@@ -33,6 +33,11 @@
 
 <preference name='phonegap-version' value='cli-6.1.0' />
 
+<gap:config-file platform="android" parent="/manifest">
+     <application android:debuggable="true" />
+</gap:config-file>
+
+
     <!-- Plugins -->
     <preference name="android-build-tool" value="gradle" />
     <plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
