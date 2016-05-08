@@ -43,7 +43,6 @@
 		DESKTOP: The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
 		You can get the UUID of your device form hardware documentation or app's chrome console.
 
-		
 		Variable uuid is device uuid.
 	*/
 	var uuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
@@ -53,6 +52,18 @@
 	*/
 	var uuidTx = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //send to device
 	var uuidRx = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; //read from device
+	/*
+		Use Evothings BLE library for data transmission instead of cordova BLE central.
+		This will make it work with Bluno and it's workaround especially for this device.
+		It requires Evothings studio if you wish to do live tests instead of Phonegap Developer App.
+
+		Important: 
+		Loader and console feedback is not supported. 
+
+		After mobile beta this feature may be removed (or made as default).
+		Involt contains this to make it work with as many devices as possible.
+	*/
+	var isEvothingsLibrary = true;
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 
