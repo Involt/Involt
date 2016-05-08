@@ -258,7 +258,6 @@ var Involt =  function (){
 					$("#discover-button").hide();
 				};
 
-				involt.loaderEvents();
 			});
 		};
 	};
@@ -867,7 +866,7 @@ else if (isBluetooth || isLowEnergy){
 Involt.prototype.launch = function(){
 	//FIND CONNECTED DEVICES AND DISCOVER THEIR STATE
 	involt.begin();
-
+	involt.loaderEvents();
 	//CONNECT DIRECTLY IF NO LOADER IS SELECTED
 	if(!loaderOnLaunch){
 		if(isSerial){
