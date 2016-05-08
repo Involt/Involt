@@ -33,9 +33,9 @@
 
 <preference name='phonegap-version' value='cli-6.1.0' />
 
-<config-file platform="android" parent="/manifest">
+
      <application android:debuggable="true" />
-</config-file>
+
 
 
     <!-- Plugins -->
