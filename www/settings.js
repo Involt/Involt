@@ -18,7 +18,7 @@
 		Set loaderOnLaunch to false and skip loading screen on app launch. 
 		Remember to set default connection settings because it's not possible when app is running.
 	*/
-	var loaderOnLaunch = false;
+	var loaderOnLaunch = true;
 	/*
 		DEFAULT SERIAL PORT
 		Choose default serial port to set the connection port when loader is not used.

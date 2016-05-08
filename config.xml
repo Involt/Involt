@@ -32,36 +32,41 @@
     <preference name="android-installLocation"    value="auto" />
     <preference name="webviewbounce"              value="true" />
 
-<preference name='phonegap-version' value='cli-6.1.0' />
+    <preference name='phonegap-version' value='cli-6.1.0' />
 
-
-     <gap:config-file platform="android" parent="/manifest">
-     <application android:debuggable="true" />
-</gap:config-file>
-
-
+    <!--For gapdebug-->
+    <!--<gap:config-file platform="android" parent="/manifest">
+        <application android:debuggable="true" />
+    </gap:config-file>-->
 
     <!-- Plugins -->
     <preference name="android-build-tool" value="gradle" />
     <plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
     <plugin name="cordova-plugin-chrome-apps-bluetoothsocket" source="npm"/>
-<plugin name="cordova-plugin-ble-central" source="npm" />
+    <plugin name="cordova-plugin-ble-central" source="npm" />
+    <plugin name="cordova-plugin-splashscreen" source="npm" />
+
+        <preference name="SplashScreenDelay" value="3000" />
+        <preference name="SplashMaintainAspectRatio" value="true" />
+        <preference name="SplashShowOnlyFirstTime" value="false" />
+
 
     <!-- Icons:-->
-    <icon src="img/icons/icon-pg.png" />
-    <icon src="img/icons/android/icon-36-ldpi.png"   gap:platform="android"    gap:qualifier="ldpi" />
-    <icon src="img/icons/android/icon-48-mdpi.png"   gap:platform="android"    gap:qualifier="mdpi" />
-    <icon src="img/icons/android/icon-72-hdpi.png"   gap:platform="android"    gap:qualifier="hdpi" />
-    <icon src="img/icons/android/icon-96-xhdpi.png"  gap:platform="android"    gap:qualifier="xhdpi" />
-    <icon src="img/icons/android/icon-144-xxhdpi.png"  gap:platform="android"    gap:qualifier="xxhdpi" />
-    <icon src="img/icons/android/icon-192-xxxhdpi.png"  gap:platform="android"    gap:qualifier="xxxhdpi" />
-
-
-  <splash src="res/screen/android/drawable-land-ldpi-screen.png"      density="land-ldpi" />
+    <platform name="android">
+        <icon src="img/icons/icon-pg.png" />
+        <icon src="img/icons/android/icon-36-ldpi.png"      qualifier="ldpi" />
+        <icon src="img/icons/android/icon-48-mdpi.png"      qualifier="mdpi" />
+        <icon src="img/icons/android/icon-72-hdpi.png"      qualifier="hdpi" />
+        <icon src="img/icons/android/icon-96-xhdpi.png"     qualifier="xhdpi" />
+        <icon src="img/icons/android/icon-144-xxhdpi.png"   qualifier="xxhdpi" />
+        <icon src="img/icons/android/icon-192-xxxhdpi.png"  qualifier="xxxhdpi" />
+    
+        <splash src="res/screen/android/drawable-land-ldpi-screen.png"      density="land-ldpi" />
         <splash src="res/screen/android/drawable-land-mdpi-screen.png"      density="land-mdpi" />
         <splash src="res/screen/android/drawable-land-hdpi-screen.png"      density="land-hdpi" />
         <splash src="res/screen/android/drawable-land-xhdpi-screen.png"     density="land-xhdpi" />
         <splash src="res/screen/android/drawable-land-xxhdpi-screen.png"    density="land-xxhdpi" />
+    </platform>
     <!-- Splashscreen: (requires plugin) -->
     <!--
     <gap:splash src="img/splashscreen/android/screen-ldpi-portrait.png"       gap:platform="android" gap:qualifier="port-ldpi" />
@@ -69,7 +74,7 @@
     <gap:splash src="img/splashscreen/android/screen-hdpi-portrait.png"       gap:platform="android" gap:qualifier="port-hdpi" />
     <gap:splash src="img/splashscreen/android/screen-xhdpi-portrait.png"      gap:platform="android" gap:qualifier="port-xhdpi" />
     <gap:splash src="img/splashscreen/android/screen-xxhdpi-portrait.png"     gap:platform="android" gap:qualifier="port-xxhdpi" />
--->
+    -->
     <!-- IOS settings (currently not tested) -->
 
     <!--
