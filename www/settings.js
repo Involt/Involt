@@ -69,6 +69,6 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = true;
+	var debugMode = false;
 
 //----------------------------------------------------------------------------------------------
