@@ -611,152 +611,102 @@ else if (isBluetooth || isLowEnergy){
 
 	else if(isLowEnergy){
 
-		if(!isEvothingsLibrary){
-			Involt.prototype.begin = function(){
-				if(!involt.isMobile) {
-					console.error("Bluetooth Low Energy support is for mobile only.");
-					involt.bottomError("Bluetooth Low Energy support is for mobile only.");
-					return;
+		Involt.prototype.begin = function(){
+			if(!involt.isMobile) {
+				console.error("Bluetooth Low Energy support is for mobile only.");
+				involt.bottomError("Bluetooth Low Energy support is for mobile only.");
+				return;
+			};
+			involt.bluetoothDiscovery(discoveryDuration);
+		};
+
+		Involt.prototype.bluetoothDiscovery = function(duration){
+
+			var onDiscoverDevice = function(device){
+				involt.bluetoothNewDevice(device);
+			};
+
+			var onError = function(reason){};
+
+			ble.startScan([], onDiscoverDevice, onError);
+
+			var stopDiscovery = function(){
+
+				var onStop = function(){
+					$(".loader-txt>span").hide();
+					$("#discover-button").html("Search for more?").fadeIn('fast');
+
+					if(!loaderOnLaunch){
+						involt.connect(defaultBtAddress);
+					}
 				};
+
+				ble.stopScan(onStop , onError);
+			};
+
+			setTimeout(stopDiscovery, duration);
+		};
+
+		Involt.prototype.connect = function(address){
+
+			var onConnect = function(){
+				console.log("Connection established:", address);
+				$("#loader-bg, #loader-error").remove();
+				$("html").css('overflow', 'auto');
+				involt.receive(); 
+			};
+
+			var onError = function(){
+				console.error("Connection error");
+			};
+
+			ble.connect(address, onConnect, onError);
+		};
+
+		Involt.prototype.send = function(sendString){
+
+			involt.debug(sendString);
+			involt.onSend();
+
+			var valueSend = involt.sendConvertString(sendString);
+			ble.writeWithoutResponse(defaultBtAddress, uuid, uuidTx, valueSend);
+
+		};
+
+		Involt.prototype.receive = function(){
+
+			var onData = function(data){
+				involt.onReceive(data);
+			}
+
+			var onError = function(reason) {
+		       involt.debug(reason);
+		    };
+
+			ble.startNotification(defaultBtAddress, uuid, uuidRx, onData, onError);
+		};
+
+		Involt.prototype.loaderEvents = function(){
+			$(document).on("click","#loader-button",function() {
+				$(this).html("Connecting...");
+				console.log("Connection attempt to: " + defaultBtAddress);
+				
+				involt.connect(defaultBtAddress);
+			});
+
+			$(document).on("click","#discover-button",function() {
 				involt.bluetoothDiscovery(discoveryDuration);
-			};
+				$(this).html("Searching for devices...");
+			});
 
-			Involt.prototype.bluetoothDiscovery = function(duration){
-
-				var onDiscoverDevice = function(device){
-					involt.bluetoothNewDevice(device);
-				};
-
-				var onError = function(reason){};
-
-				ble.startScan([], onDiscoverDevice, onError);
-
-				var stopDiscovery = function(){
-
-					var onStop = function(){
-						$(".loader-txt>span").hide();
-						$("#discover-button").html("Search for more?").fadeIn('fast');
-
-						if(!loaderOnLaunch){
-							involt.connect(defaultBtAddress);
-						}
-					};
-
-					ble.stopScan(onStop , onError);
-				};
-
-				setTimeout(stopDiscovery, duration);
-			};
-
-			Involt.prototype.connect = function(address){
-
-				var onConnect = function(){
-					console.log("Connection established:", address);
-					$("#loader-bg, #loader-error").remove();
-					$("html").css('overflow', 'auto');
-					involt.receive(); 
-				};
-
-				var onError = function(){
-					console.error("Connection error");
-				};
-
-				ble.connect(address, onConnect, onError);
-			};
-
-			Involt.prototype.send = function(sendString){
-
-				involt.debug(sendString);
-				involt.onSend();
-
-				var valueSend = involt.sendConvertString(sendString);
-				ble.writeWithoutResponse(defaultBtAddress, uuid, uuidTx, valueSend);
-
-			};
-
-			Involt.prototype.receive = function(){
-
-				var onData = function(data){
-					involt.onReceive(data);
-				}
-
-				var onError = function(reason) {
-			       involt.debug(reason);
-			    };
-
-				ble.startNotification(defaultBtAddress, uuid, uuidRx, onData, onError);
-			};
-
-			Involt.prototype.loaderEvents = function(){
-				$(document).on("click","#loader-button",function() {
-					$(this).html("Connecting...");
-					console.log("Connection attempt to: " + defaultBtAddress);
-					
-					involt.connect(defaultBtAddress);
-				});
-
-				$(document).on("click","#discover-button",function() {
-					involt.bluetoothDiscovery(discoveryDuration);
-					$(this).html("Searching for devices...");
-				});
-
-				$(document).on("click",".loader-ports > p",function() {
-					$(".loader-ports > p").removeClass("active-port");
-					$(this).addClass("active-port");
-					defaultBtAddress = involt.devices[$(this).html()].id;
-				});		
-			};
-		}
-		else {
-			//Workaround for bluno
-			Involt.prototype.begin = function(){
-
-				var onConnect = function(info){
-
-
-					var device = info.deviceHandle;
-					var rx;
-					var tx;
-
-					var getServices = function(services){
-						for (var i =0; i<services.length; i++){
-							if(services[i].uuid = uuidRx){
-								rx = services[i].handle;
-							};
-							if(services[i].uuid = uuidTx){
-								tx = services[i].handle;
-							};
-							console.log(rx);
-							console.log(tx);
-						};
-
-						var onData = function(data){
-							involt.onReceive(data);
-						};
-
-						evothings.ble.readCharacteristic(device, rx, onData, onFail);
-					};
-
-					evothings.ble.services(device, getServices, onFail);
-
-				};
-
-				var onFail = function(error){
-					console.log(error);
-				};
-
-				evothings.ble.connect(defaultBtAddress, onConnect, onFail);
-			};
-
-			Involt.prototype.send = function(sendString){
-
-				var data = involt.sendConvertString(sendString);
-				writeCharacteristic(deviceHandle, characteristicHandle, data, win, fail)
-			};
+			$(document).on("click",".loader-ports > p",function() {
+				$(".loader-ports > p").removeClass("active-port");
+				$(this).addClass("active-port");
+				defaultBtAddress = involt.devices[$(this).html()].id;
+			});		
 		};
 		
 	};
-
 };
 
 //----------------------------------------------------------------------------------------------
@@ -918,9 +868,6 @@ Involt.prototype.launch = function(){
 	//FIND CONNECTED DEVICES AND DISCOVER THEIR STATE
 	involt.begin();
 
-	//For Bluno, workaround
-	if(isEvothingsLibrary) return;
-
 	//CONNECT DIRECTLY IF NO LOADER IS SELECTED
 	if(!loaderOnLaunch){
 		if(isSerial){
@@ -953,9 +900,6 @@ var involt = new Involt();
 
 //Check if it's on mobile or desktop
 if(typeof cordova === 'object') involt.isMobile = true;
-
-//Override loader for bluno
-if(isEvothingsLibrary) loaderOnLaunch = false;
 
 //Create loader and its events
 involt.createLoaderAssets();

@@ -38,7 +38,6 @@
     <!--<plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
     <plugin name="cordova-plugin-chrome-apps-bluetoothsocket" source="npm"/>-->
 <plugin name="cordova-plugin-ble-central" source="npm" />
-<plugin name="cordova-plugin-ble" source="npm" />
 
     <!-- Icons:-->
     <icon src="img/icons/icon-pg.png" />
