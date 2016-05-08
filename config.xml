@@ -46,14 +46,9 @@
     <plugin name="cordova-plugin-ble-central" source="npm" />
     <plugin name="cordova-plugin-splashscreen" source="npm" />
 
-        <preference name="SplashScreenDelay" value="3000" />
-        <preference name="SplashMaintainAspectRatio" value="true" />
-        <preference name="SplashShowOnlyFirstTime" value="false" />
-
-
     <!-- Icons:-->
     <platform name="android">
-        <icon src="img/icons/icon-pg.png" />
+        <!--<icon src="img/icons/icon-pg.png" />-->
         <icon src="img/icons/android/icon-36-ldpi.png"      qualifier="ldpi" />
         <icon src="img/icons/android/icon-48-mdpi.png"      qualifier="mdpi" />
         <icon src="img/icons/android/icon-72-hdpi.png"      qualifier="hdpi" />
@@ -61,20 +56,17 @@
         <icon src="img/icons/android/icon-144-xxhdpi.png"   qualifier="xxhdpi" />
         <icon src="img/icons/android/icon-192-xxxhdpi.png"  qualifier="xxxhdpi" />
 
+        <!-- Splashscreen: (requires plugin, currently not working) -->
+        <!--   
         <splash src="img/splashscreen/android/screen-ldpi-portrait.png"      qualifier="port-ldpi" />
         <splash src="img/splashscreen/android/screen-mdpi-portrait.png"      qualifier="port-mdpi" />
         <splash src="img/splashscreen/android/screen-hdpi-portrait.png"      qualifier="port-hdpi" />
         <splash src="img/splashscreen/android/screen-xhdpi-portrait.png"     qualifier="port-xhdpi" />
         <splash src="img/splashscreen/android/screen-xxhdpi-portrait.png"    qualifier="port-xxhdpi" />
+         -->
     </platform>
-    <!-- Splashscreen: (requires plugin) -->
-    <!--
-    <gap:splash src="img/splashscreen/android/screen-ldpi-portrait.png"       gap:platform="android" gap:qualifier="port-ldpi" />
-    <gap:splash src="img/splashscreen/android/screen-mdpi-portrait.png"       gap:platform="android" gap:qualifier="port-mdpi" />
-    <gap:splash src="img/splashscreen/android/screen-hdpi-portrait.png"       gap:platform="android" gap:qualifier="port-hdpi" />
-    <gap:splash src="img/splashscreen/android/screen-xhdpi-portrait.png"      gap:platform="android" gap:qualifier="port-xhdpi" />
-    <gap:splash src="img/splashscreen/android/screen-xxhdpi-portrait.png"     gap:platform="android" gap:qualifier="port-xxhdpi" />
-    -->
+    
+
     <!-- IOS settings (currently not tested) -->
 
     <!--
