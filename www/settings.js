@@ -11,14 +11,14 @@
 		Select connection type, only ONE can be defined at once.
 	*/
 	var isSerial    = false;  //Desktop
-	var isBluetooth = false; //Desktop AND Mobile (BT 2.0)
-	var isLowEnergy = true; //Mobile (BT LE)
+	var isBluetooth = true; //Desktop AND Mobile (BT 2.0)
+	var isLowEnergy = false; //Mobile (BT LE)
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on app launch. 
 		Remember to set default connection settings because it's not possible when app is running.
 	*/
-	var loaderOnLaunch = true;
+	var loaderOnLaunch = false;
 	/*
 		DEFAULT SERIAL PORT
 		Choose default serial port to set the connection port when loader is not used.
@@ -45,7 +45,7 @@
 
 		Variable uuid is device uuid.
 	*/
-	var uuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
 	/*
 		For Bluetooth Low Energy:
 		Change the RX/TX uuid for communication, you should get them from device documentation.
