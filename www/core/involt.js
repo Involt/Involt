@@ -177,7 +177,7 @@ var Involt =  function (){
 		var encodedString;
 		if(!isLowEnergy) encodedString = involt.receiveConvertString(receiveInfo.data);
 		else encodedString = involt.receiveConvertString(receiveInfo);
-
+		
 		var matchingPattern = /[AF][^EAF]+\E/g;
 		var dataBlock = encodedString.match(matchingPattern);
 

@@ -79,7 +79,6 @@ void loop(void){
 
   // ADD YOUR CODE HERE
 
-  
 
   //Clear the function to trigger once.
   fname = "";
