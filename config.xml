@@ -60,12 +60,12 @@
         <icon src="img/icons/android/icon-96-xhdpi.png"     qualifier="xhdpi" />
         <icon src="img/icons/android/icon-144-xxhdpi.png"   qualifier="xxhdpi" />
         <icon src="img/icons/android/icon-192-xxxhdpi.png"  qualifier="xxxhdpi" />
-    
-        <splash src="res/screen/android/drawable-land-ldpi-screen.png"      density="land-ldpi" />
-        <splash src="res/screen/android/drawable-land-mdpi-screen.png"      density="land-mdpi" />
-        <splash src="res/screen/android/drawable-land-hdpi-screen.png"      density="land-hdpi" />
-        <splash src="res/screen/android/drawable-land-xhdpi-screen.png"     density="land-xhdpi" />
-        <splash src="res/screen/android/drawable-land-xxhdpi-screen.png"    density="land-xxhdpi" />
+
+        <splash src="img/splashscreen/android/screen-ldpi-portrait.png"      qualifier="port-ldpi" />
+        <splash src="img/splashscreen/android/screen-mdpi-portrait.png"      qualifier="port-mdpi" />
+        <splash src="img/splashscreen/android/screen-hdpi-portrait.png"      qualifier="port-hdpi" />
+        <splash src="img/splashscreen/android/screen-xhdpi-portrait.png"     qualifier="port-xhdpi" />
+        <splash src="img/splashscreen/android/screen-xxhdpi-portrait.png"    qualifier="port-xxhdpi" />
     </platform>
     <!-- Splashscreen: (requires plugin) -->
     <!--
