@@ -662,10 +662,10 @@ else if (isBluetooth || isLowEnergy){
 			//involt.onSend();
 
 
-		
+			var valueSend = involt.sendConvertString(sendString);
 
 			//console.log("Send " + toSend);
-			ble.writeWithoutResponse(defaultBtAddress, uuid, uuidTx, involt.sendConvertString(sendString));
+			ble.writeWithoutResponse("F1:20:E1:0F:46:5F", "6e400001-b5a3-f393-e0a9-e50e24dcca9e", "6e400002-b5a3-f393-e0a9-e50e24dcca9e", valueSend);
 
 		};
 
@@ -680,7 +680,7 @@ else if (isBluetooth || isLowEnergy){
 		       involt.debug(reason);
 		    };
 
-			ble.startNotification(defaultBtAddress, "6e400001-b5a3-f393-e0a9-e50e24dcca9e", "6e400003-b5a3-f393-e0a9-e50e24dcca9e", onData, onError);
+			ble.startNotification(defaultBtAddress, uuid, uuidRx, onData, onError);
 		};
 
 		Involt.prototype.createLoader = function(){
