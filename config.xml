@@ -13,7 +13,7 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id        = "io.github.involt"
-        version   = "1.0.0">
+        version   = "1.0.9">
 
     <name>Involt for Mobile</name>
 
@@ -35,20 +35,19 @@
     <preference name='phonegap-version' value='cli-6.1.0' />
 
     <!--For gapdebug-->
-    <gap:config-file platform="android" parent="/manifest">
+    <!--<gap:config-file platform="android" parent="/manifest">
         <application android:debuggable="true" />
-    </gap:config-file>
+    </gap:config-file>-->
 
     <!-- Plugins -->
     <preference name="android-build-tool" value="gradle" />
     <plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
     <plugin name="cordova-plugin-chrome-apps-bluetoothsocket" source="npm"/>
     <plugin name="cordova-plugin-ble-central" source="npm" />
-    <plugin name="cordova-plugin-splashscreen" source="npm" />
 
     <!-- Icons:-->
     <platform name="android">
-        <!--<icon src="img/icons/icon-pg.png" />-->
+        <icon src="img/icons/icon-pg.png" />
         <icon src="img/icons/android/icon-36-ldpi.png"      qualifier="ldpi" />
         <icon src="img/icons/android/icon-48-mdpi.png"      qualifier="mdpi" />
         <icon src="img/icons/android/icon-72-hdpi.png"      qualifier="hdpi" />

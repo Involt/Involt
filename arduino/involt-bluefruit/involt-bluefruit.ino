@@ -75,10 +75,11 @@ void loop(void){
   char inputs[BUFSIZE+1];
   involtReceive();
 
-  analogWrite(5, involtPin[5]);
+
+
   // ADD YOUR CODE HERE
-  delay(100);
-  involtSend(0,123);
+
+  
 
   //Clear the function to trigger once.
   fname = "";
