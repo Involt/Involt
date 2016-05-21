@@ -395,7 +395,7 @@ $(document).ready(function() {
 	$(document).on("click",".ard.submit-button", function(){
 		var $t = $(this);
 		if($t.parent("form").length>0){
-			$t.siblings('.ard.involt-input').each(function() {
+			$t.siblings('.ard.involt-input,.ard.input-write').each(function() {
 				var value = $(this).val();
 				if (!isNaN(value)) value = parseInt(value);
 				$(this).updateValue(value).sendValue();
