@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+	<title>Involt</title>
+	<script src="core/jquery/jquery-2.1.0.min.js"></script>
+	<script src="core/jquery/jquery.nouislider.min.js"></script>
+	<script src="core/jquery/jquery.knob.js"></script>
+	<script src="core/jquery/insQ.min.js"></script>
+	<script src="settings.js"></script>
+	<script src="core/bridge.js"></script>
+	<script src="core/framework.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/framework.css">
+</head>
+
+<body>
+	<div class="ard show A0"></div>
+	<input class="ard knob A0 step-10">
+	<input class="ard knob-send P9 value-10 range-0-100 step-10 fn-testing">
+	<input class="ard knob-send P9 value-10 step-10 fluid fn-demo">
+	<!--<div class="ard show A0"></div>
+	
+	<button class="ard toggle P9 ">Test 1 </button>
+	<button class="ard toggle P10 ">Test 1</button>
+	<button class="ard toggle P11">Test 1 </button>
+
+	<p>Test :</p>
+	<div class="ard button P9 255">Pin 9 255</div>
+	<button class="ard toggle" pin="P10" value="0-30">toggle p10 0-30</button>
+	<button class="ard toggle" pin="P10" value="30">toggle p10 0-30</button>
+	<button class="ard toggle" pin="P10">toggle p10 0-30</button>
+	<button class="ard increase P11 value-0 range-0-255 step-10">Increase</button>
+	<button class="ard decrease P11" value="0" min="0" max="255" step="10">Decrease</button>
+	<div class="ard switch" pin="P11" value="0-255">s</div>
+	<div class="ard hover P11 value-0-255">hover</div>
+	<div class="ard button-cta fn-testing">fn</div>
+
+	<p>Inputs :</p>
+	<input type="text" class="ard involt-input P10">
+
+	<input type="number" class="ard involt-input" pin="P10">
+	<input type="checkbox" class="ard involt-input" pin="P9" value="0-255">
+	<input type="checkbox" class="ard involt-input" pin="P9" value="100">
+	<select class="ard involt-input" pin="P9" value="123">
+		<option value="0" >0</option>
+		<option value="50">50</option>
+		<option value="100">100</option>
+		<option value="200" selected='selected'>200</option>
+	</select>
+	<input type="range" class="ard involt-input P10 value-90 range-0-100 step-10"> -->
+	<p>Test in form:</p>
+	<form action="">
+		<input type="text" class="ard involt-input P9" placeholder="test">
+	
+		<input type="number" class="ard involt-input" pin="P10" placeholder="test">
+		<input type="checkbox" class="ard involt-input" pin="P11" value="0-255">
+		<input type="checkbox" class="ard involt-input" pin="P12" value="100">
+		<select class="ard involt-input" pin="P13">
+			<option value="0" >0</option>
+			<option value="50">50</option>
+			<option value="100">100</option>
+			<option value="200" selected>200</option>
+		</select>
+		<input type="range" class="ard involt-input P10 range-0-100 step-10" value="10">
+		<input type="radio" name="demo" class="ard involt-input P14" value="1">
+		<input type="radio" name="demo" class="ard involt-input P14" value="2">
+		<input type="radio" name="demo" class="ard involt-input P14" value="3">
+		<input type="radio" name="demo" class="ard involt-input P14" value="4">
+		<input type="button" class='ard involt-submit' fn="testing">
+		<button type="button" class='ard involt-submit' fn="testing">testing</button>
+	</form>
+	<!--<button class="ard toggle S11 value-notest-test">Test 1 </button>
+	<button class="ard toggle S12" value="notest-test">Test 1 </button>-->
+	<a href="secondary.html">link sec</a>
+
+</body>
+
+</html>

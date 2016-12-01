@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Involt</title>
+	<meta charset="utf-8" />
+	<meta name="format-detection" content="telephone=no" />
+	<meta name="msapplication-tap-highlight" content="no" />
+	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+	<script src="cordova.js"></script>
+	<script src="settings.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/loader.css">
+</head>
+
+<body>
+	
+	<div id="loader-bg">
+		<div id="loader">
+			<img src="img/logo.png" alt="" id="loader-logo">
+			<p id="loader-refresh">Please select your device:</p>
+			<div id="loader-ports"></div>
+			<button id="loader-connect">Connect</button>
+			<p id="loader-resume">Continue previous connection</p>
+		</div>
+	</div>
+
+	
+
+	<iframe src="app.html" frameborder="0" name="involtApp"></iframe>
+
+	<script src="core/involt.js"></script>
+	<script src="core/loader.js"></script>
+	
+</body>
+
+</html>

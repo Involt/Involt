@@ -1,0 +1,61 @@
+/*----Loader CSS----*/
+* { 
+	-webkit-box-sizing: border-box; box-sizing: border-box; 
+	-webkit-tap-highlight-color: rgba(150, 150, 150, 0.1);
+}
+
+body{
+	margin:0;
+	padding:0;
+}
+
+iframe{
+	width: 100%;
+	height:100%;
+	position:absolute;
+	top:0;
+	bottom:0;
+	left: 0;
+	right:0px;
+	margin:0px;
+}
+
+#loader-bg{
+	border: 40px lightgray solid;
+	position: absolute;
+	left: 0;
+	top:0;
+	width: 100%;
+	height: 100%;
+	z-index:2;
+}
+
+#loader{
+	width: 200px;
+	height: 100%;
+	max-width: 360px;
+	background: gray;
+	position: fixed;
+	left: 0;
+	top:0;
+}
+
+#loader-logo{
+	display: none;
+}
+
+#loader-refresh{
+
+}
+
+#loader-ports{
+
+}
+
+#loader-connect{
+
+}
+
+#loader-resume{
+	display: none;
+}
