@@ -10,7 +10,7 @@
             "128": "involt/img/icons/desktop/icon128.png" },
   "window":{
     "width": 800,
-    "height": 500
+    "height": 600
   },
   /*"offline_enabled": true,*/
   "manifest_version": 2

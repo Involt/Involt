@@ -23,6 +23,12 @@ var Involt = function(){
 	this.send = function(pin, value){
 		//convert pin and value to framework-friendly format 
 		if(typeof pin !== 'undefined' && typeof value !== 'undefined'){
+
+			if(pin[0] == 'P'){
+				if (value == true) value = 1;
+				else if (value == false) value = 0;
+			};
+
 			var dataBlock = pin+"V"+value+"\n";
 			involt.sendToDevice(dataBlock);		
 		}

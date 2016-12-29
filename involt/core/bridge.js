@@ -84,3 +84,14 @@ var startListening = function(){
 if(!involt.isListening){
 	startListening();
 }
+
+
+
+pin.P[0]
+pin.S[0]
+
+pin["P0"]
+pin["S0"]
+
+P[0]
+S[0]

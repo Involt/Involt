@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-
 	<title>Involt</title>
+	<!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />-->
 	<script src="core/jquery/jquery-2.1.0.min.js"></script>
 	<script src="core/jquery/jquery.nouislider.min.js"></script>
 	<script src="core/jquery/jquery.knob.js"></script>
@@ -14,10 +14,35 @@
 </head>
 
 <body>
+	<div class="ard button P5 255">Button1</div>
+	<div class="ard toggle P5 0-100">Toggle</div>
+	<button class="ard button P6 255">Btn1</button>
+	<button class="ard toggle P6 0-255">Toggle</button>
+	<button class="ard increase P6">Add</button>
+	<button class="ard decrease P6">Remove</button>
+	<input type="text" class="ard involt-input P9" placeholder="test">
+	<input type="number" class="ard involt-input P9" placeholder="test">
+	<div class="ard switch P5 value-0-255"></div>
+	<input type="text" class="ard knob-send P10" fgColor="#fffff">
+
+	<div class="ard rangeslider P11"></div>
+	<div class="ard rangeslider P11 fluid"></div>
+	<div class="ard rangeslider P11 label-constant"></div>
+
+	<div class="ard show A0">12</div>
+	<div class="ard bar A0"></div>
+	<input type="text" class="ard knob A0">
+	<input type="text" class="ard value A0">
+
+	<!--<form action="">
+		<input type="text" class="ard knob-send P10" fgColor="#fffff">
+		<button type="button" class='ard involt-submit' fn="testing">testing</button>
+	</form> -->
+	<!--
 	<div class="ard show A0"></div>
 	<input class="ard knob A0 step-10">
 	<input class="ard knob-send P9 value-10 range-0-100 step-10 fn-testing">
-	<input class="ard knob-send P9 value-10 step-10 fluid fn-demo">
+	<input class="ard knob-send P9 value-10 step-10 fluid fn-demo">-->
 	<!--<div class="ard show A0"></div>
 	
 	<button class="ard toggle P9 ">Test 1 </button>
@@ -48,7 +73,7 @@
 		<option value="200" selected='selected'>200</option>
 	</select>
 	<input type="range" class="ard involt-input P10 value-90 range-0-100 step-10"> -->
-	<p>Test in form:</p>
+	<!--<p>Test in form:</p>
 	<form action="">
 		<input type="text" class="ard involt-input P9" placeholder="test">
 	
@@ -68,7 +93,7 @@
 		<input type="radio" name="demo" class="ard involt-input P14" value="4">
 		<input type="button" class='ard involt-submit' fn="testing">
 		<button type="button" class='ard involt-submit' fn="testing">testing</button>
-	</form>
+	</form> -->
 	<!--<button class="ard toggle S11 value-notest-test">Test 1 </button>
 	<button class="ard toggle S12" value="notest-test">Test 1 </button>-->
 	<a href="secondary.html">link sec</a>

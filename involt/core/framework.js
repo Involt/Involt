@@ -109,7 +109,6 @@ var defineElement = function($t){
 	$t.data(involtElement);
 	involt.debug(involtElement);
 	
-
 	//Add beginning values to pin array (if there are on/off values put the inactive state as default)
 	if(involtElement.pinType == 'P'){
 		if (typeof involtElement.value !== 'object') involtPin[involtElement.pinNumber] = involtElement.value;
@@ -123,21 +122,21 @@ var defineElement = function($t){
 		involtReceivedPin[involtElement.pinNumber] = involtElement.value;
 	};
 
-
+	//Generate UI additional assets
 	if(involtElement.name == 'knob'){
 		involtElement.readOnly = true;
-		involtElement.fgColor = "#0064fa";
-		involtElement.bgColor = "#e5e5e5";
-		involtElement.inputColor = "#363636";
+		if(typeof $t.data('fgcolor') === 'undefined') involtElement.fgColor = "#00baff";
+		if(typeof $t.data('bgcolor') === 'undefined') involtElement.bgColor = "#e5e5e5";
+		if(typeof $t.data('inputcolor') === 'undefined') involtElement.inputColor = "#363636";
 		$t.knob(involtElement);	
 	}
 	else if(involtElement.name == 'knob-send'){
-		involtElement.displayPrevious = true;
-		involtElement.angleOffset = -140;
-		involtElement.angleArc = 280;
-		involtElement.fgColor = "#0064fa";
-		involtElement.bgColor = "#e5e5e5";
-		involtElement.inputColor = "#363636";
+		if(typeof $t.data('displayprevious') === 'undefined') involtElement.displayPrevious = true;
+		if(typeof $t.data('angleoffset') === 'undefined') involtElement.angleOffset = -140;
+		if(typeof $t.data('anglearc') === 'undefined') involtElement.angleArc = 280;
+		if(typeof $t.data('fgcolor') === 'undefined') involtElement.fgColor = "#00baff";
+		if(typeof $t.data('bgcolor') === 'undefined') involtElement.bgColor = "#e5e5e5";
+		if(typeof $t.data('inputcolor') === 'undefined') involtElement.inputColor = "#363636";
 
 		if(classes.indexOf('fluid')>=0){
 			involtElement.change = function(){
@@ -147,7 +146,7 @@ var defineElement = function($t){
 				if (involtPin[index] !== this.cv){
 					if (this.cv <= max){
 						involtPin[index] = this.cv;
-						if ($t.parent("form").length == 0) $t.sendValue();
+						if ($t.parents("form").length == 0) $t.sendValue();
 					}
 					else {
 						involtPin[index] = max;
@@ -167,9 +166,9 @@ var defineElement = function($t){
 				else {
 					involtPin[index] = max;
 				};
-				if ($t.parent("form").length == 0) $t.sendValue(); 
+				if ($t.parents("form").length == 0) $t.sendValue(); 
 			};
-			if ($t.parent("form").length == 0) $t.sendFn();
+			if ($t.parents("form").length == 0) $t.sendFn();
 		};
 
 		$t.knob(involtElement);	
@@ -180,10 +179,61 @@ var defineElement = function($t){
 		$t.children('.bar-label').css('max-width', parseInt($t.css('width')));
 	}
 	else if(involtElement.name == 'rangeslider'){
+		$t.append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
 		
+		var $slider = $t.children('.slider');
+		var $tooltip = $slider.siblings('.tooltip');
+		
+		//prevents from buffer overload issue
+		var isFluid = false;
+		if ($t.hasClass('fluid')) isFluid = true;
+
+		$tooltip.html($t.data('value')).hide();
+		$slider.siblings('.label').html($t.data('value'));
+
+		$slider.noUiSlider({
+			start: [involtElement.value],
+			range: {
+				'min': [involtElement.min],
+				'max': [involtElement.max]
+			},
+			step: involtElement.step
+		});
+		
+		$slider.on({
+			slide: function(){
+				var cssPos = $slider.children('.noUi-base').children('.noUi-origin').css('left');
+				var val = parseInt($slider.val());
+				$tooltip.css('left',cssPos).html(val);
+				$slider.siblings('.label').html(val);
+				$tooltip.fadeIn(100);
+				if(isFluid){
+					involtPin[$t.data("pinNumber")] = val;
+					if ($t.parent("form").length == 0) involt.send($t.data("pin"), val);
+				};
+			},
+			set: function(){
+				var val = parseInt($slider.val());
+				$tooltip.fadeOut(500);
+				involtPin[$t.data("pinNumber")] = val;
+				involt.send($t.data("pin"), val);
+				if ($t.parent("form").length == 0) $t.sendFn();
+				
+			}
+		});
+
+		$t.hover(function() {
+			$tooltip.css('left', $slider.children('.noUi-base').children('.noUi-origin').css('left'));
+			$tooltip.fadeIn(250);
+		}, function() {
+			$tooltip.fadeOut(250);
+		});
 	}
 	else if(involtElement.name == 'switch'){
-		
+		$t.append('<div class="switch-track"><div class="switch-handle"></div></div>');
+		if($t.hasClass('active')){
+			$t.children('.switch-track').children('.switch-handle').addClass('active');
+		};
 	}
 
 };
@@ -434,7 +484,7 @@ $(document).ready(function() {
 		var $t = $(this);
 		var $form = $t.parents("form");
 
-		$form.find('input.ard, select.ard').not(".involt-submit").each(function() {
+		$form.find('input.ard, select.ard, .ard.knob-send').not(".involt-submit").each(function() {
 
 			var $input = $(this);
 			var $inputType = $input.attr('type');
@@ -450,6 +500,10 @@ $(document).ready(function() {
 			else if($inputType == 'radio'){
 				if(this.checked) $input.sendValue();
 			};
+
+			if($input.hasClass("knob-send")){
+				$input.sendValue();
+			}
 
 		});
 
