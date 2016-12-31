@@ -1,78 +1,95 @@
 var defineElement = function($t){
 
-	var involtElement = {};
+	var involtElement = {
+		pin: null,
+		value: 0,
+		range: null,
+		min: 0,
+		max: 255,
+		step: 1,
+		fn: null
+	};
 
 	var classes = $t.attr('class').trim().split(' ');
 	var ardIndex = classes.indexOf('ard');
-
-	var isInput = $t.is('input');
-
-	var parameters = ['pin','value','range','min','max','step','fn'];
-
 	involtElement.name = classes[ardIndex+1];
 
-	var convertValueType = function(data){
-		for(var i=0;i<data.length;i++){
-			if(!isNaN(data[i])) data[i] = parseInt(data[i]);
+	if(['bar','knob'].indexOf(involtElement.name) > -1) involtElement.max = 1024;
+
+	var searchInClasses = function(name){
+		return name.startsWith(prop+'-');
+	};
+
+	var defineValue = function(data){
+		if(Array.isArray(data)){
+			for(var i=0; i<data.length; i++){
+				if(!isNaN(data[i])) data[i] = parseInt(data[i]);
+			};
+			if(data.length == 1) data = data[0];
+		}
+		else{
+			if(!isNaN(data)) data = parseInt(data);
+		}
+
+		return data;
+	};
+
+	for(prop in involtElement){
+
+		if(typeof $t.attr(prop) !== 'undefined') involtElement[prop] = defineValue($t.attr(prop));
+		else {
+
+			var propInClass = classes.find(searchInClasses);
+
+			if(typeof propInClass !== 'undefined'){
+				var classData = propInClass.split('-');
+				classData.shift();
+				involtElement[prop] = defineValue(classData);
+			};
 		};
 
-		if(data.length == 1) return data[0];
-		else return data;
 	};
 
-	var matchAttribute = function(parameter){
-		if(typeof $t.attr(parameter) !== 'undefined'){
-			involtElement[parameter] = convertValueType($t.attr(parameter).split('-'));
-		};
-	};
-
-	//Match attributes to involt syntax
-	parameters.forEach(matchAttribute);
-
-	var matchClasses = function(className){
-		className = className.split('-');
-		var parameterPrefix = className.shift();
-		if(parameters.indexOf(parameterPrefix) >= 0){
-			involtElement[parameterPrefix] = convertValueType(className);
-		};
-	};
-
-	//Match CSS to involt syntax
-	classes.forEach(matchClasses);
-
-	//This element requires only the fn
-	if(involtElement.name == 'button-cta' || involtElement.name == 'involt-submit'){
-		$t.data('fn', involtElement.fn);
-		return
-	};
-
-	//Define pin from class after the name not attr/pin-
-	if(typeof involtElement.pin === 'undefined'){
-		involtElement.pin = classes[ardIndex+2];
-	}
-
-	involtElement.pinType = involtElement.pin[0];
-	involtElement.pinNumber = parseInt(involtElement.pin.substring(1,involtElement.pin.length));
-
-	//Convert range to parameters
-	if(typeof involtElement.range !== 'undefined'){
+	if(involtElement.range != null){
 		involtElement.min = involtElement.range[0];
 		involtElement.max = involtElement.range[1];
 	};
 
+	//This element requires only the fn
+	if(involtElement.name == 'button-cta' || involtElement.name == 'involt-submit'){
+		$t.data('fn', involtElement.fn);
+		return;
+	};
+
+	//Define pin from class after the name not attr/pin-
+	if(involtElement.pin == null){
+		involtElement.pin = classes[ardIndex+2];
+	};
+
+	involtElement.pinType = involtElement.pin[0];
+	involtElement.pinNumber = parseInt(involtElement.pin.substring(1,involtElement.pin.length));
+
 	//Shorthand single value from old syntax
-	if(typeof involtElement.value === 'undefined' && !isNaN(classes[ardIndex+3])){
+	if(!isNaN(classes[ardIndex+3])){
 		involtElement.value = parseInt(classes[ardIndex+3]);
 	};
 
 	//Values for toggle when it's not defined
 	if(involtElement.name == "toggle" || $t.attr('type') == 'checkbox' || involtElement.name == "hover" || involtElement.name == "switch"){
-		if(typeof involtElement.value === 'undefined') involtElement.value = [0,1];
-		else if(typeof involtElement.value === 'number') involtElement.value = [0,involtElement.value];	
+		if(involtElement.value == 0) involtElement.value = [0,1];
+		if(typeof involtElement.value === 'number') involtElement.value = [0,involtElement.value];
 	};
 
-	if($t.is('select')){
-		
+	if($t.is('input')){
+		var dataToAttribute = {
+			min: involtElement.min,
+			max: involtElement.max,
+			step: involtElement.step		
+		};
+		if(!$t.attr('placeholder')) dataToAttribute.value = involtElement.value;
+		$t.attr(dataToAttribute);
+	}
+	else if($t.is('select')){
 		$t.children('option').each(function() {
 			if(this.selected) {
 				involtElement.value = $(this).val();
@@ -80,30 +97,6 @@ var defineElement = function($t){
 		});
 
 		if(!isNaN(involtElement.value)) involtElement.value = parseInt(involtElement.value);
-		
-	};
-
-	//Set default values for dynamic elements
-	if(['rangeslider','knob-send','increase','decrease'].indexOf(involtElement.name) > -1 || $t.attr('type') == 'range' || $t.attr('type') == 'number'){
-		if(typeof involtElement.min === 'undefined') involtElement.min = 0;
-		if(typeof involtElement.max === 'undefined') involtElement.max = 255;
-		if(typeof involtElement.step === 'undefined') involtElement.step = 1;
-		if(typeof involtElement.value === 'undefined' && $t.attr('type') != 'number') involtElement.value = 0;
-	}
-	else if(['bar','knob'].indexOf(involtElement.name) > -1){
-		involtElement.value = 0;
-		if(typeof involtElement.min === 'undefined') involtElement.min = 0;
-		if(typeof involtElement.max === 'undefined') involtElement.max = 1024;
-	};
-
-	if(isInput){
-		var dataToAttribute = {
-			min: involtElement.min,
-			max: involtElement.max,
-			step: involtElement.step,
-			value: involtElement.value
-		};
-		$t.attr(dataToAttribute);
 	};
 
 	$t.data(involtElement);
@@ -185,8 +178,7 @@ var defineElement = function($t){
 		var $tooltip = $slider.siblings('.tooltip');
 		
 		//prevents from buffer overload issue
-		var isFluid = false;
-		if ($t.hasClass('fluid')) isFluid = true;
+		var isFluid = $t.hasClass('fluid');
 
 		$tooltip.html($t.data('value')).hide();
 		$slider.siblings('.label').html($t.data('value'));
@@ -234,7 +226,7 @@ var defineElement = function($t){
 		if($t.hasClass('active')){
 			$t.children('.switch-track').children('.switch-handle').addClass('active');
 		};
-	}
+	};
 
 };
 
@@ -249,7 +241,7 @@ var defineElement = function($t){
 			var $t = $(this);
 
 			if(typeof name === 'undefined'){
-				if(typeof $t.data('fn') !== 'undefined'){
+				if($t.data('fn') != null){
 					involt.sendFunction($t.data('fn'));
 				};
 			}
