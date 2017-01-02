@@ -14,10 +14,15 @@
 </head>
 
 <body>
+	<form action="">
+		<input type="text" class="ard involt-input P7" placeholder="test">
+		<button type="button" class='ard involt-submit' fn="testing">testing</button>
+	</form>
+	<button class="ard button" pin="P5" value="255"></button>
 	<div class="ard button P5 255">Button1</div>
-	<div class="ard toggle P5 0-100">Toggle</div>
+	<div class="ard toggle P5 value-0-100">Toggle</div>
 	<button class="ard button P6 255">Btn1</button>
-	<button class="ard toggle P6 0-255">Toggle</button>
+	<button class="ard toggle P6 value-0-255">Toggle</button>
 	<button class="ard increase P6">Add</button>
 	<button class="ard decrease P6">Remove</button>
 	<input type="text" class="ard involt-input P9" placeholder="test">
@@ -25,7 +30,7 @@
 	<div class="ard switch P5 value-0-255"></div>
 	<input type="text" class="ard knob-send P10" fgColor="#fffff">
 
-	<div class="ard rangeslider P11"></div>
+	<div class="ard rangeslider P11 range-0-255 step-5"></div>
 	<div class="ard rangeslider P11 fluid"></div>
 	<div class="ard rangeslider P11 label-constant"></div>
 

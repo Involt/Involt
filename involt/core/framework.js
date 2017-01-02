@@ -100,7 +100,8 @@ var defineElement = function($t){
 	};
 
 	$t.data(involtElement);
-	involt.debug(involtElement);
+	//console.log(involtElement.name, involtElement);
+	involt.debug(involtElement.name, involtElement);
 	
 	//Add beginning values to pin array (if there are on/off values put the inactive state as default)
 	if(involtElement.pinType == 'P'){
@@ -229,8 +230,8 @@ var defineElement = function($t){
 				var val = parseInt($slider.val());
 
 				involtPin[$t.data("pinNumber")] = val;
-				involt.send($t.data("pin"), val);
-				if ($t.parents("form").length == 0) $t.sendFn();
+				if(!isFluid) involt.send($t.data("pin"), val);
+				if($t.parents("form").length == 0) $t.sendFn();
 			}
 		});
 	}
@@ -489,7 +490,7 @@ $(document).ready(function() {
 		var $t = $(this);
 		var $form = $t.parents("form");
 
-		$form.find('input.ard, select.ard, .ard.knob-send').not(".involt-submit").each(function() {
+		$form.find('input.ard, select.ard, .ard.knob-send, .ard.rangeslider').not(".involt-submit").each(function() {
 
 			var $input = $(this);
 			var $inputType = $input.attr('type');
@@ -509,6 +510,9 @@ $(document).ready(function() {
 			if($input.hasClass("knob-send")){
 				$input.sendValue();
 			}
+			else if($input.hasClass('rangeslider')){
+				$input.sendValue();
+			};
 
 		});
 

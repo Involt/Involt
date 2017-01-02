@@ -1,10 +1,18 @@
 var involt = window.parent.involt;
 
+//variables kept for backward compability of custon scripts
 var involtPin = involt.involtPin;
 var involtString = involt.involtString;
 var involtReceivedPin = involt.involtReceivedPin;
+
 var involtFunction = involt.involtFunction;
 var involtListenForPin = involt.involtListenForPin;
+
+var pin = {
+	P: involt.involtPin,
+	S: involt.involtString,
+	A: involt.involtReceivedPin
+};
 
 var gotData = function(receiveInfo){
 	if (isSerial && receiveInfo.connectionId !== involt.id) return;
@@ -47,14 +55,14 @@ var parseData = function(data){
 
 			if(!isNaN(value)){
 				if(value.indexOf('.')>0){
-					involtReceivedPin[index] = parseFloat(value);
+					pin.A[index] = parseFloat(value);
 				}
 				else {
-					involtReceivedPin[index] = parseInt(value);
+					pin.A[index] = parseInt(value);
 				};
 			}
 			else{
-				involtReceivedPin[index] = value;
+				pin.A[index] = value;
 			};
 			if(typeof involtListenForPin[index] === 'function') involtListenForPin[index](index, value);
 		}
@@ -83,15 +91,4 @@ var startListening = function(){
 
 if(!involt.isListening){
 	startListening();
-}
-
-
-
-pin.P[0]
-pin.S[0]
-
-pin["P0"]
-pin["S0"]
-
-P[0]
-S[0]
+};

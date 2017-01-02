@@ -5,8 +5,7 @@ Involt.prototype.addToLoaderList = function(name){
 	if(!loaderOnLaunch) return;
 
 	var device = document.createElement("p");
-	var text = document.createTextNode(name);
-	device.appendChild(text); 
+	device.textContent = name;
 
 	var changeDevice = function(){
 
@@ -18,10 +17,10 @@ Involt.prototype.addToLoaderList = function(name){
 		};
 
 		Array.prototype.filter.call(document.getElementById('loader-ports').children, function(child){
-			child.style.color = 'blue';
+			child.style.background = 'rgb(240,240,240)';
 		});
 
-		this.style.color = 'red';
+		this.style.background = 'rgb(209,209,209)';
 
 	};
 
@@ -37,7 +36,21 @@ Involt.prototype.removeLoader = function(){
 	loader.outerHTML = "";
 	delete loader;
 	
-}
+};
+
+Involt.prototype.bottomError = function(message){
+	var bottom = document.createElement("div");
+	bottom.className = "loader-bottom";
+	bottom.textContent = message;
+	document.body.appendChild(bottom);
+
+	var removeBar = function(){
+		bottom.remove();
+	};
+
+	setTimeout(removeBar, 5000);
+
+};
 
 if(loaderOnLaunch){
 	var startConnecting = function(){
@@ -51,24 +64,30 @@ if(loaderOnLaunch){
 			involt.connect(involt.selectedDevice.address, uuid);
 		};
 
+		
 	};
 
 	document.getElementById('loader-connect').addEventListener("click", startConnecting);
 
-	var resumeSession = function(){
+	if(involt.stillConnectedDevices.length>0){
 
-		if(isSerial){
-			involt.id = involt.stillConnectedDevice[0].connectionId;
-		}
-		else if(isBluetooth){
-			involt.id = involt.stillConnectedDevice[0].socketId;
+		document.getElementById('loader-resume').style.display = "block";
+
+		var resumeSession = function(){
+
+			if(isSerial){
+				involt.id = involt.stillConnectedDevices[0].connectionId;
+			}
+			else if(isBluetooth){
+				involt.id = involt.stillConnectedDevices[0].socketId;
+			};
+
+			console.log("Resumed previous connection: ID ", involt.id);
+
 		};
 
-		console.log("Resumed previous connection: ID ", involt.id);
-
+		document.getElementById('loader-resume').addEventListener("click", resumeSession);
 	};
-
-	document.getElementById('loader-resume').addEventListener("click", resumeSession);
 
 	var discoverMore = function(){
 
@@ -76,6 +95,6 @@ if(loaderOnLaunch){
 
 	};
 
-	document.getElementById('loader-refresh').addEventListener("click", discoverMore);
+	if(isBluetooth)	document.getElementById('loader-refresh').addEventListener("click", discoverMore);
 
 };

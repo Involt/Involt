@@ -18,7 +18,7 @@ var Involt = function(){
 
 	this.fullString = "";
 	this.onSend =  function(){
-
+		//involt.debug()
 	};
 	this.send = function(pin, value){
 		//convert pin and value to framework-friendly format 
@@ -91,7 +91,7 @@ var Involt = function(){
 		};
 	};
 	this.checkPersistentDevices = function(persistentDevices){
-		
+
 		if(persistentDevices.length == 0) return;
 		
 		document.getElementById('loader-resume').style.display = 'block';
@@ -117,9 +117,11 @@ var Involt = function(){
 		};
 
 	};
-	this.debug = function(data){
+	this.debug = function(first, second){
 		if(debugMode){
-			console.log(data);
+			//printing this way makes some elements more readable in dev tools
+			if (typeof second !== 'undefined') console.log(first, second);
+			else console.log(first);
 		};
 	};
 };
@@ -136,7 +138,8 @@ if(isSerial){
 
 		var onConnect = function(device){
 			if(!device){
-				console.error('Could not open, check if Arduino is connected, try other serial port or relaunch Chrome.');
+				console.error('Could not open, check if Arduino is connected, try other serial port or relaunch app.');
+				involt.bottomError('Could not open, check if Arduino is connected, try other serial port or relaunch app.');
 				return;
 			};
 
@@ -186,6 +189,7 @@ else if (isBluetooth){
 			}
 			else{
 				console.error("Bluetooth adapter is OFF. Turn ON bluetooth in your computer.");
+				involt.bottomError('Bluetooth adapter is turned OFF. Turn ON bluetooth in your computer.');
 			};
 		};
 
@@ -258,7 +262,7 @@ else if (isBluetooth){
 			if (!involt.isMobile){
 				if (chrome.runtime.lastError) {
 					console.error("Connection failed: " + chrome.runtime.lastError.message);
-					//involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open chrome console.');
+					involt.bottomError('Could not connect, check if bluetooth device is paired. For more info open console.');
 					return;
 				};
 			};
