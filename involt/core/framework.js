@@ -176,12 +176,27 @@ var defineElement = function($t){
 		
 		var $slider = $t.children('.slider');
 		var $tooltip = $slider.siblings('.tooltip');
+		var $label = $slider.siblings('.label');
 		
-		//prevents from buffer overload issue
 		var isFluid = $t.hasClass('fluid');
+		var isLabel = $t.hasClass('label-constant');
 
-		$tooltip.html($t.data('value')).hide();
-		$slider.siblings('.label').html($t.data('value'));
+		if(isLabel) {
+			$tooltip.remove();
+			$label.html(involtElement.value);
+		}
+		else {
+			$label.remove();
+			$tooltip.html(involtElement.value);
+			$tooltip.hide();
+
+			$t.hover(function() {
+				$tooltip.css('left', $slider.children('.noUi-base').children('.noUi-origin').css('left'));
+				$tooltip.fadeIn(250);
+			}, function() {
+				$tooltip.fadeOut(250);
+			});
+		};
 
 		$slider.noUiSlider({
 			start: [involtElement.value],
@@ -191,34 +206,32 @@ var defineElement = function($t){
 			},
 			step: involtElement.step
 		});
-		
+
 		$slider.on({
-			slide: function(){
-				var cssPos = $slider.children('.noUi-base').children('.noUi-origin').css('left');
+			slide: function(){ 
+				var position = $slider.children('.noUi-base').children('.noUi-origin').css('left');
 				var val = parseInt($slider.val());
-				$tooltip.css('left',cssPos).html(val);
-				$slider.siblings('.label').html(val);
-				$tooltip.fadeIn(100);
+
+				if(isLabel){
+					$label.html(val);
+				}
+				else{
+					$tooltip.css('left', position).html(val);
+				};
+
 				if(isFluid){
 					involtPin[$t.data("pinNumber")] = val;
-					if ($t.parent("form").length == 0) involt.send($t.data("pin"), val);
+					if ($t.parents("form").length == 0) involt.send($t.data("pin"), val);
 				};
+
 			},
 			set: function(){
 				var val = parseInt($slider.val());
-				$tooltip.fadeOut(500);
+
 				involtPin[$t.data("pinNumber")] = val;
 				involt.send($t.data("pin"), val);
-				if ($t.parent("form").length == 0) $t.sendFn();
-				
+				if ($t.parents("form").length == 0) $t.sendFn();
 			}
-		});
-
-		$t.hover(function() {
-			$tooltip.css('left', $slider.children('.noUi-base').children('.noUi-origin').css('left'));
-			$tooltip.fadeIn(250);
-		}, function() {
-			$tooltip.fadeOut(250);
 		});
 	}
 	else if(involtElement.name == 'switch'){
