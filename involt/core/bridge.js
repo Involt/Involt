@@ -3,16 +3,10 @@ var involt = window.parent.involt;
 var involtFunction = involt.involtFunction;
 var involtListenForPin = involt.involtListenForPin;
 
-var pin = {
-	P: involt.pin.P,
-	S: involt.pin.S,
-	A: involt.pin.A
-};
-
 //variables kept for backward compability of custom scripts
-var involtPin = pin.P;
-var involtString = pin.S;
-var involtReceivedPin = pin.A;
+var involtPin = involt.pin.P;
+var involtString = involt.pin.S;
+var involtReceivedPin = involt.pin.A;
 
 var gotData = function(receiveInfo){
 	if (isSerial && receiveInfo.connectionId !== involt.id) return;
@@ -55,14 +49,14 @@ var parseData = function(data){
 
 			if(!isNaN(value)){
 				if(value.indexOf('.')>0){
-					pin.A[index] = parseFloat(value);
+					involt.pin.A[index] = parseFloat(value);
 				}
 				else {
-					pin.A[index] = parseInt(value);
+					involt.pin.A[index] = parseInt(value);
 				};
 			}
 			else{
-				pin.A[index] = value;
+				involt.pin.A[index] = value;
 			};
 			if(typeof involtListenForPin[index] === 'function') involtListenForPin[index](index, value);
 		}
