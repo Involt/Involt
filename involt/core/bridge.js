@@ -1,18 +1,18 @@
 var involt = window.parent.involt;
 
-//variables kept for backward compability of custon scripts
-var involtPin = involt.involtPin;
-var involtString = involt.involtString;
-var involtReceivedPin = involt.involtReceivedPin;
-
 var involtFunction = involt.involtFunction;
 var involtListenForPin = involt.involtListenForPin;
 
 var pin = {
-	P: involt.involtPin,
-	S: involt.involtString,
-	A: involt.involtReceivedPin
+	P: involt.pin.P,
+	S: involt.pin.S,
+	A: involt.pin.A
 };
+
+//variables kept for backward compability of custom scripts
+var involtPin = pin.P;
+var involtString = pin.S;
+var involtReceivedPin = pin.A;
 
 var gotData = function(receiveInfo){
 	if (isSerial && receiveInfo.connectionId !== involt.id) return;

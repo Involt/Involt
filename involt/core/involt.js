@@ -9,9 +9,11 @@ var Involt = function(){
 	this.isMobile = false;
 	this.isListening = false;
 
-	this.involtPin = [];
-	this.involtString = [];
-	this.involtReceivedPin = [];
+	this.pin = {
+		P: [],
+		S: [],
+		A: []
+	};
 
 	this.involtFunction = {};
 	this.involtListenForPin = {};

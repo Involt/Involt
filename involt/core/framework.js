@@ -105,15 +105,15 @@ var defineElement = function($t){
 	
 	//Add beginning values to pin array (if there are on/off values put the inactive state as default)
 	if(involtElement.pinType == 'P'){
-		if (typeof involtElement.value !== 'object') involtPin[involtElement.pinNumber] = involtElement.value;
-		else involtPin[involtElement.pinNumber] = involtElement.value[0];
+		if (typeof involtElement.value !== 'object') pin.P[involtElement.pinNumber] = involtElement.value;
+		else pin.P[involtElement.pinNumber] = involtElement.value[0];
 	}
 	else if(involtElement.pinType == 'S'){
-		if (typeof involtElement.value !== 'object') involtPin[involtElement.pinNumber] = involtElement.value;
-		else involtPin[involtElement.pinNumber] = involtElement.value[0];
+		if (typeof involtElement.value !== 'object') pin.S[involtElement.pinNumber] = involtElement.value;
+		else pin.P[involtElement.pinNumber] = involtElement.value[0];
 	}
 	else if(involtElement.pinType == 'A'){
-		involtReceivedPin[involtElement.pinNumber] = involtElement.value;
+		pin.A[involtElement.pinNumber] = involtElement.value;
 	};
 
 	//Generate UI additional assets
@@ -137,13 +137,13 @@ var defineElement = function($t){
 				var index = $t.data("pinNumber");
 				var max = $t.data("max");
 
-				if (involtPin[index] !== this.cv){
+				if (pin.P[index] !== this.cv){
 					if (this.cv <= max){
-						involtPin[index] = this.cv;
+						pin.P[index] = this.cv;
 						if ($t.parents("form").length == 0) $t.sendValue();
 					}
 					else {
-						involtPin[index] = max;
+						pin.P[index] = max;
 					};
 				};	
 			};
@@ -153,12 +153,12 @@ var defineElement = function($t){
 			var index = $t.data("pinNumber");
 			var max = $t.data("max");
 
-			if (involtPin[index] !== value){
+			if (pin.P[index] !== value){
 				if (value <= max){
-					involtPin[index] = value;
+					pin.P[index] = value;
 				}
 				else {
-					involtPin[index] = max;
+					pin.P[index] = max;
 				};
 				if ($t.parents("form").length == 0) $t.sendValue(); 
 			};
@@ -221,7 +221,7 @@ var defineElement = function($t){
 				};
 
 				if(isFluid){
-					involtPin[$t.data("pinNumber")] = val;
+					pin.P[$t.data("pinNumber")] = val;
 					if ($t.parents("form").length == 0) involt.send($t.data("pin"), val);
 				};
 
@@ -229,7 +229,7 @@ var defineElement = function($t){
 			set: function(){
 				var val = parseInt($slider.val());
 
-				involtPin[$t.data("pinNumber")] = val;
+				pin.P[$t.data("pinNumber")] = val;
 				if(!isFluid) involt.send($t.data("pin"), val);
 				if($t.parents("form").length == 0) $t.sendFn();
 			}
@@ -275,8 +275,8 @@ var defineElement = function($t){
 
 			if(typeof value === 'undefined'){
 				if(typeof pin === 'undefined'){
-					if($t.data("pinType") == 'P') involt.send($t.data('pin'), involtPin[$t.data("pinNumber")]);
-					else if($t.data("pinType") == 'S') involt.send($t.data('pin'), involtString[$t.data("pinNumber")]);
+					if($t.data("pinType") == 'P') involt.send($t.data('pin'), pin.P[$t.data("pinNumber")]);
+					else if($t.data("pinType") == 'S') involt.send($t.data('pin'), pin.S[$t.data("pinNumber")]);
 				}
 				else{
 					involt.send($t.data('pin'), pin);
@@ -303,13 +303,13 @@ var defineElement = function($t){
 
 				//$t.data("value", newValue);
 
-				if($t.data("pinType") == 'P') involtPin[$t.data("pinNumber")] = newValue;
-				else if($t.data("pinType") == 'S') involtString[$t.data("pinNumber")] = newValue;
+				if($t.data("pinType") == 'P') pin.P[$t.data("pinNumber")] = newValue;
+				else if($t.data("pinType") == 'S') pin.S[$t.data("pinNumber")] = newValue;
 				
 			}
 			else{
-				if ($t.data("pinType") == 'P') involtPin[$t.data("pinNumber")] = $t.data("value");
-				else if ($t.data("pinType") == 'S')	involtString[$t.data("pinNumber")] = $t.data("value");
+				if ($t.data("pinType") == 'P') pin.P[$t.data("pinNumber")] = $t.data("value");
+				else if ($t.data("pinType") == 'S')	pin.S[$t.data("pinNumber")] = $t.data("value");
 			};
 
 		});
@@ -352,10 +352,10 @@ var defineElement = function($t){
 			$t.data("pinNumber", parseInt(newPin.substring(1,newPin.length)));
 
 			if($t.data("pinType") == 'P'){
-				if (typeof involtPin[$t.data("pinNumber")] === 'undefined') involtPin[$t.data("pinNumber")] = involtPin[$oldPin];
+				if (typeof pin.P[$t.data("pinNumber")] === 'undefined') pin.P[$t.data("pinNumber")] = pin.P[$oldPin];
 			}
 			else if($t.data("pinType") == 'S'){
-				if (typeof involtString[$t.data("pinNumber")] === 'undefined') involtString[$t.data("pinNumber")] = involtString[$oldPin];
+				if (typeof pin.S[$t.data("pinNumber")] === 'undefined') pin.S[$t.data("pinNumber")] = pin.S[$oldPin];
 			};
 
 		}); 
@@ -429,8 +429,8 @@ $(document).ready(function() {
 		var $t = $(this);
 		var index = $t.data("pinNumber");
 
-		involtPin[index] = involtPin[index] + $t.data("step");
-		involtPin[index] = Math.min(Math.max(involtPin[index], $t.data("min")), $t.data("max"));
+		pin.P[index] = pin.P[index] + $t.data("step");
+		pin.P[index] = Math.min(Math.max(pin.P[index], $t.data("min")), $t.data("max"));
 		$t.sendValue(); 
 	});
 
@@ -439,8 +439,8 @@ $(document).ready(function() {
 		var $t = $(this);
 		var index = $t.data("pinNumber");
 
-		involtPin[index] = involtPin[index] - $t.data("step");
-		involtPin[index] = Math.min(Math.max(involtPin[index], $t.data("min")), $t.data("max"));
+		pin.P[index] = pin.P[index] - $t.data("step");
+		pin.P[index] = Math.min(Math.max(pin.P[index], $t.data("min")), $t.data("max"));
 		$t.sendValue(); 
 	});
 
@@ -532,13 +532,13 @@ var analogUpdate = function(){
 	//show
 	$(".ard.show").each(function() {
 		var $t = $(this);
-		$t.html(involtReceivedPin[$t.data("pinNumber")]);
+		$t.html(pin.A[$t.data("pinNumber")]);
 	});
 
 	//bar
 	$(".ard.bar").each(function() {
 		var $t = $(this);
-		if (isNaN(involtReceivedPin[$t.data("pinNumber")])) return;
+		if (isNaN(pin.A[$t.data("pinNumber")])) return;
 		//map the value to bar pixel width
 		var bar = {
 			minValue : $t.data('min'),
@@ -546,23 +546,23 @@ var analogUpdate = function(){
 			maxWidth : parseInt($t.children('.bar-background').css('width'))
 		};
 		//scaling the css width of active element to total width
-		var widthMap = (involtReceivedPin[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
+		var widthMap = (pin.A[$t.data("pinNumber")]-bar.minValue)*(bar.maxWidth-0)/(bar.maxValue-bar.minValue)+0;
 		//change bar width
 		$t.children('.bar-background').children(".bar-value").css('width', widthMap);
 		//display the value
-		$t.children(".bar-label").css('width', widthMap).html(involtReceivedPin[$t.data("pinNumber")]);
+		$t.children(".bar-label").css('width', widthMap).html(pin.A[$t.data("pinNumber")]);
 	});
 
 	//knob
 	$(".ard.knob").each(function() {
-		if (isNaN(involtReceivedPin[$(this).data("pinNumber")])) return;
-		$(this).val(involtReceivedPin[$(this).data("pinNumber")]).trigger('change');
+		if (isNaN(pin.A[$(this).data("pinNumber")])) return;
+		$(this).val(pin.A[$(this).data("pinNumber")]).trigger('change');
 	});
 
 	//value
 	$(".ard.value").each(function() {
 		var $t = $(this);
-		$t.attr('value', involtReceivedPin[$t.data("pinNumber")]);
+		$t.attr('value', pin.A[$t.data("pinNumber")]);
 	});
 
 };
