@@ -275,8 +275,7 @@ var defineElement = function($t){
 
 			if(typeof value === 'undefined'){
 				if(typeof pin === 'undefined'){
-					if($t.data("pinType") == 'P') involt.send($t.data('pin'), involt.pin.P[$t.data("pinNumber")]);
-					else if($t.data("pinType") == 'S') involt.send($t.data('pin'), involt.pin.S[$t.data("pinNumber")]);
+					involt.send($t.data('pin'), involt.pin[$t.data('pinType')][$t.data("pinNumber")]);
 				}
 				else{
 					involt.send($t.data('pin'), pin);
@@ -303,13 +302,10 @@ var defineElement = function($t){
 
 				//$t.data("value", newValue);
 
-				if($t.data("pinType") == 'P') involt.pin.P[$t.data("pinNumber")] = newValue;
-				else if($t.data("pinType") == 'S') involt.pin.S[$t.data("pinNumber")] = newValue;
-				
+				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = newValue;			
 			}
 			else{
-				if ($t.data("pinType") == 'P') involt.pin.P[$t.data("pinNumber")] = $t.data("value");
-				else if ($t.data("pinType") == 'S')	involt.pin.S[$t.data("pinNumber")] = $t.data("value");
+				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = $t.data("value");
 			};
 
 		});
@@ -333,7 +329,7 @@ var defineElement = function($t){
 			var $t = $(this);
 			$t.data("pin", pin);
 			$t.data("pinType", pin[0]);
-			$t.data("pinNumber", parseInt(involt.pin.Substring(1,pin.length)));
+			$t.data("pinNumber", parseInt(pin.substring(1,pin.length)));
 
 		});
 
@@ -349,13 +345,12 @@ var defineElement = function($t){
 
 			$t.data("pin", newPin);
 			$t.data("pinType", newPin[0]);
-			$t.data("pinNumber", parseInt(newinvolt.pin.Substring(1,newPin.length)));
+			$t.data("pinNumber", parseInt(newPin.substring(1,newPin.length)));
 
-			if($t.data("pinType") == 'P'){
-				if (typeof involt.pin.P[$t.data("pinNumber")] === 'undefined') involt.pin.P[$t.data("pinNumber")] = involt.pin.P[$oldPin];
-			}
-			else if($t.data("pinType") == 'S'){
-				if (typeof involt.pin.S[$t.data("pinNumber")] === 'undefined') involt.pin.S[$t.data("pinNumber")] = involt.pin.S[$oldPin];
+			var $pinType = $t.data("pinType");
+
+			if(typeof involt.pin[$pinType][$t.data("pinNumber")] === 'undefined') {
+				involt.pin[$pinType][$t.data("pinNumber")] = involt.pin[$pinType][$oldPin];
 			};
 
 		}); 

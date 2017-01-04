@@ -58,13 +58,11 @@ var parseData = function(data){
 			else{
 				involt.pin.A[index] = value;
 			};
-			if(typeof involtListenForPin[index] === 'function') involtListenForPin[index](index, value);
+			if(typeof involtListenForPin[index] === 'function') involtListenForPin[index](index, involt.pin.A[index]);
 		}
 		else if (data[j].indexOf('F') == 0){
 			var name = data[j].substring(1,indexE);
-			if(typeof window["involtFunction"][name] !== 'undefined'){
-				window["involtFunction"][name]();
-			};
+			if(typeof involtFunction[name] === 'function') involtFunction[name]();
 		};
 	};
 }
