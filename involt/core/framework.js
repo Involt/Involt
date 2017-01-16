@@ -1,6 +1,13 @@
+/*
+	DEFINE FRAMEWORK ELEMENTS AND THEIR EVENTS
+
+	Also contains JQuery methods and update of read-only elements.
+*/
+
 var defineElement = function($t){
 
 	var involtElement = {
+		name: null,
 		pin: null,
 		value: 0,
 		range: null,
@@ -12,7 +19,7 @@ var defineElement = function($t){
 
 	var classes = $t.attr('class').trim().split(' ');
 	var ardIndex = classes.indexOf('ard');
-	involtElement.name = classes[ardIndex+1];
+	if(typeof classes[ardIndex+1] !== 'undefined') involtElement.name = classes[ardIndex+1];
 
 	if(['bar','knob'].indexOf(involtElement.name) > -1) involtElement.max = 1024;
 
@@ -268,55 +275,47 @@ var defineElement = function($t){
 	};
 	
 	//Send the value for pin related to UI element pin, if no value defined - send the value defined in array
-	$.fn.sendValue = function(pin, value){
+	$.fn.sendValue = function(value){
 
 		return this.each(function() {
 			var $t = $(this);
 
 			if(typeof value === 'undefined'){
-				if(typeof pin === 'undefined'){
-					involt.send($t.data('pin'), involt.pin[$t.data('pinType')][$t.data("pinNumber")]);
-				}
-				else{
-					involt.send($t.data('pin'), pin);
-				}
+				involt.send($t.data('pin'), involt.pin[$t.data('pinType')][$t.data("pinNumber")]);
 			}
-			else {
-				involt.send(pin,value)
+			else{
+				involt.send($t.data('pin'), value);
 			};
 
-			$t.not('.knob-send').not('.rangeslider').sendFn(); 
+			$t.not('.knob-send, .rangeslider').sendFn();
 
 		});	
 
 	};
 
-	//Update the value related to target pin, if nothing is defined the value in array will be data of UI element
-	$.fn.updateValue = function(newValue){
+	//Update the value related to target pin, if nothing is defined the pin value will be data of UI element
+	//If updateElement is set, it will also update UI element data
+	$.fn.updateValue = function(newValue, updateElement){
 
 		return this.each(function() {
 			var $t = $(this);
 
-			if(typeof newValue !== 'undefined') {
-				if(!isNaN(newValue)) newValue = parseInt(newValue);
-
-				//$t.data("value", newValue);
-
-				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = newValue;			
-			}
-			else{
+			if(typeof newValue === 'undefined') {
 				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = $t.data("value");
+			}
+			else {
+
+				if(!isNaN(newValue)) newValue = parseInt(newValue);
+				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = newValue;	
+
+				if(typeof updateElement !== "undefined"){
+
+					if(updateElement){
+						$t.data("value", newValue);
+					};
+
+				};
 			};
-
-		});
-
-	};
-
-	//Send raw string directly to device
-	$.fn.sendRawString = function(string){
-
-		return this.each(function() {
-			involt.sendToDevice(string+"\n");
 		});
 
 	};
@@ -361,14 +360,28 @@ var defineElement = function($t){
 	$.fn.sendAndUpdate = function(pin, value){
 
 		return this.each(function(){
+			var $t = $(this);
 
 			if (typeof value === 'undefined') {
-				$(this).updateValue(pin).sendValue();
+				$t.updateValue(pin).sendValue();
+
+				if (typeof pin === 'undefined'){
+					$t.updateValue($t.data("value")).sendValue();
+				}
 			}
 			else {
-				$(this).pinDefine(pin).updateValue(value).sendValue();
+				$t.pinDefine(pin).updateValue(value).sendValue();
 			};
 
+		});
+
+	};
+
+	//Send raw string directly to device
+	$.fn.sendRawString = function(string){
+
+		return this.each(function() {
+			involt.sendToDevice(string+"\n");
 		});
 
 	};
