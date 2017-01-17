@@ -5,13 +5,21 @@
 	<meta charset="utf-8" />
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="msapplication-tap-highlight" content="no" />
-	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+	<!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />-->
 	<script src="cordova.js"></script>
 	<script src="settings.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/loader.css">
 </head>
 
 <body>
+
+	<!--
+
+		This document contains loader and handles the communication while layout is showed within iframe
+
+		There is no need of changing anything here.
+
+	-->
 	
 	<div id="loader-bg">
 		<div id="loader">
@@ -29,7 +37,6 @@
 		</div>
 	</div>
 
-	
 
 	<iframe src="app.html" frameborder="0" name="involtApp"></iframe>
 

@@ -4,9 +4,9 @@
 Why Involt?
 ------
 
-Developing interactive product is multidisciplinary task. It's related to industrial design, programming, user experience and sometimes graphic design skills. Arduino is easy hardware prototyping platform but things get complicated when software is involved in project - even if there are many great tools and frameworks for app prototyping. It's a huge obstacle that blocks many concepts from making it to the real world. Involt is a framework to help designers in their projects on early stages without advanced programming.
+Developing interactive product is multidisciplinary task. It's related to industrial design, programming, user experience and sometimes graphic design skills. Arduino is easy hardware prototyping platform but things get complicated when software is involved in project - even if there are many great tools and frameworks for app prototyping. It's a huge obstacle that blocks many concepts from making it to the real world. Involt is a framework to help you on early stages without advanced programming.
 
-The key to Involt is to "make it simple" to prototype, iterate and quickly show results to users. It simplifies the injection of hardware interactions into HTML based prototypes. It makes it as simple as adding CSS clas to element. Involt can be a huge boost in your design process, especially during RITE method (Rapid Iterative Testing and Evaluation).
+The key to Involt is to "make it simple" to prototype, iterate and quickly show results to users. It simplifies the injection of hardware interactions into HTML based prototypes. It makes it as simple as adding CSS class to element. Involt can be a huge boost in your design process, especially during RITE method (Rapid Iterative Testing and Evaluation).
 
 The main feature of this framework is easy and quick workflow. The syntax was inspired by popular responsive design frameworks. You can create your app with basic knowledge about HTML, CSS and Arduino. You can also create more advanced interactions with use of JavaScript and JQuery.
 

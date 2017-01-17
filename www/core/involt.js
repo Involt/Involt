@@ -1,4 +1,9 @@
-//MAIN INVOLT OBJECT (COMMUNICATION BRIDGE)
+/*
+	INVOLT MAIN OBJECT AND COMMUNICATION
+
+	This file contains all functions related to communication between
+	app and device and establishing connection.
+*/
 
 var Involt = function(){
 	this.id = 0;
@@ -169,7 +174,7 @@ if(isSerial){
 	};
 	Involt.prototype.sendToDevice = function(sendString){
 
-		involt.debug(sendString);
+		involt.debug(sendString, involt.pin);
 
 		chrome.serial.send(involt.id, involt.sendStringConvert(sendString), involt.onSend);
 
@@ -240,6 +245,8 @@ else if (isBluetooth){
 		var discoveryStopped = function(){
 			chrome.bluetooth.stopDiscovery(function() {
 				console.info("Discovery stopped");
+
+				involt.discoveryStoppedText();
 				//Somehow Android requires this step after the discovery, otherwise it will not detect the devices as in desktop.
 				if (involt.isMobile){
 					chrome.bluetooth.getDevices(involt.newDeviceFound);
@@ -252,6 +259,7 @@ else if (isBluetooth){
 
 		chrome.bluetooth.startDiscovery(function() {
 			console.info("Start discovery");
+			involt.discoveryStartedText();
 			setTimeout(discoveryStopped, duration);
 		});
 
@@ -305,7 +313,7 @@ else if (isBluetooth){
 
 	Involt.prototype.sendToDevice = function(sendString){
 
-		involt.debug(sendString);
+		involt.debug(sendString, involt.pin);
 
 		chrome.bluetoothSocket.send(involt.id, involt.sendStringConvert(sendString), involt.onSend);
 
@@ -318,9 +326,7 @@ var involt = new Involt();
 if(typeof cordova === 'object') involt.isMobile = true;
 
 if(!loaderOnLaunch){
-	var loader = document.getElementById("loader-bg");
-	loader.outerHTML = "";
-	delete loader;
+	document.getElementById("loader-bg").outerHTML = ""; //not removeLoader because it's still not loaded
 };
 
 Involt.prototype.launch = function(){

@@ -1,4 +1,8 @@
-//JQuery is not used here intentionally making the framework core elements independed from it
+/*
+	LOADER EVENTS
+
+	JQuery is not used here intentionally making the framework core elements independed from it.
+*/
 
 Involt.prototype.addToLoaderList = function(name){
 
@@ -32,13 +36,12 @@ Involt.prototype.addToLoaderList = function(name){
 
 Involt.prototype.removeLoader = function(){
 
-	var loader = document.getElementById("loader-bg");
-	loader.outerHTML = "";
-	delete loader;
+	document.getElementById("loader-bg").outerHTML = "";
 	
 };
 
 Involt.prototype.bottomError = function(message){
+	
 	var bottom = document.createElement("div");
 	bottom.className = "loader-bottom";
 	bottom.textContent = message;
@@ -52,7 +55,30 @@ Involt.prototype.bottomError = function(message){
 
 };
 
+if(isBluetooth){
+	Involt.prototype.discoveryStoppedText = function(){
+		if(loaderOnLaunch){
+			var refreshButton = document.getElementById('loader-refresh');
+			if(refreshButton == null) return;
+			refreshButton.textContent = 'Search for more?';
+			refreshButton.style.textDecoration = 'underline';
+			refreshButton.style.cursor = 'pointer';
+		};
+	};
+
+	Involt.prototype.discoveryStartedText = function(){
+		if(loaderOnLaunch){
+			var refreshButton = document.getElementById('loader-refresh');
+			refreshButton.textContent = 'Seraching for devices...';
+			refreshButton.style.textDecoration = 'none';
+			refreshButton.style.cursor = 'cursor';
+		};
+	};
+};
+
+
 if(loaderOnLaunch){
+
 	var startConnecting = function(){
 
 		if(involt.selectedDevice == '') return;
@@ -63,7 +89,6 @@ if(loaderOnLaunch){
 		else if(isBluetooth){
 			involt.connect(involt.selectedDevice.address, uuid);
 		};
-
 		
 	};
 
@@ -83,6 +108,8 @@ if(loaderOnLaunch){
 			};
 
 			console.log("Resumed previous connection: ID ", involt.id);
+
+			involt.removeLoader();
 
 		};
 

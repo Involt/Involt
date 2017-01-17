@@ -19,7 +19,7 @@ var defineElement = function($t){
 
 	var classes = $t.attr('class').trim().split(' ');
 	var ardIndex = classes.indexOf('ard');
-	if(typeof classes[ardIndex+1] !== 'undefined') involtElement.name = classes[ardIndex+1];
+	involtElement.name = classes[ardIndex+1];
 
 	if(['bar','knob'].indexOf(involtElement.name) > -1) involtElement.max = 1024;
 
@@ -294,28 +294,29 @@ var defineElement = function($t){
 	};
 
 	//Update the value related to target pin, if nothing is defined the pin value will be data of UI element
-	//If updateElement is set, it will also update UI element data
 	$.fn.updateValue = function(newValue, updateElement){
 
 		return this.each(function() {
 			var $t = $(this);
 
-			if(typeof newValue === 'undefined') {
+			if(typeof newValue === 'undefined'){
 				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = $t.data("value");
 			}
-			else {
+			else{
+				if(!isNaN(newValue)) newValue = parseInt(newValue); 
+				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = newValue;
+			};
 
-				if(!isNaN(newValue)) newValue = parseInt(newValue);
-				involt.pin[$t.data("pinType")][$t.data("pinNumber")] = newValue;	
+			if(typeof updateElement !== 'undefined'){
+				if(updateElement){
+					$t.data("value", newValue);
 
-				if(typeof updateElement !== "undefined"){
-
-					if(updateElement){
-						$t.data("value", newValue);
+					if($t.is('input')){
+						$t.val(newValue);
 					};
-
 				};
 			};
+
 		});
 
 	};
@@ -360,19 +361,7 @@ var defineElement = function($t){
 	$.fn.sendAndUpdate = function(pin, value){
 
 		return this.each(function(){
-			var $t = $(this);
-
-			if (typeof value === 'undefined') {
-				$t.updateValue(pin).sendValue();
-
-				if (typeof pin === 'undefined'){
-					$t.updateValue($t.data("value")).sendValue();
-				}
-			}
-			else {
-				$t.pinDefine(pin).updateValue(value).sendValue();
-			};
-
+			$(this).pinDefine(pin).updateValue(value, true).sendValue();
 		});
 
 	};
@@ -571,6 +560,7 @@ var analogUpdate = function(){
 	$(".ard.value").each(function() {
 		var $t = $(this);
 		$t.attr('value', involt.pin.A[$t.data("pinNumber")]);
+		$t.data("value", involt.pin.A[$t.data("pinNumber")]);
 	});
 
 };

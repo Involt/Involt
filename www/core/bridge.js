@@ -1,3 +1,9 @@
+/*
+	CONVERT VALUES RECEIVED FROM DEVICE
+
+	and pass the values and function triggering to layout.
+*/
+
 var involt = window.parent.involt;
 
 var involtFunction = involt.involtFunction;
@@ -81,6 +87,7 @@ var startListening = function(){
 	involt.isListening = true;
 };
 
+//start listening after the connection or when receive functions are loaded.
 if(!involt.isListening){
 	startListening();
 };

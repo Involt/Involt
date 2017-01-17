@@ -1,9 +1,9 @@
 /*
   INVOLT BASIC ARDUINO SKETCH
-  by Ernest Warzocha 2015
+  by Ernest Warzocha 2016
   ------------------------------------------------------
   This file is for serial communication between Arduino 
-  Uno and Involt App. It can be used with HC-05 Bluetooth 
+  Uno and Involt App. It can be used with Bluetooth 2.0
   device connected via hardware serial.
 */
 
@@ -15,8 +15,8 @@
   store more values then arduino total pins. Use them 
   in sketch for not only pin-to-pin communication.
 */
-int    involtPin[14] = {};
-String involtString[2] ={};
+int    involtPin[14] = {}; //equals involt.pin.P in app
+String involtString[2] ={}; //equals involt.pin.S in app
 
 /*
   Buffer for received data. If you plan to receive more 
@@ -25,51 +25,27 @@ String involtString[2] ={};
 char involt[16];
 
 /*
-  String for function received from app.
+  String for responding to function received from app.
 */
 String fname;
 
 void setup() {
  //Connection speed must be same as app.
  Serial.begin(57600);
- pinMode(13,OUTPUT);
 }
 
 void loop() {
   involtReceive();
 
+  //PUT YOUR CODE HERE
 
-  involtSend(0,analogRead(A0));
-  delay(20);
-
-analogWrite(9, involtPin[9]);
-analogWrite(10, involtPin[10]);
-analogWrite(11, involtPin[11]);
-
-  digitalWrite(13, involtPin[13]);
-
-  if(fname == "testing"){
-    digitalWrite(13,HIGH);
-    delay(1000);
-  }
-  /*(
-  involtSendString(0, "255,23,1");
-  delay(5);
-  involtSendFunction("check");
-  delay(500);
-  */
- 
-  //Clear the function to trigger once.
+  //Clear the function to trigger it only once.
   fname = "";
 }
 
 /*
   INVOLT FUNCTIONS
   ------------------------------------------------------
-  You don't have to look below. Especially if you don't
-  want to complicate everything. However, you can add 
-  your own functions (additional letters for example) 
-  when data is received.
 
   involtReceive
   ------------------------------------------------------ 
@@ -81,6 +57,10 @@ analogWrite(11, involtPin[11]);
   ------------------------------------------------------
   send int or string to app. Multiple prints are to
   reduce the sketch size (compared to sprintf()).
+
+  involtSendFunction
+  ------------------------------------------------------
+  send function name to trigger it in app.
 */
 
 void involtReceive(){

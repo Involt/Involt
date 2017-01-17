@@ -10,9 +10,8 @@
 		CONNECTION TYPE
 		Select connection type, only ONE can be defined at once.
 	*/
-	var isSerial    = true;  //Desktop
-	var isBluetooth = false; //Desktop AND Mobile (BT 2.0)
-	var isLowEnergy = false; //Mobile (BT LE) DEPRECIATED
+	var isSerial    = false; //Desktop
+	var isBluetooth = true; //Desktop AND Mobile (BT 2.0)
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on app launch. 
@@ -26,7 +25,7 @@
 		PERSISTENT SERIAL CONNECTION
 		Use isPersistent to hold the connection after app shutdown. The session is returned when
 		relaunching. It's set to false by default because it blocks Arduino sketch upload process.
-		Changes from chrome apps to node-webkit made this currently not working.
+		Changes from chrome apps to node-webkit made this currently not working (?).
 	*/
 	var defaultSerialPort = "COM4";
 	var isPersistent = false;
@@ -44,12 +43,6 @@
 	*/
 	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
 	/*
-		For Bluetooth Low Energy:
-		Change the RX/TX uuid for communication, you should get them from device documentation.
-	*/
-	var uuidTx = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //send to device
-	var uuidRx = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; //read from device
-	/*
 		BITRATE
 		The bitrate should remain unchanged. 
 		If you have to lower the speed don't overload the port from arduino.
@@ -66,6 +59,6 @@
 		DEBUG MODE
 		Debug mode logs more information to console.
 	*/
-	var debugMode = true;
+	var debugMode = false;
 
 //----------------------------------------------------------------------------------------------
