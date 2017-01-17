@@ -1,6 +1,6 @@
 /*
 		INVOLT CONNECTION SETTINGS
-		Ernest Warzocha 2015
+		Ernest Warzocha 2016
 		involt.github.io
 */
 
@@ -10,9 +10,8 @@
 		CONNECTION TYPE
 		Select connection type, only ONE can be defined at once.
 	*/
-	var isSerial    = true;  //Desktop
+	var isSerial    = true; //Desktop
 	var isBluetooth = false; //Desktop AND Mobile (BT 2.0)
-	var isLowEnergy = false; //Mobile (BT LE)
 	/*
 		LOADING SCREEN
 		Set loaderOnLaunch to false and skip loading screen on app launch. 
@@ -26,8 +25,9 @@
 		PERSISTENT SERIAL CONNECTION
 		Use isPersistent to hold the connection after app shutdown. The session is returned when
 		relaunching. It's set to false by default because it blocks Arduino sketch upload process.
+		Changes from chrome apps to node-webkit made this currently not working (?).
 	*/
-	var defaultSerialPort = "COM3";
+	var defaultSerialPort = "COM4";
 	var isPersistent = false;
 	/*
 		BLUETOOTH DEFAULT ADDRESS
@@ -39,19 +39,9 @@
 	var defaultBtAddress = "98:D3:31:90:4C:66";
 	var discoveryDuration = 3000;
 	/*
-		CONNECTION UUID
-		DESKTOP: The UUID must be same in manifest.json and the app must be reloaded from extensions menu.
-		You can get the UUID of your device form hardware documentation or app's chrome console.
-
-		Variable uuid is device uuid.
+		CONNECTION UUID (Serial Port Profile)
 	*/
 	var uuid = "00001101-0000-1000-8000-00805f9b34fb";
-	/*
-		For Bluetooth Low Energy:
-		Change the RX/TX uuid for communication, you should get them from device documentation.
-	*/
-	var uuidTx = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; //send to device
-	var uuidRx = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; //read from device
 	/*
 		BITRATE
 		The bitrate should remain unchanged. 

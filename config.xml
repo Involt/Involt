@@ -4,7 +4,7 @@
 
     This file contains Phonegap settings for Mobile version of framework. 
 
-    For desktop see manifest.json and for connection settings settings.js
+    For desktop see package.json and for connection settings settings.js
 
     config.xml reference: https://build.phonegap.com/docs/config-xml 
 
@@ -13,7 +13,7 @@
         xmlns:gap = "http://phonegap.com/ns/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id        = "io.github.involt"
-        version   = "1.0.9">
+        version   = "1.1.0">
 
     <name>Involt for Mobile</name>
 
@@ -32,12 +32,7 @@
     <preference name="android-installLocation"    value="auto" />
     <preference name="webviewbounce"              value="true" />
 
-    <preference name='phonegap-version' value='cli-6.1.0' />
-
-    <!--For gapdebug-->
-    <!--<gap:config-file platform="android" parent="/manifest">
-        <application android:debuggable="true" />
-    </gap:config-file>-->
+    <preference name='phonegap-version' value='cli-6.3.0' />
 
     <!-- Plugins -->
     <preference name="android-build-tool" value="gradle" />
@@ -54,53 +49,12 @@
         <icon src="img/icons/android/icon-96-xhdpi.png"     qualifier="xhdpi" />
         <icon src="img/icons/android/icon-144-xxhdpi.png"   qualifier="xxhdpi" />
         <icon src="img/icons/android/icon-192-xxxhdpi.png"  qualifier="xxxhdpi" />
-
-        <!-- Splashscreen: (requires plugin, currently not working) -->
-        <!--   
-        <splash src="img/splashscreen/android/screen-ldpi-portrait.png"      qualifier="port-ldpi" />
-        <splash src="img/splashscreen/android/screen-mdpi-portrait.png"      qualifier="port-mdpi" />
-        <splash src="img/splashscreen/android/screen-hdpi-portrait.png"      qualifier="port-hdpi" />
-        <splash src="img/splashscreen/android/screen-xhdpi-portrait.png"     qualifier="port-xhdpi" />
-        <splash src="img/splashscreen/android/screen-xxhdpi-portrait.png"    qualifier="port-xxhdpi" />
-         -->
     </platform>
-    
-
-    <!-- IOS settings (currently not tested) -->
-
-    <!--
-    <preference name="prerendered-icon"           value="true" />
-    <preference name="stay-in-webview"            value="false" />          
-    <preference name="ios-statusbarstyle"         value="black-opaque" />   
-    <preference name="detect-data-types"          value="true" />          
-    <preference name="exit-on-suspend"            value="false" />          
-    <preference name="show-splash-screen-spinner" value="true" />           
-    <preference name="auto-hide-splash-screen"    value="true" /> 
-    <preference name="disable-cursor"             value="false" />
-    -->
-
-    <!-- IOS icons and splashscreen (not tested)-->
-
-    <!--
-    <icon src="img/icons/ios/icon-57.png"                                gap:platform="ios"     width="57" height="57" />
-    <icon src="img/icons/ios/icon-72.png"                                gap:platform="ios"     width="72" height="72" />
-    <icon src="img/icons/ios/icon-57-2x.png"                             gap:platform="ios"     width="114" height="114" />
-    <icon src="img/icons/ios/icon-72-2x.png"                             gap:platform="ios"     width="144" height="144" />
-
-    <gap:splash src="img/splashscreen/ios/screen-iphone-portrait.png"         gap:platform="ios"     width="320" height="480" />
-    <gap:splash src="img/splashscreen/ios/screen-iphone-portrait-2x.png"      gap:platform="ios"     width="640" height="960" />
-    <gap:splash src="img/splashscreen/ios/screen-iphone-portrait-568h-2x.png" gap:platform="ios"     width="640" height="1136" />
-    <gap:splash src="img/splashscreen/ios/screen-ipad-portrait.png"           gap:platform="ios"     width="768" height="1024" />
-    <gap:splash src="img/splashscreen/ios/screen-ipad-landscape.png"          gap:platform="ios"     width="1024" height="768" />
-
-    <gap:config-file platform="ios" parent="CFBundleShortVersionString">
-    <string>100</string>
-    </gap:config-file>
-    -->
 
     <access origin="*"/>
     <plugin name="cordova-plugin-whitelist" version="1" />
     <allow-intent href="http://*/*" />
+    <!--<allow-intent href="file://*/*" />-->
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
     <allow-intent href="sms:*" />

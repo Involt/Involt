@@ -1,35 +1,48 @@
 <!doctype html>
 <html lang="en">
 <head>
+	<title>Involt</title>
 	<meta charset="utf-8" />
 	<meta name="format-detection" content="telephone=no" />
 	<meta name="msapplication-tap-highlight" content="no" />
-	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
-	<title>Involt</title>
-	<!--Involt UI kit-->
-	<link rel="stylesheet" type="text/css" href="css/framework.css">
-	<link rel="stylesheet" type="text/css" href="css/layout-components.css">
-	<!-- Uncomment to use wireframing overlay -->
-	<!--<link rel="stylesheet" type="text/css" href="css/proto.css"> -->
+	<!--<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />-->
 	<script src="cordova.js"></script>
-	<script src="core/jquery/jquery-2.1.0.min.js"></script>
-	<script src="core/jquery/jquery.nouislider.min.js"></script>
-	<script src="core/jquery/jquery.knob.js"></script>
-	<script src="core/jquery/insQ.min.js"></script>
 	<script src="settings.js"></script>
-	<script src="core/involt.js"></script>
-	<script src="core/framework.js"></script> 
+	<link rel="stylesheet" type="text/css" href="css/loader.css">
 </head>
 
 <body>
 
+	<!--
+
+		This document contains loader and handles the communication while layout is showed within iframe
+
+		There is no need of changing anything here.
+
+	-->
+	
+	<div id="loader-bg">
+		<div id="loader">
+			<div id="loader-logo-bg">
+				<img src="img/logo.png" alt="" id="loader-logo">
+			</div>
+			<div id="loader-wrapper">
+				<p id="loader-refresh">Please select your device:</p>
+				<div id="loader-ports"></div>
+			</div>
+			<div id="button-wrapper">
+				<button id="loader-connect">Connect</button>
+				<p id="loader-resume">Continue previous connection</p>
+			</div>
+		</div>
+	</div>
 
 
-	<!--  Your content goes here. You can remove this line.  -->
-	<div id="involthankyou">Thank you for choosing Involt.</div>
+	<iframe src="app.html" frameborder="0" name="involtApp"></iframe>
 
-
-
+	<script src="core/involt.js"></script>
+	<script src="core/loader.js"></script>
+	
 </body>
 
 </html>
