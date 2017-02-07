@@ -43,7 +43,13 @@ var defineElement = function($t){
 
 	for(prop in involtElement){
 
-		if(typeof $t.attr(prop) !== 'undefined') involtElement[prop] = defineValue($t.attr(prop));
+		if(typeof $t.attr(prop) !== 'undefined'){
+
+			var attrData = $t.attr(prop);
+			if(attrData.indexOf('-')>0) attrData = attrData.split('-');
+
+			involtElement[prop] = defineValue(attrData);
+		}
 		else {
 
 			var propInClass = classes.find(searchInClasses);
@@ -54,7 +60,6 @@ var defineElement = function($t){
 				involtElement[prop] = defineValue(classData);
 			};
 		};
-
 	};
 
 	if(involtElement.range != null){
