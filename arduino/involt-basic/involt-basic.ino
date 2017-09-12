@@ -20,7 +20,7 @@ String involtString[2] ={}; //equals involt.pin.S in app
 
 /*
   Buffer for received data. If you plan to receive more 
-  at once just increase the array length.
+  chars at once just increase the array length.
 */
 char involt[16];
 
@@ -30,7 +30,10 @@ char involt[16];
 String fname;
 
 void setup() {
- //Connection speed must be same as app.
+ /*
+  Connection speed must be same as app.
+  Should remain unchanged.
+ */
  Serial.begin(57600);
 }
 

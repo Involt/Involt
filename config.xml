@@ -2,7 +2,9 @@
 
 <!-- 
 
-    This file contains Phonegap settings for Mobile version of framework. 
+    INVOLT FOR MOBILE
+
+    This file contains Phonegap settings for Mobile version of Involt framework. 
 
     For desktop see package.json and for connection settings settings.js
 
@@ -18,7 +20,7 @@
     <name>Involt for Mobile</name>
 
     <description>
-        Mobile version of Involt framework.
+        Mobile version of Involt framework. Use with Bluetooth 2.0 and Android.
     </description>
 
     <author href="http://involt.github.io" email="ernestwarzocha@gmail.com">
@@ -32,17 +34,17 @@
     <preference name="android-installLocation"    value="auto" />
     <preference name="webviewbounce"              value="true" />
 
-    <preference name='phonegap-version' value='cli-6.3.0' />
+    <preference name='phonegap-version' value='cli-7.0.1' />
 
     <!-- Plugins -->
-    <preference name="android-build-tool" value="gradle" />
+    <!--<preference name="android-build-tool" value="gradle" />-->
     <plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
     <plugin name="cordova-plugin-chrome-apps-bluetoothsocket" source="npm"/>
     <plugin name="cordova-plugin-ble-central" source="npm" />
 
     <!-- Icons:-->
     <platform name="android">
-        <icon src="img/icons/icon-pg.png" />
+        <icon src="www/img/icons/icon-pg.png" />
         <icon src="img/icons/android/icon-36-ldpi.png"      qualifier="ldpi" />
         <icon src="img/icons/android/icon-48-mdpi.png"      qualifier="mdpi" />
         <icon src="img/icons/android/icon-72-hdpi.png"      qualifier="hdpi" />
