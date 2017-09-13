@@ -57,24 +57,28 @@ iframe{
 }
 
 #loader-wrapper{
-	margin: 20px;
+	margin: 20px 0px;
 }
 
 #loader-refresh{
-	display: block;
-	margin: 20px;
+	font-family: 'LatoRegular';
+	display: inline-block;
+	margin: 0 auto 15px auto;
 }
 
 #loader-ports{
 	min-height: 200px;
+	height: 300px;
+	overflow: auto;
 }
 
-#loader-ports>p, #loader-connect{
+#loader-ports>p{
 	background: rgb(240,240,240);
 	height: 40px;
 	line-height: 40px;
 	border-radius: 4px;
 	cursor:pointer;
+	margin: 15px 20px;
 }
 
 #button-wrapper{
@@ -85,6 +89,10 @@ iframe{
 }
 
 #loader-connect{
+	height: 40px;
+	line-height: 40px;
+	border-radius: 4px;
+	cursor:pointer;
 	border:none;
 	display: block;
 	background: rgb(0,186,255);
@@ -136,6 +144,10 @@ iframe{
 		margin:0;
 		top:0;
 		box-shadow: none;
+	}
+
+	#loader-ports{
+		height: 400px;
 	}
 
 }
