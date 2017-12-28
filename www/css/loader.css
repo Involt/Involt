@@ -57,7 +57,12 @@ iframe{
 }
 
 #loader-wrapper{
-	margin: 20px 0px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	margin-top:120px;
+	margin-bottom:120px;
 }
 
 #loader-refresh{
@@ -67,8 +72,7 @@ iframe{
 }
 
 #loader-ports{
-	min-height: 200px;
-	height: 300px;
+	height: 100%;
 	overflow: auto;
 }
 
@@ -144,10 +148,6 @@ iframe{
 		margin:0;
 		top:0;
 		box-shadow: none;
-	}
-
-	#loader-ports{
-		height: 400px;
 	}
 
 }
