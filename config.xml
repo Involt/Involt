@@ -2,28 +2,30 @@
 
 <!-- 
 
-    This file contains Phonegap settings for Mobile version of framework. 
+    INVOLT FOR MOBILE
+
+    This file contains Phonegap settings for Mobile version of Involt framework. 
 
     For desktop see package.json and for connection settings settings.js
 
-    config.xml reference: https://build.phonegap.com/docs/config-xml 
-
 -->
+
 <widget xmlns     = "http://www.w3.org/ns/widgets"
         xmlns:gap = "http://phonegap.com/ns/1.0"
-        xmlns:android="http://schemas.android.com/apk/res/android"
         id        = "io.github.involt"
         version   = "1.1.0">
 
     <name>Involt for Mobile</name>
 
     <description>
-        Mobile version of Involt framework.
+        Mobile version of Involt framework. Use with Bluetooth 2.0 and Android.
     </description>
 
     <author href="http://involt.github.io" email="ernestwarzocha@gmail.com">
         Involt, Ernest Warzocha
     </author>
+
+    <preference name='phonegap-version' value='cli-7.0.1' />
 
     <preference name="permissions"                value="none"/>
     <preference name="orientation"                value="default" />
@@ -32,23 +34,20 @@
     <preference name="android-installLocation"    value="auto" />
     <preference name="webviewbounce"              value="true" />
 
-    <preference name='phonegap-version' value='cli-6.3.0' />
-
-    <!-- Plugins -->
-    <preference name="android-build-tool" value="gradle" />
     <plugin name="cordova-plugin-chrome-apps-bluetooth" source="npm"/>
     <plugin name="cordova-plugin-chrome-apps-bluetoothsocket" source="npm"/>
+
+    <!--Temporary fix for permissions issue in manifest, BT LE is not supported-->
     <plugin name="cordova-plugin-ble-central" source="npm" />
 
-    <!-- Icons:-->
     <platform name="android">
-        <icon src="img/icons/icon-pg.png" />
-        <icon src="img/icons/android/icon-36-ldpi.png"      qualifier="ldpi" />
-        <icon src="img/icons/android/icon-48-mdpi.png"      qualifier="mdpi" />
-        <icon src="img/icons/android/icon-72-hdpi.png"      qualifier="hdpi" />
-        <icon src="img/icons/android/icon-96-xhdpi.png"     qualifier="xhdpi" />
-        <icon src="img/icons/android/icon-144-xxhdpi.png"   qualifier="xxhdpi" />
-        <icon src="img/icons/android/icon-192-xxxhdpi.png"  qualifier="xxxhdpi" />
+        <icon src="www/img/icons/icon-pg.png" />
+        <icon src="www/img/icons/android/icon-36-ldpi.png"      density="ldpi" />
+        <icon src="www/img/icons/android/icon-48-mdpi.png"      density="mdpi" />
+        <icon src="www/img/icons/android/icon-72-hdpi.png"      density="hdpi" />
+        <icon src="www/img/icons/android/icon-96-xhdpi.png"     density="xhdpi" />
+        <icon src="www/img/icons/android/icon-144-xxhdpi.png"   density="xxhdpi" />
+        <icon src="www/img/icons/android/icon-192-xxxhdpi.png"  density="xxxhdpi" />
     </platform>
 
     <access origin="*"/>
