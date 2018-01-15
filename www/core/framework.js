@@ -411,8 +411,15 @@ $(document).ready(function() {
 		var $values = $t.data("value");
 		$t.toggleClass('active');
 
-		if ($t.hasClass('active')) $t.updateValue($values[1]).sendValue();
-		else $t.updateValue($values[0]).sendValue();
+		if ($t.hasClass('active')){
+			$t.updateValue($values[1]);
+			if($t.parents("form").length == 0) $t.sendValue();
+		}
+		else {
+			$t.updateValue($values[0]);
+			if($t.parents("form").length == 0) $t.sendValue();			
+		};
+
 	});
 
 	//switch
@@ -422,8 +429,15 @@ $(document).ready(function() {
 		var $values = $t.data("value");
 		$handle.toggleClass('active');
 
-		if ($handle.hasClass('active')) $t.updateValue($values[1]).sendValue();
-		else $t.updateValue($values[0]).sendValue();
+		if ($handle.hasClass('active')){
+			$t.updateValue($values[1]);
+			if($t.parents("form").length == 0) $t.sendValue();
+		}
+		else {
+			$t.updateValue($values[0]);
+			if($t.parents("form").length == 0) $t.sendValue();			
+		};
+
 	});	
 
 	//increase
@@ -433,7 +447,7 @@ $(document).ready(function() {
 
 		involt.pin.P[index] = involt.pin.P[index] + $t.data("step");
 		involt.pin.P[index] = Math.min(Math.max(involt.pin.P[index], $t.data("min")), $t.data("max"));
-		$t.sendValue(); 
+		if($t.parents("form").length == 0) $t.sendValue(); 
 	});
 
 	//decrease
@@ -443,7 +457,7 @@ $(document).ready(function() {
 
 		involt.pin.P[index] = involt.pin.P[index] - $t.data("step");
 		involt.pin.P[index] = Math.min(Math.max(involt.pin.P[index], $t.data("min")), $t.data("max"));
-		$t.sendValue(); 
+		if($t.parents("form").length == 0) $t.sendValue(); 
 	});
 
 	//hover
@@ -492,7 +506,7 @@ $(document).ready(function() {
 		var $t = $(this);
 		var $form = $t.parents("form");
 
-		$form.find('input.ard, select.ard, .ard.knob-send, .ard.rangeslider').not(".involt-submit").each(function() {
+		$form.find('input.ard, select.ard, .ard.knob-send, .ard.rangeslider, .ard.increase, .ard.decrease, .ard.switch, .ard.toggle').not(".involt-submit").each(function() {
 
 			var $input = $(this);
 			var $inputType = $input.attr('type');
@@ -509,10 +523,7 @@ $(document).ready(function() {
 				if(this.checked) $input.sendValue();
 			};
 
-			if($input.hasClass("knob-send")){
-				$input.sendValue();
-			}
-			else if($input.hasClass('rangeslider')){
+			if($input.hasClass("knob-send") || $input.hasClass("rangeslider") || $input.hasClass("increase") || $input.hasClass("decrease") || $input.hasClass("switch") || $input.hasClass("toggle")){
 				$input.sendValue();
 			};
 
