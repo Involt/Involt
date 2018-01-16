@@ -9,11 +9,6 @@ var involt = window.parent.involt;
 var involtFunction = involt.involtFunction;
 var involtListenForPin = involt.involtListenForPin;
 
-//variables kept for backward compability of custom scripts
-var involtPin = involt.pin.P;
-var involtString = involt.pin.S;
-var involtReceivedPin = involt.pin.A;
-
 var gotData = function(receiveInfo){
 	if (isSerial && receiveInfo.connectionId !== involt.id) return;
 	if (isBluetooth && receiveInfo.socketId !== involt.id) return;

@@ -117,15 +117,27 @@ var defineElement = function($t){
 	
 	//Add beginning values to pin array (if there are on/off values put the inactive state as default)
 	if(involtElement.pinType == 'P'){
-		if (typeof involtElement.value !== 'object') involt.pin.P[involtElement.pinNumber] = involtElement.value;
-		else involt.pin.P[involtElement.pinNumber] = involtElement.value[0];
+
+		if(typeof involt.pin.P[involtElement.pinNumber] === 'undefined'){
+			if (typeof involtElement.value !== 'object') involt.pin.P[involtElement.pinNumber] = involtElement.value;
+			else involt.pin.P[involtElement.pinNumber] = involtElement.value[0];
+		};
+
 	}
 	else if(involtElement.pinType == 'S'){
-		if (typeof involtElement.value !== 'object') involt.pin.S[involtElement.pinNumber] = involtElement.value;
-		else involt.pin.P[involtElement.pinNumber] = involtElement.value[0];
+
+		if(typeof involt.pin.S[involtElement.pinNumber] === 'undefined'){
+			if (typeof involtElement.value !== 'object') involt.pin.S[involtElement.pinNumber] = involtElement.value;
+			else involt.pin.S[involtElement.pinNumber] = involtElement.value[0];
+		};
+		
 	}
 	else if(involtElement.pinType == 'A'){
-		involt.pin.A[involtElement.pinNumber] = involtElement.value;
+
+		if(typeof involt.pin.A[involtElement.pinNumber] === 'undefined'){
+			involt.pin.A[involtElement.pinNumber] = involtElement.value;
+		};
+
 	};
 
 	//Generate UI additional assets
