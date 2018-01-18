@@ -6,7 +6,7 @@
 
 var defineElement = function($t){
 
-	var involtElement = {
+	var ard = {
 		name: null,
 		pin: null,
 		value: 0,
@@ -19,15 +19,12 @@ var defineElement = function($t){
 
 	var classes = $t.attr('class').trim().split(' ');
 	var ardIndex = classes.indexOf('ard');
-	involtElement.name = classes[ardIndex+1];
+	ard.name = classes[ardIndex+1];
 
-	if(['bar','knob'].indexOf(involtElement.name) > -1) involtElement.max = 1024;
+	if(ard.name == 'bar' || ard.name == 'knob') ard.max = 1024;	
 
-	var searchInClasses = function(name){
-		return name.startsWith(prop+'-');
-	};
+	var parseValue = function(data){
 
-	var defineValue = function(data){
 		if(Array.isArray(data)){
 			for(var i=0; i<data.length; i++){
 				if(!isNaN(data[i])) data[i] = parseInt(data[i]);
@@ -41,123 +38,117 @@ var defineElement = function($t){
 		return data;
 	};
 
-	for(prop in involtElement){
-
-		if(typeof $t.attr(prop) !== 'undefined'){
-
-			var attrData = $t.attr(prop);
-			if(attrData.indexOf('-')>0) attrData = attrData.split('-');
-
-			involtElement[prop] = defineValue(attrData);
-		}
-		else {
-
-			var propInClass = classes.find(searchInClasses);
-
-			if(typeof propInClass !== 'undefined'){
-				var classData = propInClass.split('-');
-				classData.shift();
-				involtElement[prop] = defineValue(classData);
-			};
-		};
+	var prefix = function(name){
+		return name.startsWith(prop+'-');
 	};
 
-	if(involtElement.range != null){
-		involtElement.min = involtElement.range[0];
-		involtElement.max = involtElement.range[1];
+	for(prop in ard){
+	
+		var propInClass = classes.find(prefix);
+		var propInAttr = $t.attr(prop);
+
+		//prefer attribute over class
+		if(propInAttr){
+			propInAttr = propInAttr.split('-');
+			ard[prop] = parseValue(propInAttr);
+		}
+		else if(propInClass){
+			propInClass = propInClass.split('-');
+			propInClass.shift();
+			ard[prop] = parseValue(propInClass);
+		};
+
 	};
 
 	//This element requires only the fn
-	if(involtElement.name == 'button-cta' || involtElement.name == 'involt-submit'){
-		$t.data('fn', involtElement.fn);
+	if(ard.name == 'button-cta' || ard.name == 'involt-submit'){
+		$t.data('fn', ard.fn);
 		return;
 	};
 
-	//Define pin from class after the name not attr/pin-
-	if(involtElement.pin == null){
-		involtElement.pin = classes[ardIndex+2];
+	if(ard.range != null){
+		ard.min = ard.range[0];
+		ard.max = ard.range[1];
 	};
 
-	involtElement.pinType = involtElement.pin[0];
-	involtElement.pinNumber = parseInt(involtElement.pin.substring(1,involtElement.pin.length));
+	//Define pin from class after the name not attr/pin-
+	if(ard.pin == null){
+		ard.pin = classes[ardIndex+2];
+	};
+
+	if(ard.pin != null){
+		ard.pinType = ard.pin[0];
+		ard.pinNumber = parseInt(ard.pin.substring(1,ard.pin.length));
+	};
 
 	//Shorthand single value from old syntax
 	if(!isNaN(classes[ardIndex+3])){
-		involtElement.value = parseInt(classes[ardIndex+3]);
+		ard.value = parseInt(classes[ardIndex+3]);
 	};
 
 	//Values for toggle when it's not defined
-	if(involtElement.name == "toggle" || $t.attr('type') == 'checkbox' || involtElement.name == "hover" || involtElement.name == "switch"){
-		if(involtElement.value == 0) involtElement.value = [0,1];
-		if(typeof involtElement.value === 'number') involtElement.value = [0,involtElement.value];
+	if(ard.name == "toggle" || $t.attr('type') == 'checkbox' || ard.name == "hover" || ard.name == "switch"){
+		if(ard.value == 0) ard.value = [0,1];
+		if(typeof ard.value === 'number') ard.value = [0,ard.value];
 	};
 
 	if($t.is('input')){
+
 		var dataToAttribute = {
-			min: involtElement.min,
-			max: involtElement.max,
-			step: involtElement.step		
+			min: ard.min,
+			max: ard.max,
+			step: ard.step		
 		};
-		if(!$t.attr('placeholder')) dataToAttribute.value = involtElement.value;
+
+		if(!$t.attr('placeholder')) dataToAttribute.value = ard.value;
+
 		$t.attr(dataToAttribute);
 	}
 	else if($t.is('select')){
+
 		$t.children('option').each(function() {
 			if(this.selected) {
-				involtElement.value = $(this).val();
+				ard.value = $(this).val();
 			};		
 		});
 
-		if(!isNaN(involtElement.value)) involtElement.value = parseInt(involtElement.value);
+		if(!isNaN(ard.value)) ard.value = parseInt(ard.value);
 	};
 
-	$t.data(involtElement);
-	//console.log(involtElement.name, involtElement);
-	involt.debug(involtElement.name, involtElement);
-	
+	$t.data(ard);
+
+	involt.debug(ard.name, ard);
+
 	//Add beginning values to pin array (if there are on/off values put the inactive state as default)
-	if(involtElement.pinType == 'P'){
+	if(typeof involt.pin[ard.pinType][ard.pinNumber] === 'undefined'){
 
-		if(typeof involt.pin.P[involtElement.pinNumber] === 'undefined'){
-			if (typeof involtElement.value !== 'object') involt.pin.P[involtElement.pinNumber] = involtElement.value;
-			else involt.pin.P[involtElement.pinNumber] = involtElement.value[0];
-		};
-
-	}
-	else if(involtElement.pinType == 'S'){
-
-		if(typeof involt.pin.S[involtElement.pinNumber] === 'undefined'){
-			if (typeof involtElement.value !== 'object') involt.pin.S[involtElement.pinNumber] = involtElement.value;
-			else involt.pin.S[involtElement.pinNumber] = involtElement.value[0];
-		};
-		
-	}
-	else if(involtElement.pinType == 'A'){
-
-		if(typeof involt.pin.A[involtElement.pinNumber] === 'undefined'){
-			involt.pin.A[involtElement.pinNumber] = involtElement.value;
+		if(typeof ard.value !== 'object'){
+			involt.pin[ard.pinType][ard.pinNumber] = ard.value;
+		}
+		else{
+			involt.pin[ard.pinType][ard.pinNumber] = ard.value[0];
 		};
 
 	};
 
 	//Generate UI additional assets
-	if(involtElement.name == 'knob'){
-		involtElement.readOnly = true;
-		if(typeof $t.data('fgcolor') === 'undefined') involtElement.fgColor = "#00baff";
-		if(typeof $t.data('bgcolor') === 'undefined') involtElement.bgColor = "#e5e5e5";
-		if(typeof $t.data('inputcolor') === 'undefined') involtElement.inputColor = "#363636";
-		$t.knob(involtElement);	
+	if(ard.name == 'knob'){
+		ard.readOnly = true;
+		if(typeof $t.data('fgcolor') === 'undefined') ard.fgColor = "#00baff";
+		if(typeof $t.data('bgcolor') === 'undefined') ard.bgColor = "#e5e5e5";
+		if(typeof $t.data('inputcolor') === 'undefined') ard.inputColor = "#363636";
+		$t.knob(ard);	
 	}
-	else if(involtElement.name == 'knob-send'){
-		if(typeof $t.data('displayprevious') === 'undefined') involtElement.displayPrevious = true;
-		if(typeof $t.data('angleoffset') === 'undefined') involtElement.angleOffset = -140;
-		if(typeof $t.data('anglearc') === 'undefined') involtElement.angleArc = 280;
-		if(typeof $t.data('fgcolor') === 'undefined') involtElement.fgColor = "#00baff";
-		if(typeof $t.data('bgcolor') === 'undefined') involtElement.bgColor = "#e5e5e5";
-		if(typeof $t.data('inputcolor') === 'undefined') involtElement.inputColor = "#363636";
+	else if(ard.name == 'knob-send'){
+		if(typeof $t.data('displayprevious') === 'undefined') ard.displayPrevious = true;
+		if(typeof $t.data('angleoffset') === 'undefined') ard.angleOffset = -140;
+		if(typeof $t.data('anglearc') === 'undefined') ard.angleArc = 280;
+		if(typeof $t.data('fgcolor') === 'undefined') ard.fgColor = "#00baff";
+		if(typeof $t.data('bgcolor') === 'undefined') ard.bgColor = "#e5e5e5";
+		if(typeof $t.data('inputcolor') === 'undefined') ard.inputColor = "#363636";
 
 		if(classes.indexOf('fluid')>=0){
-			involtElement.change = function(){
+			ard.change = function(){
 				var index = $t.data("pinNumber");
 				var max = $t.data("max");
 
@@ -173,7 +164,7 @@ var defineElement = function($t){
 			};
 		};
 		
-		involtElement.release = function(value){
+		ard.release = function(value){
 			var index = $t.data("pinNumber");
 			var max = $t.data("max");
 
@@ -189,14 +180,14 @@ var defineElement = function($t){
 			if ($t.parents("form").length == 0) $t.sendFn();
 		};
 
-		$t.knob(involtElement);	
+		$t.knob(ard);	
 	}
-	else if(involtElement.name == 'bar'){
+	else if(ard.name == 'bar'){
 		$t.append('<div class="bar-label">0</div><div class="bar-background"><div class="bar-value"></div></div>');
 		$t.children('.bar-background').children('.bar-value').css('max-width', parseInt($t.children('.bar-background').css('width')));
 		$t.children('.bar-label').css('max-width', parseInt($t.css('width')));
 	}
-	else if(involtElement.name == 'rangeslider'){
+	else if(ard.name == 'rangeslider'){
 		$t.append('<div class="label"></div><div class="tooltip">slide</div><div class="slider"></div>');
 		
 		var $slider = $t.children('.slider');
@@ -208,11 +199,11 @@ var defineElement = function($t){
 
 		if(isLabel) {
 			$tooltip.remove();
-			$label.html(involtElement.value);
+			$label.html(ard.value);
 		}
 		else {
 			$label.remove();
-			$tooltip.html(involtElement.value);
+			$tooltip.html(ard.value);
 			$tooltip.hide();
 
 			$t.hover(function() {
@@ -224,12 +215,12 @@ var defineElement = function($t){
 		};
 
 		$slider.noUiSlider({
-			start: [involtElement.value],
+			start: [ard.value],
 			range: {
-				'min': [involtElement.min],
-				'max': [involtElement.max]
+				'min': [ard.min],
+				'max': [ard.max]
 			},
-			step: involtElement.step
+			step: ard.step
 		});
 
 		$slider.on({
@@ -259,7 +250,7 @@ var defineElement = function($t){
 			}
 		});
 	}
-	else if(involtElement.name == 'switch'){
+	else if(ard.name == 'switch'){
 		$t.append('<div class="switch-track"><div class="switch-handle"></div></div>');
 		if($t.hasClass('active')){
 			$t.children('.switch-track').children('.switch-handle').addClass('active');
@@ -476,23 +467,23 @@ $(document).ready(function() {
 	$(document).on({
 		mouseenter: function () {
 			var $t = $(this);
-			var values = $t.data("value");
-			$t.updateValue(values[1]).sendValue();
+			var $values = $t.data("value");
+			$t.updateValue($values[1]).sendValue();
 		},
 		mouseleave: function () {
 			var $t = $(this);
-			var values = $t.data("value");
-			$t.updateValue(values[0]).sendValue();
+			var $values = $t.data("value");
+			$t.updateValue($values[0]).sendValue();
 		}
 	}, ".ard.hover");
 
 	//handle checkbox dual value behaviour
 	$(document).on("change",".ard.involt-input[type='checkbox']",function(){
 		var $t = $(this);
-		var $checkboxValue = $t.data('value');
+		var $values = $t.data('value');
 
-		if(this.checked) $t.updateValue($checkboxValue[1]);
-		else $t.updateValue($checkboxValue[0]);
+		if(this.checked) $t.updateValue($values[1]);
+		else $t.updateValue($values[0]);
 	
 		if($t.parents("form").length == 0) $t.sendValue();
 	});
